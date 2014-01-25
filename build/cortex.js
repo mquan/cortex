@@ -1,11 +1,9 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var ArrayWrapper, DataWrapper, ObjectWrapper, Path, _extend, _include;
+var DataWrapper, Enumerable, Path, _extend, _include;
 
 Path = require("./path");
 
-ObjectWrapper = require("./wrappers/object_wrapper");
-
-ArrayWrapper = require("./wrappers/array_wrapper");
+Enumerable = require("./wrappers/enumerable");
 
 DataWrapper = (function() {
   function DataWrapper(value, path, parentWrapper) {
@@ -99,11 +97,11 @@ _include = function(klass, mixins) {
   return _results;
 };
 
-_include(DataWrapper, [ObjectWrapper, ArrayWrapper]);
+_include(DataWrapper, [Enumerable]);
 
 module.exports = DataWrapper;
 
-},{"./path":3,"./wrappers/array_wrapper":4,"./wrappers/object_wrapper":5}],2:[function(require,module,exports){
+},{"./path":3,"./wrappers/enumerable":4}],2:[function(require,module,exports){
 var Cortex, DataWrapper,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -148,7 +146,11 @@ Cortex = (function(_super) {
 
 })(DataWrapper);
 
-window.Cortex = Cortex;
+if (typeof window !== "undefined" && window !== null) {
+  window.Cortex = Cortex;
+}
+
+module.exports = Cortex;
 
 },{"./data_wrapper":1}],3:[function(require,module,exports){
 var Path;
@@ -186,74 +188,80 @@ Path = (function() {
 module.exports = Path;
 
 },{}],4:[function(require,module,exports){
-var ArrayWrapper;
+var EnumerableWrapper;
 
-ArrayWrapper = {
-  length: function() {
-    return this.wrappers.length;
+EnumerableWrapper = {
+  getLength: function() {
+    return this.value.length;
   },
   forEach: function(callback) {
-    console.log("entry");
-    console.log(this.wrappers);
-    return this.wrappers.forEach(callback);
+    var key, wrapper, _ref, _results;
+    if (this.wrappers.constructor === Object) {
+      _ref = this.wrappers;
+      _results = [];
+      for (key in _ref) {
+        wrapper = _ref[key];
+        _results.push(callback(key, wrapper));
+      }
+      return _results;
+    } else if (this.wrappers.constructor === Array) {
+      return this.wrappers.forEach(callback);
+    }
   },
   map: function(callback) {
     return this.wrappers.map(callback);
   },
   find: function(callback) {
-    return this.wrappers.find(callback);
+    var index, wrapper, _i, _len, _ref;
+    _ref = this.wrappers;
+    for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
+      wrapper = _ref[index];
+      if (callback(wrapper, index, this.wrappers)) {
+        return wrapper;
+      }
+    }
+    return false;
   },
-  indexOf: function(wrapperElement) {
-    return this.wrappers.indexOf(wrapperElement);
-  },
-  indexOfValue: function(value) {
-    return this.value.indexOf(value);
+  findIndex: function(callback) {
+    var index, wrapper, _i, _len, _ref;
+    _ref = this.wrappers;
+    for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
+      wrapper = _ref[index];
+      if (callback(wrapper, index, this.wrappers)) {
+        return index;
+      }
+    }
+    return -1;
   },
   push: function(value) {
     var length;
-    length = this.values.push(value);
-    this.set(this.values);
+    length = this.value.push(value);
+    this.set(this.value);
     return length;
   },
   pop: function() {
     var last;
-    last = this.values.pop();
-    this.set(this.values);
+    last = this.value.pop();
+    this.set(this.value);
     return last;
   },
   insertAt: function(index, value) {
-    this.values.splice(index, 0, value);
-    return this.set(this.values);
+    var args;
+    args = [index, 0].concat(value);
+    Array.prototype.splice.apply(this.value, args);
+    return this.set(this.value);
   },
   removeAt: function(index, howMany) {
     var removed;
-    removed = this.values.splice(index, howMany);
-    this.set(this.values);
+    if (howMany == null) {
+      howMany = 1;
+    }
+    removed = this.value.splice(index, howMany);
+    this.set(this.value);
     return removed;
   }
 };
 
-module.exports = ArrayWrapper;
-
-},{}],5:[function(require,module,exports){
-var ObjectWrapper;
-
-ObjectWrapper = {
-  keys: function() {
-    return this.values.keys();
-  },
-  forEach: function(callback) {
-    var key, wrapper, _ref, _results;
-    _ref = this.wrappers;
-    _results = [];
-    for (key in _ref) {
-      wrapper = _ref[key];
-      _results.push(callback(key, wrapper));
-    }
-    return _results;
-  }
-};
-
-module.exports = ObjectWrapper;
+module.exports = EnumerableWrapper;
 
 },{}]},{},[2])

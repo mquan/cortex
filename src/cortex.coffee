@@ -13,7 +13,7 @@ class Cortex extends DataWrapper
   _setValue: (newValue, path) ->
     # When saving an object to a variable it's pass by reference, but when doing so for a primitive value
     # it's pass by value. We avoid this pass by value problem by only setting subValue when path length is greater
-    # than 2 (meaning it can't never be a primitive). When path is 0 or 1 we set the value directly.
+    # than 2 (meaning it can't never be a primitive). When path length is 0 or 1 we set the value directly.
     if path.length > 1
       subValue = @value
       subValue = subValue[key] for key in path[0..path.length-2]
@@ -23,4 +23,6 @@ class Cortex extends DataWrapper
     else
       @value = newValue
 
-window.Cortex = Cortex
+window.Cortex = Cortex if window?
+
+module.exports = Cortex

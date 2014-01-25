@@ -1,7 +1,6 @@
 Path = require("./path")
 
-ObjectWrapper = require("./wrappers/object_wrapper")
-ArrayWrapper = require("./wrappers/array_wrapper")
+Enumerable = require("./wrappers/enumerable")
 
 class DataWrapper
   constructor: (@value, @path = null, @parentWrapper = null) ->
@@ -47,6 +46,6 @@ _extend = (obj, mixin) ->
 _include = (klass, mixins) ->
   _extend(klass.prototype, mixin) for mixin in mixins
 
-_include(DataWrapper, [ObjectWrapper, ArrayWrapper])
+_include(DataWrapper, [Enumerable])
 
 module.exports = DataWrapper

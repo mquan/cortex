@@ -13,6 +13,10 @@ gulp.task("coffee", function() {
   gulp.src(["src/*.coffee", "src/**/*.coffee"])
       .pipe(coffee({bare: true}).on("error", gutil.log))
       .pipe(gulp.dest("temp/src"));
+
+  gulp.src(["test/*.coffee", "test/**/*.coffee"])
+      .pipe(coffee({bare: true}).on("error", gutil.log))
+      .pipe(gulp.dest("temp/test"));
 });
 
 gulp.task("scripts", function() {
@@ -28,6 +32,28 @@ gulp.task("scripts", function() {
       .pipe(gulp.dest("build"));
 });
 
+gulp.task("test", function() {
+  gulp.run("coffee");
+
+  var tests = [
+    "temp/test/path_test.js",
+    "temp/test/data_wrapper_test.js",
+    "temp/test/wrappers/enumerable_test.js",
+    "temp/test/cortex_test.js"
+  ];
+
+  for(var i=0,ii=tests.length;i<ii;i++) {
+    gulp.src([tests[i]])
+        .pipe(browserify())
+        .pipe(jasmine());
+  }
+});
+
+gulp.task("react", function() {
+  gulp.src(["examples/skyline/application.jsx"])
+      .pipe(react())
+      .pipe(gulp.dest("examples/skyline"));
+});
 
 gulp.task("default", function() {
   gulp.run("scripts");
