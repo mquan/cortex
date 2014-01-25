@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://fb.me/react-0.8.0.min.js"></script>
+    <script src="http://fb.me/JSXTransformer-0.8.0.js"></script>
+    <script src="../../build/cortex.js"></script>
+    <style>
+      body{
+        margin: 0;
+        padding: 0;
+      }
+
+      div#city {
+        min-height: 600px;
+        overflow: auto;
+
+        /* Safari 5.1, Chrome 10+ */
+        background: -webkit-linear-gradient(top, #3e0860, #fdd4d7);
+
+        /* Firefox 3.6+ */
+        background: -moz-linear-gradient(top, #3e0860, #fdd4d7);
+
+        /* IE 10 */
+        background: -ms-linear-gradient(top, #3e0860, #fdd4d7);
+
+        /* Opera 11.10+ */
+        background: -o-linear-gradient(top, #3e0860, #fdd4d7);
+      }
+
+      div.city-container {
+        height: 100%;
+        width: auto;
+        white-space: nowrap;
+        padding-top: 10px;
+      }
+
+      div.building-container {
+        display: table-cell;
+        height: 600px;
+        vertical-align: bottom;
+      }
+
+      div.building {
+        display: inline-block;
+        background-color: #000000;
+        margin: 0 5px;
+        padding: 5px;
+      }
+
+      div.city-controls {
+        position: absolute;
+      }
+
+      div.city-controls a {
+        text-decoration: none;
+      }
+
+      a.add-floor {
+        display: block;
+        height: 20px;
+        background-color: #0f0f0f;
+        color: #0f0f0f;
+        text-align: center;
+        text-decoration: none;
+      }
+
+      a.add-floor:hover {
+        color: #ffffff;
+      }
+
+      div.floor {
+        height: 20px;
+      }
+
+      div.floor:hover {
+        background-color: #aaaaaa;
+      }
+      span.room {
+        height: 20px;
+        width: 20px;
+        display: inline-block;
+      }
+
+      a.window {
+        display: block;
+        display: block;
+        margin: 5px;
+        height: 10px;
+        width: 10px;
+      }
+
+      .light-on {
+        background-color: #f0c802;
+      }
+
+      .light-off {
+        background-color: #888888;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="city"></div>
+    <div>
+      <h2>About the demo</h2>
+      This is a demo for <a href="https://github.com/mquan/cortex">Cortex</a>, a javascript library for centrally managing data in React.
+      <div>
+        This is an app for drawing the city skyline. The City can have many Buildings. Each building has many Floors. Each Floor has many Rooms, and each Room can have its light turned on or off. Click "Add Building" to create more buildings. Click on a building's base (with the plus sign) to add more floors, click on a floor to add more room, and click on the room to toggle its light. This demonstrates Cortex's power in a 4-level components architecture without using callbacks to communicate between parents and children.
+      </div>
+    </div>
+
+    <script type="text/javascript" src="application.js"></script>
+  </body>
+</html>
