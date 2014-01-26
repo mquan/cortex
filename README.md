@@ -5,7 +5,7 @@ Cortex is a Javascript library for centrally managing React data.
 
 In React's world data flows in one direction from the top down. That means if you want to make a change, change it at the source and let it propagate down the chain. But what happen when a child component wants to update the data? React's official guideline is to use callback for communication between parent and child components.
 
-However, this simply isn't sustainable even for trivially nested data. Imagine a Restaurant app in which the Restaurant has many Orders, each has many LineItems, each of which has many Modifiers. If you want to update a Modifier from 'medium rare' to 'well-done' you'd have to pass the data several levels up. This is not only awkward but also creates unnecessary extra code in each component in the chain only for the purpose of passing data upstream.
+However, this simply isn't sustainable even for trivially nested data. Imagine a Restaurant app in which the Restaurant has many Orders, each has many Items, each of which has many Modifiers. If you want to update a Modifier from 'medium rare' to 'well-done' you'd have to pass the data several levels up. This is not only awkward but also creates unnecessary extra code in each component in the chain only for the purpose of passing data upstream.
 
 Cortex's goal is to support arbitrarily deep data without requiring you to pass callbacks down the chain while complying to React one-direction data flow. Cortex achieves this by thinly wrap your data in an object that contains the key for locating each nested piece of data as accessed from the top level. When you change the data, internally Cortex passes the new value along with its location key to update the data at the source.
 
@@ -70,7 +70,7 @@ var orderCortex = new Cortex(orderData, function(updatedOrder) {
 
 Then it is passed into the Order component, which is then used to render the array of Item components.
 
-In Item component, note that we display the values with ``this.props.item.get('qty').getValue()``. This is because ``this.props.item.get('qty')`` only gives us the wrapper of the ``qty`` attribute, we need to call ``getValue()`` to get the actual value.
+In Item component, note that we display the values with ``this.props.item.get('qty').getValue()`` and ``this.props.item.get('name').getValue()``. This is because ``this.props.item.get('qty')`` only gives us the wrapper of the ``qty`` attribute, we need to call ``getValue()`` to get the actual value.
 
 In the `increase()` method, we use ``this.props.item.get('qty').set(qty + 1)`` to add 1 to the current qty value.
 
