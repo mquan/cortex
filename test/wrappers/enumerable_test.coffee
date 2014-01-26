@@ -45,6 +45,12 @@ describe "Enumerable", ->
 
       expect(out.getValue()).toBe(value)
 
+    it "returns null when does not meet condition", ->
+      out = @wrapper.find (obj) ->
+        false
+
+      expect(out).toBe(null)
+
   describe "#findIndex", ->
     it "returns index of value when value exists in array", ->
       index = Math.floor(@value.length / 2)
@@ -53,6 +59,12 @@ describe "Enumerable", ->
         elem.getValue() == value
 
       expect(out).toBe(index)
+
+    it "returns -1 when not found", ->
+      out = @wrapper.findIndex (elem, i, arr) ->
+        false
+
+      expect(out).toBe(-1)
 
     it "returns -1 when value does not exist in array", ->
       someValue = 1000
