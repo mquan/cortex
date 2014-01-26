@@ -10,6 +10,10 @@
         padding: 0;
       }
 
+      a {
+        color: #70e0b6;
+      }
+
       div#city {
         min-height: 600px;
         overflow: auto;
@@ -53,6 +57,10 @@
 
       div.city-controls a {
         text-decoration: none;
+        display: inline-block;
+        background-color: #70e0b6;
+        color: #ffffff;
+        padding: 5px;
       }
 
       a.add-floor {
@@ -96,16 +104,26 @@
       .light-off {
         background-color: #888888;
       }
+
+      #description {
+        margin: 40px 10px 10px;
+        color: #333;
+        font-family: Helvetica Neue;
+        font-size: 14px;
+        line-height: 18px;
+      }
     </style>
   </head>
   <body>
     <div id="city"></div>
-    <div>
+    <div id="description">
       <h2>About the demo</h2>
-      This is a demo for <a href="https://github.com/mquan/cortex">Cortex</a>, a javascript library for centrally managing data in React.
-      <div>
-        This is an app for drawing the city skyline. The City can have many Buildings. Each building has many Floors. Each Floor has many Rooms, and each Room can have its light turned on or off. Click "Add Building" to create more buildings. Click on a building's base (with the plus sign) to add more floors, click on a floor to add more room, and click on the room to toggle its light. This demonstrates Cortex's power in a 4-level components architecture without using callbacks to communicate between parents and children.
-      </div>
+      <h3>
+        This is a demo for <a href="https://github.com/mquan/cortex">Cortex</a>, a javascript library for centrally managing data in React.
+      </h3>
+      <p>
+        This app allows you to draw the city skyline. The City can have many Buildings. Each Building has many Floors. Each Floor has many Rooms, and each Room can have its light turned on or off. Click "Add Building" to create more buildings. Click on a building's base (with the plus sign) to add more floors, click on a floor to add more room, and click on the room to toggle its light. This demonstrates Cortex's power in a 4-level components architecture without using callbacks to communicate between parents and children. Check out the source <a href="https://github.com/mquan/cortex/tree/master/examples/skyline">here</a>
+      </p>
     </div>
 
     <script type="text/javascript" src="application.js"></script>
