@@ -14,7 +14,7 @@ EnumerableWrapper =
   find: (callback) ->
     for wrapper, index in @wrappers when callback(wrapper, index, @wrappers)
       return wrapper
-    false
+    null
 
   findIndex: (callback) ->
     for wrapper, index in @wrappers when callback(wrapper, index, @wrappers)
