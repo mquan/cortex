@@ -220,7 +220,7 @@ EnumerableWrapper = {
         return wrapper;
       }
     }
-    return false;
+    return null;
   },
   findIndex: function(callback) {
     var index, wrapper, _i, _len, _ref;
