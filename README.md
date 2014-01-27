@@ -1,4 +1,4 @@
-Cortex is a Javascript library for centrally managing React data.
+Cortex is a Javascript library for centrally managing data with React.
 
 
 # Overview
