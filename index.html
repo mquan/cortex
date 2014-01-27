@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Cortex : A javascript library for centrally managing data with React" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Cortex</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/mquan/cortex">View on GitHub</a>
+
+          <h1 id="project_title">Cortex</h1>
+          <h2 id="project_tagline">A javascript library for centrally managing data with React</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/mquan/cortex/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/mquan/cortex/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p>Cortex is a Javascript library for centrally managing React data.</p>
+
+<h1>
+<a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h1>
+
+<p>In React's world data flows in one direction from the top down. That means if you want to make a change, change it at the source and let it propagate down the chain. But what happen when a child component wants to update the data? React's official guideline is to use callback for communication between parent and child components.</p>
+
+<p>However, this simply isn't sustainable even for trivially nested data. Imagine a Restaurant app in which the Restaurant has many Orders, each has many Items, each of which has many Modifiers. If you want to update a Modifier from 'medium rare' to 'well-done' you'd have to pass the data several levels up. This is not only awkward but also creates unnecessary extra code in each component in the chain only for the purpose of passing data upstream.</p>
+
+<p>Cortex's goal is to support arbitrarily deep data without requiring you to pass callbacks down the chain while complying to React one-direction data flow. Cortex achieves this by thinly wrap your data in an object that contains the key for locating each nested piece of data as accessed from the top level. When you change the data, internally Cortex passes the new value along with its location key to update the data at the source.</p>
+
+<h1>
+<a name="basic-example" class="anchor" href="#basic-example"><span class="octicon octicon-link"></span></a>Basic example</h1>
+
+<p>Let's look at the following example for Order and Item components. An Order contains an array of Items, and each Item can increase its own quantity attribute.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">Item</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+  <span class="nx">increase</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">qty</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">item</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'qty'</span><span class="p">).</span><span class="nx">getValue</span><span class="p">();</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">item</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'qty'</span><span class="p">).</span><span class="nx">set</span><span class="p">(</span><span class="nx">qty</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+  <span class="p">},</span>
+  <span class="nx">subTotal</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">item</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'qty'</span><span class="p">).</span><span class="nx">getValue</span><span class="p">()</span> <span class="o">*</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">item</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'price'</span><span class="p">).</span><span class="nx">getValue</span><span class="p">();</span>
+  <span class="p">},</span>
+  <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="s2">"item"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">"#"</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">increase</span><span class="p">}</span><span class="o">&gt;+&lt;</span><span class="err">/a&gt;</span>
+      <span class="o">&lt;</span><span class="nx">span</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">item</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'qty'</span><span class="p">).</span><span class="nx">getValue</span><span class="p">()}</span><span class="o">&lt;</span><span class="err">/span&gt;</span>
+      <span class="o">&lt;</span><span class="nx">span</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">item</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'name'</span><span class="p">).</span><span class="nx">getValue</span><span class="p">()}</span><span class="o">&lt;</span><span class="err">/span&gt;</span>
+      <span class="o">&lt;</span><span class="nx">span</span><span class="o">&gt;</span><span class="nx">$</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">subTotal</span><span class="p">()}</span><span class="o">&lt;</span><span class="err">/span&gt;</span>
+    <span class="o">&lt;</span><span class="err">/div&gt;</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+
+<span class="kd">var</span> <span class="nx">Order</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+  <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">items</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">order</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">item</span><span class="p">){</span>
+      <span class="k">return</span> <span class="o">&lt;</span><span class="nx">Item</span> <span class="nx">item</span><span class="o">=</span><span class="p">{</span><span class="nx">item</span><span class="p">}</span> <span class="o">/&gt;</span><span class="p">;</span>
+    <span class="p">});</span>
+    <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+      <span class="p">{</span><span class="nx">items</span><span class="p">}</span>
+    <span class="o">&lt;</span><span class="err">/div&gt;</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+
+<span class="kd">var</span> <span class="nx">orderComponent</span><span class="p">,</span>
+    <span class="nx">orderData</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="p">{</span><span class="nx">name</span><span class="o">:</span> <span class="s2">"Burger"</span><span class="p">,</span> <span class="nx">qty</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span> <span class="nx">price</span><span class="o">:</span> <span class="mf">5.0</span><span class="p">},</span>
+      <span class="p">{</span><span class="nx">name</span><span class="o">:</span> <span class="s2">"Salad"</span><span class="p">,</span> <span class="nx">qty</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">price</span><span class="o">:</span> <span class="mf">4.50</span><span class="p">},</span>
+      <span class="p">{</span><span class="nx">name</span><span class="o">:</span> <span class="s2">"Coke"</span><span class="p">,</span> <span class="nx">qty</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span> <span class="nx">price</span><span class="o">:</span> <span class="mf">1.50</span><span class="p">}</span>
+    <span class="p">];</span>
+
+<span class="c1">//Initialize cortex with data and pass in a callback to run when data is updated.</span>
+<span class="kd">var</span> <span class="nx">orderCortex</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Cortex</span><span class="p">(</span><span class="nx">orderData</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">updatedOrder</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">orderComponent</span><span class="p">.</span><span class="nx">setProps</span><span class="p">({</span><span class="nx">order</span><span class="o">:</span> <span class="nx">orderCortex</span><span class="p">});</span>
+<span class="p">});</span>
+
+<span class="nx">orderComponent</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">renderComponent</span><span class="p">(</span>
+  <span class="o">&lt;</span><span class="nx">Order</span> <span class="nx">order</span><span class="o">=</span><span class="p">{</span><span class="nx">orderCortex</span><span class="p">}</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">"order"</span><span class="p">)</span>
+<span class="p">);</span>
+</pre></div>
+
+<p>In the above example, we initialize cortex with:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">orderCortex</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Cortex</span><span class="p">(</span><span class="nx">orderData</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">updatedOrder</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">orderComponent</span><span class="p">.</span><span class="nx">setProps</span><span class="p">({</span><span class="nx">order</span><span class="o">:</span> <span class="nx">orderCortex</span><span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>Then it is passed into the Order component, which is then used to render the array of Item components.</p>
+
+<p>In Item component, note that we display the values with <code>this.props.item.get('qty').getValue()</code> and <code>this.props.item.get('name').getValue()</code>. This is because <code>this.props.item.get('qty')</code> only gives us the wrapper of the <code>qty</code> attribute, we need to call <code>getValue()</code> to get the actual value.</p>
+
+<p>In the <code>increase()</code> method, we use <code>this.props.item.get('qty').set(qty + 1)</code> to add 1 to the current qty value.</p>
+
+<h1>
+<a name="cortex-api" class="anchor" href="#cortex-api"><span class="octicon octicon-link"></span></a>Cortex API</h1>
+
+<h3>
+<a name="initialize" class="anchor" href="#initialize"><span class="octicon octicon-link"></span></a>Initialize:</h3>
+
+<div class="highlight highlight-javascript"><pre><span class="k">new</span> <span class="nx">Cortex</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">//trigger your React component to update</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>
+<a name="instance-methods" class="anchor" href="#instance-methods"><span class="octicon octicon-link"></span></a>Instance methods:</h3>
+
+<table>
+<thead><tr>
+<th>Method</th>
+<th align="left">Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>get(key)</code></td>
+<td align="left">Returns the wrapper object for the provided key</td>
+</tr>
+<tr>
+<td><code>getValue()</code></td>
+<td align="left">Returns the actual value</td>
+</tr>
+<tr>
+<td><code>set(value)</code></td>
+<td align="left">Changes the value and rewrap the entire data tree</td>
+</tr>
+</tbody>
+</table><h3>
+<a name="cortex-wrapper-of-enumerable-data-has-the-following-methods" class="anchor" href="#cortex-wrapper-of-enumerable-data-has-the-following-methods"><span class="octicon octicon-link"></span></a>Cortex wrapper of enumerable data has the following methods:</h3>
+
+<table>
+<thead><tr>
+<th>Method</th>
+<th align="left">Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>getLength()</code></td>
+<td align="left">Returns length of nested wrappers</td>
+</tr>
+<tr>
+<td><code>forEach(callback)</code></td>
+<td align="left">Iterates over all elements. The callback accepts the following input <code>(wrapperElement, index, wrapperArray)</code>
+</td>
+</tr>
+<tr>
+<td><code>map(callback)</code></td>
+<td align="left">Returns a new array as returned by the callback. Callback accepts same input as forEach callback</td>
+</tr>
+<tr>
+<td><code>find(callback)</code></td>
+<td align="left">Returns the first wrapper element that meets the condition returned by callback. Callback accepts same input as forEach callback.</td>
+</tr>
+<tr>
+<td><code>findIndex(callback)</code></td>
+<td align="left">Returns index of first wrapper element that meets condition returned callback. Callback accepts same input as forEach callback.</td>
+</tr>
+<tr>
+<td><code>push(value)</code></td>
+<td align="left">Inserts and rewrap the value at the end of the array.</td>
+</tr>
+<tr>
+<td><code>pop()</code></td>
+<td align="left">Removes the last element in the array</td>
+</tr>
+<tr>
+<td><code>insertAt(index, [value])</code></td>
+<td align="left">Inserts a value or an array of values starting at specified index.</td>
+</tr>
+<tr>
+<td><code>removeAt(index, howMany = 1)</code></td>
+<td align="left">Removes specified number of elements starting at index location. By default it removes 1 element if number of elements to be removed isn't specified.</td>
+</tr>
+</tbody>
+</table><h1>
+<a name="buidling-cortex" class="anchor" href="#buidling-cortex"><span class="octicon octicon-link"></span></a>Buidling Cortex</h1>
+
+<p>To build Cortex:</p>
+
+<div class="highlight highlight-console"><pre><span class="go">gulp</span>
+</pre></div>
+
+<p>To run test:</p>
+
+<div class="highlight highlight-console"><pre><span class="go">gulp test</span>
+</pre></div>
+
+<p>To compile jsx files in examples into js files:</p>
+
+<div class="highlight highlight-console"><pre><span class="go">gulp react</span>
+</pre></div>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Cortex maintained by <a href="https://github.com/mquan">mquan</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
