@@ -1,5 +1,6 @@
 Cortex is a Javascript library for centrally managing data with React.
 
+[Here's a basic demo](http://mquan.github.io/cortex/examples/skyline/)
 
 # Overview
 
