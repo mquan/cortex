@@ -19,9 +19,7 @@ gulp.task("coffee", function() {
       .pipe(gulp.dest("temp/test"));
 });
 
-gulp.task("scripts", function() {
-  gulp.run("coffee");
-
+gulp.task("scripts", ["coffee"], function() {
   gulp.src(["temp/src/cortex.js"])
       .pipe(browserify())
       .pipe(gulp.dest("build"));
@@ -32,9 +30,7 @@ gulp.task("scripts", function() {
       .pipe(gulp.dest("build"));
 });
 
-gulp.task("test", function() {
-  gulp.run("coffee");
-
+gulp.task("test", ["coffee"], function() {
   var tests = [
     "temp/test/path_test.js",
     "temp/test/data_wrapper_test.js",
@@ -49,7 +45,7 @@ gulp.task("test", function() {
   }
 });
 
-gulp.task("react", function() {
+gulp.task("react", ["scripts"], function() {
   gulp.src(["examples/skyline/application.jsx"])
       .pipe(react())
       .pipe(gulp.dest("examples/skyline"));
