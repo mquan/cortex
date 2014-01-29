@@ -4,8 +4,8 @@ class Cortex extends DataWrapper
   constructor: (@value, @callback) ->
     @_wrap()
 
-  update: (params) ->
-    @_setValue(params.value, params.path)
+  update: (newValue, path) ->
+    @_setValue(newValue, path)
     @_wrap()
 
     @callback(this) if @callback

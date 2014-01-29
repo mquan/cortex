@@ -7,7 +7,7 @@ class DataWrapper
     @_wrap()
 
   set: (value) ->
-    @_getRoot().update({sourceKey: @sourceKey, value: value, path: @getPath()})
+    @_getRoot().update(value, @getPath())
 
   get: (key) ->
     @wrappers[key]

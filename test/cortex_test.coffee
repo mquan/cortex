@@ -19,21 +19,21 @@ describe "Cortex", ->
       cortex = new Cortex(@value, ->
         called = true
       )
-      cortex.update({path: [], value: {}})
+      cortex.update({}, [])
 
       expect(called).toBe(true)
 
     it "sets value to new data", ->
       cortex = new Cortex(@value)
       newValue = {foo: "bar"}
-      cortex.update({path: [], value: newValue})
+      cortex.update(newValue, [])
 
       expect(cortex.getValue()).toEqual(newValue)
 
     it "sets value of a key", ->
       cortex = new Cortex(@value)
       newValue = 100
-      cortex.update({path: [cortex.get("a").getPath()], value: newValue})
+      cortex.update(newValue, [cortex.get("a").getPath()])
 
       expect(cortex.getValue()["a"]).toEqual(newValue)
 
@@ -41,7 +41,7 @@ describe "Cortex", ->
       cortex = new Cortex(@value)
       newValue = {nested: [100, 200, 300]}
       path = cortex.get("b").get("key2").get("key3").getPath()
-      cortex.update({path: path, value: newValue})
+      cortex.update(newValue, path)
 
       expect(cortex.getValue()["b"]["key2"]["key3"]).toEqual(newValue)
 
@@ -49,7 +49,7 @@ describe "Cortex", ->
       cortex = new Cortex(@value)
       newValue = [0, 11, 22]
       path = cortex.get("c").getPath()
-      cortex.update({path: path, value: newValue})
+      cortex.update(newValue, path)
 
       expect(cortex.getValue()["c"]).toEqual(newValue)
 
@@ -57,6 +57,6 @@ describe "Cortex", ->
       cortex = new Cortex(@value)
       newValue = -1
       path = cortex.get("c").get(0).getPath()
-      cortex.update({path: path, value: newValue})
+      cortex.update(newValue, path)
 
       expect(cortex.getValue()["c"][0]).toEqual(newValue)

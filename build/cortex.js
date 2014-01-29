@@ -14,11 +14,7 @@ DataWrapper = (function() {
   }
 
   DataWrapper.prototype.set = function(value) {
-    return this._getRoot().update({
-      sourceKey: this.sourceKey,
-      value: value,
-      path: this.getPath()
-    });
+    return this._getRoot().update(value, this.getPath());
   };
 
   DataWrapper.prototype.get = function(key) {
@@ -117,8 +113,8 @@ Cortex = (function(_super) {
     this._wrap();
   }
 
-  Cortex.prototype.update = function(params) {
-    this._setValue(params.value, params.path);
+  Cortex.prototype.update = function(newValue, path) {
+    this._setValue(newValue, path);
     this._wrap();
     if (this.callback) {
       return this.callback(this);
