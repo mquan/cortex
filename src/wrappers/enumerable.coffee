@@ -1,5 +1,5 @@
 EnumerableWrapper =
-  getLength: ->
+  count: ->
     @value.length
 
   forEach: (callback) ->

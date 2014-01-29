@@ -6,9 +6,9 @@ describe "Enumerable", ->
     @value = [1, 1, 2, 3, 5, 8, 13]
     @wrapper = new Cortex(@value)
 
-  describe "#getLength", ->
+  describe "#count", ->
     it "returns length of nested wrappers", ->
-      expect(@wrapper.getLength()).toBe(@value.length)
+      expect(@wrapper.count()).toBe(@value.length)
 
   describe "#forEach", ->
     describe "when array", ->
@@ -82,7 +82,7 @@ describe "Enumerable", ->
 
       # Check that push return the length.
       expect(newLength).toBe(length + 1)
-      expect(@wrapper.getLength()).toBe(length + 1)
+      expect(@wrapper.count()).toBe(length + 1)
       expect(@wrapper.get(length).getValue()).toBe(value)
 
   describe "#pop", ->
@@ -93,7 +93,7 @@ describe "Enumerable", ->
       removed = @wrapper.pop()
 
       expect(removed).toBe(value)
-      expect(@wrapper.getLength()).toBe(currentLength - 1)
+      expect(@wrapper.count()).toBe(currentLength - 1)
 
   describe "#insertAt", ->
     describe "when insert value is not an array", ->
@@ -103,7 +103,7 @@ describe "Enumerable", ->
         index = Math.floor(currentLength / 2)
         @wrapper.insertAt(index, insertValue)
 
-        expect(@wrapper.getLength()).toBe(currentLength + 1)
+        expect(@wrapper.count()).toBe(currentLength + 1)
         expect(@wrapper.get(index).getValue()).toBe(insertValue)
 
     describe "when insert value is an array", ->
@@ -118,7 +118,7 @@ describe "Enumerable", ->
 
         @wrapper.insertAt(index, insertArray)
 
-        expect(@wrapper.getLength()).toBe(currentLength + insertArray.length)
+        expect(@wrapper.count()).toBe(currentLength + insertArray.length)
 
         @wrapper.forEach (wrapperElement, i) ->
           expect(wrapperElement.getValue()).toBe(newArray[i])
@@ -135,6 +135,6 @@ describe "Enumerable", ->
       removed = @wrapper.removeAt(index, howMany)
 
       expect(removed).toEqual(expectedRemoved)
-      expect(@wrapper.getLength()).toBe(currentLength - howMany)
+      expect(@wrapper.count()).toBe(currentLength - howMany)
       @wrapper.forEach (wrapperElement, i) ->
         expect(wrapperElement.getValue()).toBe(newArray[i])

@@ -191,7 +191,7 @@ module.exports = Path;
 var EnumerableWrapper;
 
 EnumerableWrapper = {
-  getLength: function() {
+  count: function() {
     return this.value.length;
   },
   forEach: function(callback) {

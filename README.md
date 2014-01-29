@@ -97,7 +97,7 @@ new Cortex(data, function() {
 
     Method                         | Description
     -------------------------------|:----------------------
-    `getLength()`                  | Returns length of nested wrappers
+    `count()`                      | Returns length of nested wrappers
     `forEach(callback)`            | Iterates over all elements. The callback accepts the following input `(wrapperElement, index, wrapperArray)`
     `map(callback)`                | Returns a new array as returned by the callback. Callback accepts same input as forEach callback
     `find(callback)`               | Returns the first wrapper element that meets the condition returned by callback. Callback accepts same input as forEach callback.
