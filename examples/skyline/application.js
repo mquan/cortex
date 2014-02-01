@@ -2,7 +2,7 @@
 
 var Room = React.createClass({displayName: 'Room',
   toggleLight: function(e) {
-    current = this.props.room.get("light_on").getValue();
+    var current = this.props.room.get("light_on").getValue();
     this.props.room.get("light_on").set(!current);
     return false;
   },
@@ -63,7 +63,7 @@ var City = React.createClass({displayName: 'City',
     this.props.city.push(newBuilding);
     e.preventDefault();
   },
-  removeBuidling: function(e) {
+  removeBuilding: function(e) {
     this.props.city.pop();
     e.preventDefault();
   },
@@ -76,7 +76,7 @@ var City = React.createClass({displayName: 'City',
         buildings,
         React.DOM.div( {className:"city-controls"}, 
           React.DOM.a( {href:"#", onClick:this.addBuilding}, "Add Building"), " | ",
-          React.DOM.a( {href:"#", onClick:this.removeBuidling}, "Remove Building")
+          React.DOM.a( {href:"#", onClick:this.removeBuilding}, "Remove Building")
         )
       )
     );
