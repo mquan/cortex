@@ -42,4 +42,9 @@ EnumerableWrapper =
     @set(@value)
     return removed
 
+  delete: ->
+    if @path and @parentWrapper
+      @parentWrapper.removeAt(@path.getKey())
+
+
 module.exports = EnumerableWrapper
