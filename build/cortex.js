@@ -258,6 +258,8 @@ EnumerableWrapper = {
       removed = this.value[index];
       delete this.value[index];
       delete this.wrappers[index];
+    } else {
+      throw "`removeAt` called on a primitive wrapper";
     }
     this.set(this.value);
     return removed;
