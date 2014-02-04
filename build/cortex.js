@@ -252,9 +252,22 @@ EnumerableWrapper = {
     if (howMany == null) {
       howMany = 1;
     }
-    removed = this.value.splice(index, howMany);
+    if (this.value.splice) {
+      removed = this.value.splice(index, howMany);
+    } else if (this.wrappers.constructor === Object) {
+      removed = this.value[index];
+      delete this.value[index];
+      delete this.wrappers[index];
+    } else {
+      throw "`removeAt` called on a primitive wrapper";
+    }
     this.set(this.value);
     return removed;
+  },
+  "delete": function() {
+    if (this.path && this.parentWrapper) {
+      return this.parentWrapper.removeAt(this.path.getKey());
+    }
   }
 };
 

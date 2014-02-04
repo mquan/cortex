@@ -138,3 +138,37 @@ describe "Enumerable", ->
       expect(@wrapper.count()).toBe(currentLength - howMany)
       @wrapper.forEach (wrapperElement, i) ->
         expect(wrapperElement.getValue()).toBe(newArray[i])
+
+    it "fails when called on a non-object", ->
+      @wrapper = new Cortex(1)
+      expect(@wrapper.removeAt.bind(0)).toThrow()
+
+  describe "#delete", ->
+    describe "when parent is a hash", ->
+      beforeEach ->
+        @wrapper = new Cortex({"foo": "bar", "baz": "bort"})
+
+      it "deletes the correct child", ->
+        @wrapper.get("foo").delete()
+        expect(@wrapper.get("foo")).toBe(undefined)
+        expect(@wrapper.get("baz").getValue()).toBe("bort")
+ 
+    describe "when parent is an array", ->
+      beforeEach ->
+        @wrapper = new Cortex([1,2,3])
+
+      it "deletes the correct child", ->
+        value = @wrapper.get(0)
+        value.delete()
+        expect(@wrapper.get(0).getValue()).toBe(2)
+        expect(@wrapper.get(1).getValue()).toBe(3)
+        expect(@wrapper.count()).toBe(2)
+
+    describe "when root", ->
+      beforeEach ->
+        @wrapper = new Cortex(1)
+        
+      it "does nothing to itself", ->
+        @wrapper.delete()
+        expect(@wrapper.getValue()).toEqual(1)
+
