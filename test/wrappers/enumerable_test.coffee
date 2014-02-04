@@ -144,12 +144,11 @@ describe "Enumerable", ->
       beforeEach ->
         @wrapper = new Cortex({"foo": "bar", "baz": "bort"})
 
-        it "deletes the correct child", ->
-          value = @wrapper.get("foo")
-          value.delete()
-          expect(@wrapper.get("foo")).toBe(undefined)
-          expect(@wrapper.get("baz").getValue()).toBe("bort")
-
+      it "deletes the correct child", ->
+        @wrapper.get("foo").delete()
+        expect(@wrapper.get("foo")).toBe(undefined)
+        expect(@wrapper.get("baz").getValue()).toBe("bort")
+ 
     describe "when parent is an array", ->
       beforeEach ->
         @wrapper = new Cortex([1,2,3])

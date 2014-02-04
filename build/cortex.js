@@ -252,7 +252,13 @@ EnumerableWrapper = {
     if (howMany == null) {
       howMany = 1;
     }
-    removed = this.value.splice(index, howMany);
+    if (this.value.splice) {
+      removed = this.value.splice(index, howMany);
+    } else if (this.wrappers.constructor === Object) {
+      removed = this.value[index];
+      delete this.value[index];
+      delete this.wrappers[index];
+    }
     this.set(this.value);
     return removed;
   },

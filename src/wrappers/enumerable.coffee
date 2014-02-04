@@ -38,7 +38,12 @@ EnumerableWrapper =
     @set(@value)
 
   removeAt: (index, howMany = 1) ->
-    removed = @value.splice(index, howMany)
+    if @value.splice
+      removed = @value.splice(index, howMany)
+    else if @wrappers.constructor == Object
+      removed = @value[index]
+      delete @value[index]
+      delete @wrappers[index]
     @set(@value)
     return removed
 
