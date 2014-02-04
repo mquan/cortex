@@ -255,6 +255,11 @@ EnumerableWrapper = {
     removed = this.value.splice(index, howMany);
     this.set(this.value);
     return removed;
+  },
+  "delete": function() {
+    if (this.path && this.parentWrapper) {
+      return this.parentWrapper.removeAt(this.path.getKey());
+    }
   }
 };
 
