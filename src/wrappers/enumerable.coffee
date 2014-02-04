@@ -44,6 +44,8 @@ EnumerableWrapper =
       removed = @value[index]
       delete @value[index]
       delete @wrappers[index]
+    else
+      throw "`removeAt` called on a primitive wrapper"
     @set(@value)
     return removed
 

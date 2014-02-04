@@ -139,6 +139,10 @@ describe "Enumerable", ->
       @wrapper.forEach (wrapperElement, i) ->
         expect(wrapperElement.getValue()).toBe(newArray[i])
 
+    it "fails when called on a non-object", ->
+      @wrapper = new Cortex(1)
+      expect(@wrapper.removeAt.bind(0)).toThrow()
+
   describe "#delete", ->
     describe "when parent is a hash", ->
       beforeEach ->
