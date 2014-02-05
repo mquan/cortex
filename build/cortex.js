@@ -1,9 +1,13 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var DataWrapper, Enumerable, Path, _extend, _include;
+var ArrayWrapper, DataWrapper, HashWrapper, Path, SharedWrapper, _extend, _include;
 
 Path = require("./path");
 
-Enumerable = require("./wrappers/enumerable");
+ArrayWrapper = require("./wrappers/array");
+
+HashWrapper = require("./wrappers/hash");
+
+SharedWrapper = require("./wrappers/shared");
 
 DataWrapper = (function() {
   function DataWrapper(value, path, parentWrapper) {
@@ -93,11 +97,11 @@ _include = function(klass, mixins) {
   return _results;
 };
 
-_include(DataWrapper, [Enumerable]);
+_include(DataWrapper, [ArrayWrapper, HashWrapper, SharedWrapper]);
 
 module.exports = DataWrapper;
 
-},{"./path":3,"./wrappers/enumerable":4}],2:[function(require,module,exports){
+},{"./path":3,"./wrappers/array":4,"./wrappers/hash":5,"./wrappers/shared":6}],2:[function(require,module,exports){
 var Cortex, DataWrapper,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -116,6 +120,10 @@ Cortex = (function(_super) {
   Cortex.prototype.update = function(newValue, path) {
     this._setValue(newValue, path);
     this._wrap();
+    return this._afterUpdate();
+  };
+
+  Cortex.prototype._afterUpdate = function() {
     if (this.callback) {
       return this.callback(this);
     }
@@ -184,25 +192,11 @@ Path = (function() {
 module.exports = Path;
 
 },{}],4:[function(require,module,exports){
-var EnumerableWrapper;
+var ArrayWrapper;
 
-EnumerableWrapper = {
+ArrayWrapper = {
   count: function() {
     return this.value.length;
-  },
-  forEach: function(callback) {
-    var key, wrapper, _ref, _results;
-    if (this.wrappers.constructor === Object) {
-      _ref = this.wrappers;
-      _results = [];
-      for (key in _ref) {
-        wrapper = _ref[key];
-        _results.push(callback(key, wrapper));
-      }
-      return _results;
-    } else if (this.wrappers.constructor === Array) {
-      return this.wrappers.forEach(callback);
-    }
   },
   map: function(callback) {
     return this.wrappers.map(callback);
@@ -238,6 +232,7 @@ EnumerableWrapper = {
   pop: function() {
     var last;
     last = this.value.pop();
+    this.wrappers.pop();
     this.set(this.value);
     return last;
   },
@@ -252,25 +247,77 @@ EnumerableWrapper = {
     if (howMany == null) {
       howMany = 1;
     }
-    if (this.value.splice) {
-      removed = this.value.splice(index, howMany);
-    } else if (this.wrappers.constructor === Object) {
-      removed = this.value[index];
-      delete this.value[index];
-      delete this.wrappers[index];
-    } else {
-      throw "`removeAt` called on a primitive wrapper";
-    }
+    removed = this.value.splice(index, howMany);
     this.set(this.value);
     return removed;
+  }
+};
+
+module.exports = ArrayWrapper;
+
+},{}],5:[function(require,module,exports){
+var HashWrapper;
+
+HashWrapper = {
+  keys: function() {
+    return Object.keys(this.value);
   },
-  "delete": function() {
-    if (this.path && this.parentWrapper) {
-      return this.parentWrapper.removeAt(this.path.getKey());
+  values: function() {
+    var key, val, values, _ref;
+    values = [];
+    _ref = this.value;
+    for (key in _ref) {
+      val = _ref[key];
+      values.push(val);
+    }
+    return values;
+  },
+  hasKey: function(key) {
+    return this.value[key] != null;
+  },
+  "delete": function(key) {
+    var removed;
+    removed = this.value[key];
+    delete this.value[key];
+    this.set(this.value);
+    return removed;
+  }
+};
+
+module.exports = HashWrapper;
+
+},{}],6:[function(require,module,exports){
+var SharedWrapper;
+
+SharedWrapper = {
+  forEach: function(callback) {
+    var key, wrapper, _ref, _results;
+    if (this.wrappers.constructor === Object) {
+      _ref = this.wrappers;
+      _results = [];
+      for (key in _ref) {
+        wrapper = _ref[key];
+        _results.push(callback(key, wrapper));
+      }
+      return _results;
+    } else if (this.wrappers.constructor === Array) {
+      return this.wrappers.forEach(callback);
+    }
+  },
+  remove: function() {
+    if (this.parentWrapper) {
+      if (this.parentWrapper.getValue().constructor === Object) {
+        return this.parentWrapper["delete"](this.path.getKey());
+      } else if (this.parentWrapper.getValue().constructor === Array) {
+        return this.parentWrapper.removeAt(this.path.getKey());
+      }
+    } else {
+      delete this.value;
+      return delete this.wrappers;
     }
   }
 };
 
-module.exports = EnumerableWrapper;
+module.exports = SharedWrapper;
 
 },{}]},{},[2])

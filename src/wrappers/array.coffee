@@ -1,12 +1,6 @@
-EnumerableWrapper =
+ArrayWrapper =
   count: ->
     @value.length
-
-  forEach: (callback) ->
-    if @wrappers.constructor == Object
-      callback(key, wrapper) for key, wrapper of @wrappers
-    else if @wrappers.constructor == Array
-      @wrappers.forEach(callback)
 
   map: (callback) ->
     @wrappers.map(callback)
@@ -28,6 +22,7 @@ EnumerableWrapper =
 
   pop: ->
     last = @value.pop()
+    @wrappers.pop()
     @set(@value)
     return last
 
@@ -38,20 +33,8 @@ EnumerableWrapper =
     @set(@value)
 
   removeAt: (index, howMany = 1) ->
-    if @value.splice
-      removed = @value.splice(index, howMany)
-    else if @wrappers.constructor == Object
-      removed = @value[index]
-      delete @value[index]
-      delete @wrappers[index]
-    else
-      throw "`removeAt` called on a primitive wrapper"
+    removed = @value.splice(index, howMany)
     @set(@value)
     return removed
 
-  delete: ->
-    if @path and @parentWrapper
-      @parentWrapper.removeAt(@path.getKey())
-
-
-module.exports = EnumerableWrapper
+module.exports = ArrayWrapper

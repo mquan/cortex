@@ -1,7 +1,7 @@
 # Use Cortex model for testing because we don't want to stub update method.
 Cortex = require("../../src/cortex")
 
-describe "Enumerable", ->
+describe "ArrayWrapper", ->
   beforeEach ->
     @value = [1, 1, 2, 3, 5, 8, 13]
     @wrapper = new Cortex(@value)
@@ -9,26 +9,6 @@ describe "Enumerable", ->
   describe "#count", ->
     it "returns length of nested wrappers", ->
       expect(@wrapper.count()).toBe(@value.length)
-
-  describe "#forEach", ->
-    describe "when array", ->
-      it "iterates over all elements of wrapper array", ->
-        out = []
-        @wrapper.forEach (obj) ->
-          out.push(obj.getValue())
-
-        expect(out).toEqual(@value)
-
-    describe "when an object", ->
-      it "iterates over every key and element pair in the object", ->
-        value = {a: 1, b: 2, c: 3}
-        wrapper = new Cortex(value)
-
-        out = []
-        wrapper.forEach (key, wrapper) ->
-          out.push("#{key}:#{wrapper.getValue()}")
-
-        expect(out).toEqual(["a:1", "b:2", "c:3"])
 
   describe "#map", ->
     it "returns a new array with elements as results returned from function", ->
@@ -139,36 +119,6 @@ describe "Enumerable", ->
       @wrapper.forEach (wrapperElement, i) ->
         expect(wrapperElement.getValue()).toBe(newArray[i])
 
-    it "fails when called on a non-object", ->
+    it "fails when called on a non array", ->
       @wrapper = new Cortex(1)
       expect(@wrapper.removeAt.bind(0)).toThrow()
-
-  describe "#delete", ->
-    describe "when parent is a hash", ->
-      beforeEach ->
-        @wrapper = new Cortex({"foo": "bar", "baz": "bort"})
-
-      it "deletes the correct child", ->
-        @wrapper.get("foo").delete()
-        expect(@wrapper.get("foo")).toBe(undefined)
-        expect(@wrapper.get("baz").getValue()).toBe("bort")
- 
-    describe "when parent is an array", ->
-      beforeEach ->
-        @wrapper = new Cortex([1,2,3])
-
-      it "deletes the correct child", ->
-        value = @wrapper.get(0)
-        value.delete()
-        expect(@wrapper.get(0).getValue()).toBe(2)
-        expect(@wrapper.get(1).getValue()).toBe(3)
-        expect(@wrapper.count()).toBe(2)
-
-    describe "when root", ->
-      beforeEach ->
-        @wrapper = new Cortex(1)
-        
-      it "does nothing to itself", ->
-        @wrapper.delete()
-        expect(@wrapper.getValue()).toEqual(1)
-

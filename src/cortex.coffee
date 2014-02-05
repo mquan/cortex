@@ -7,7 +7,6 @@ class Cortex extends DataWrapper
   update: (newValue, path) ->
     @_setValue(newValue, path)
     @_wrap()
-
     @callback(this) if @callback
 
   _setValue: (newValue, path) ->

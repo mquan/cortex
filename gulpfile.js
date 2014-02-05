@@ -34,7 +34,9 @@ gulp.task("test", ["coffee"], function() {
   var tests = [
     "temp/test/path_test.js",
     "temp/test/data_wrapper_test.js",
-    "temp/test/wrappers/enumerable_test.js",
+    "temp/test/wrappers/array_test.js",
+    "temp/test/wrappers/hash_test.js",
+    "temp/test/wrappers/shared_test.js",
     "temp/test/cortex_test.js"
   ];
 
