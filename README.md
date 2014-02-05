@@ -1,5 +1,9 @@
 Cortex is a Javascript library for centrally managing data with React.
 
+Features:
+- supports deeply nested data with a simple API
+- has built-in methods for working with arrays and hashes data
+
 [Here's a basic demo](http://mquan.github.io/cortex/examples/skyline/)
 
 # Overview
@@ -8,7 +12,7 @@ In React's world data flows in one direction from the top down. That means if yo
 
 However, this simply isn't sustainable even for trivially nested data. Imagine a Restaurant app in which the Restaurant has many Orders, each has many Items, each of which has many Modifiers. If you want to update a Modifier from 'medium rare' to 'well-done' you'd have to pass the data changes several levels up. This is not only awkward but also creates unnecessary extra code in each component in the chain only for the purpose of passing data upstream.
 
-Cortex's goal is to support arbitrarily deep data without requiring you to pass callbacks down the chain while complying to React one-direction data flow. Cortex achieves this by thinly wrap your data in an object that contains the key for locating each nested piece of data as accessed from the top level. When you change the data, internally Cortex passes the new value along with its location key to update the data at the source.
+Cortex's goal is to support arbitrarily deep data structure without requiring you to pass callbacks down the chain while complying to React one-direction data flow. Cortex achieves this by thinly wrap your data in an object that contains the key for locating each nested piece of data as accessed from the top level. When you change the data, internally Cortex passes the new value along with its location key to update the data at the source.
 
 
 # Basic example
@@ -93,7 +97,7 @@ new Cortex(data, function() {
     `getValue()`   | Returns the actual value
     `set(value)`   | Changes the value and rewrap the entire data tree
 
-### Cortex wrapper of enumerable data has the following methods:
+### Cortex wrapper of array data has the following methods:
 
     Method                         | Description
     -------------------------------|:----------------------
@@ -106,6 +110,15 @@ new Cortex(data, function() {
     `pop()`                        | Removes the last element in the array
     `insertAt(index, [value])`     | Inserts a value or an array of values starting at specified index.
     `removeAt(index, howMany = 1)` | Removes specified number of elements starting at index location. By default it removes 1 element if number of elements to be removed isn't specified.
+
+### Cortex wrapper of hash data has the following methods:
+    Methods                        | Description
+    -------------------------------|:------------------------
+    `keys()`                       | Returns the array of keys
+    `values()`                     | Returns the array of values
+    `hasKey(key)`                  | Returns boolean value whether the key exists
+    `forEach(callback)`            | Iterates over every key and value pair. The callback accepts the following inputs `(key, wrapperElement)`
+    `delete(key)`                  | Deletes the specified key and value pair
 
 
 # Buidling Cortex
