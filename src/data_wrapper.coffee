@@ -7,8 +7,8 @@ class DataWrapper
   constructor: (@value, @path = null, @parentWrapper = null) ->
     @_wrap()
 
-  set: (value) ->
-    @_getRoot().update(value, @getPath())
+  set: (value, forceUpdate = false) ->
+    @_getRoot().update(value, @getPath(), forceUpdate)
 
   get: (key) ->
     @wrappers[key]

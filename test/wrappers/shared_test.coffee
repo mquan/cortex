@@ -50,4 +50,3 @@ describe "SharedWrapper", ->
         wrapper.remove()
 
         expect(wrapper.getValue()).toBe(undefined)
-

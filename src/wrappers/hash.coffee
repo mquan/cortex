@@ -13,7 +13,7 @@ HashWrapper =
   delete: (key) ->
     removed = @value[key]
     delete @value[key]
-    @set(@value)
+    @set(@value, true)
     removed
 
 module.exports = HashWrapper

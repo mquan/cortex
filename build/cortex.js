@@ -17,8 +17,11 @@ DataWrapper = (function() {
     this._wrap();
   }
 
-  DataWrapper.prototype.set = function(value) {
-    return this._getRoot().update(value, this.getPath());
+  DataWrapper.prototype.set = function(value, forceUpdate) {
+    if (forceUpdate == null) {
+      forceUpdate = false;
+    }
+    return this._getRoot().update(value, this.getPath(), forceUpdate);
   };
 
   DataWrapper.prototype.get = function(key) {
@@ -117,32 +120,70 @@ Cortex = (function(_super) {
     this._wrap();
   }
 
-  Cortex.prototype.update = function(newValue, path) {
-    this._setValue(newValue, path);
+  Cortex.prototype.update = function(newValue, path, forceUpdate) {
+    var updated;
+    updated = this._setValue(newValue, path, forceUpdate);
+    if (!updated) {
+      return;
+    }
     this._wrap();
-    return this._afterUpdate();
-  };
-
-  Cortex.prototype._afterUpdate = function() {
     if (this.callback) {
       return this.callback(this);
     }
   };
 
-  Cortex.prototype._setValue = function(newValue, path) {
-    var key, subValue, _i, _len, _ref;
-    if (path.length > 1) {
-      subValue = this.value;
-      _ref = path.slice(0, +(path.length - 2) + 1 || 9e9);
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        key = _ref[_i];
-        subValue = subValue[key];
+  Cortex.prototype._setValue = function(newValue, path, forceUpdate) {
+    var currentValue, key, oldValue, _i, _j, _len, _len1, _ref;
+    if (!forceUpdate) {
+      oldValue = this.value;
+      for (_i = 0, _len = path.length; _i < _len; _i++) {
+        key = path[_i];
+        oldValue = oldValue[key];
       }
-      return subValue[path[path.length - 1]] = newValue;
+      if (!this._isDifferent(oldValue, newValue)) {
+        return false;
+      }
+    }
+    if (path.length > 1) {
+      currentValue = this.value;
+      _ref = path.slice(0, +(path.length - 2) + 1 || 9e9);
+      for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+        key = _ref[_j];
+        currentValue = currentValue[key];
+      }
+      currentValue[path[path.length - 1]] = newValue;
     } else if (path.length === 1) {
-      return this.value[path[0]] = newValue;
+      this.value[path[0]] = newValue;
     } else {
-      return this.value = newValue;
+      this.value = newValue;
+    }
+    return true;
+  };
+
+  Cortex.prototype._isDifferent = function(oldValue, newValue) {
+    var i, key, val, _i, _len;
+    if (oldValue.constructor === Object) {
+      if (newValue.constructor !== Object || this._isDifferent(Object.keys(oldValue).sort(), Object.keys(newValue).sort())) {
+        return true;
+      }
+      for (key in oldValue) {
+        val = oldValue[key];
+        if (this._isDifferent(oldValue[key], newValue[key])) {
+          return true;
+        }
+      }
+    } else if (oldValue.constructor === Array) {
+      if (newValue.constructor !== Array || oldValue.length !== newValue.length) {
+        return true;
+      }
+      for (i = _i = 0, _len = oldValue.length; _i < _len; i = ++_i) {
+        val = oldValue[i];
+        if (this._isDifferent(oldValue[i], newValue[i])) {
+          return true;
+        }
+      }
+    } else {
+      return oldValue !== newValue;
     }
   };
 
@@ -226,21 +267,21 @@ ArrayWrapper = {
   push: function(value) {
     var length;
     length = this.value.push(value);
-    this.set(this.value);
+    this.set(this.value, true);
     return length;
   },
   pop: function() {
     var last;
     last = this.value.pop();
     this.wrappers.pop();
-    this.set(this.value);
+    this.set(this.value, true);
     return last;
   },
   insertAt: function(index, value) {
     var args;
     args = [index, 0].concat(value);
     Array.prototype.splice.apply(this.value, args);
-    return this.set(this.value);
+    return this.set(this.value, true);
   },
   removeAt: function(index, howMany) {
     var removed;
@@ -248,7 +289,7 @@ ArrayWrapper = {
       howMany = 1;
     }
     removed = this.value.splice(index, howMany);
-    this.set(this.value);
+    this.set(this.value, true);
     return removed;
   }
 };
@@ -279,7 +320,7 @@ HashWrapper = {
     var removed;
     removed = this.value[key];
     delete this.value[key];
-    this.set(this.value);
+    this.set(this.value, true);
     return removed;
   }
 };
