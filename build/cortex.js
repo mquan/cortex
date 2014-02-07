@@ -121,11 +121,13 @@ Cortex = (function(_super) {
   }
 
   Cortex.prototype.update = function(newValue, path, forceUpdate) {
-    var updated;
-    updated = this._setValue(newValue, path, forceUpdate);
-    if (!updated) {
-      return;
+    if (forceUpdate == null) {
+      forceUpdate = false;
     }
+    if (!forceUpdate && !this._shouldUpdate(newValue, path)) {
+      return false;
+    }
+    this._setValue(newValue, path);
     this._wrap();
     if (this.callback) {
       return this.callback(this);
@@ -133,31 +135,31 @@ Cortex = (function(_super) {
   };
 
   Cortex.prototype._setValue = function(newValue, path, forceUpdate) {
-    var currentValue, key, oldValue, _i, _j, _len, _len1, _ref;
-    if (!forceUpdate) {
-      oldValue = this.value;
-      for (_i = 0, _len = path.length; _i < _len; _i++) {
-        key = path[_i];
-        oldValue = oldValue[key];
-      }
-      if (!this._isDifferent(oldValue, newValue)) {
-        return false;
-      }
-    }
+    var key, subValue, _i, _len, _ref;
     if (path.length > 1) {
-      currentValue = this.value;
+      subValue = this.value;
       _ref = path.slice(0, +(path.length - 2) + 1 || 9e9);
-      for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-        key = _ref[_j];
-        currentValue = currentValue[key];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        key = _ref[_i];
+        subValue = subValue[key];
       }
-      currentValue[path[path.length - 1]] = newValue;
+      subValue[path[path.length - 1]] = newValue;
     } else if (path.length === 1) {
       this.value[path[0]] = newValue;
     } else {
       this.value = newValue;
     }
     return true;
+  };
+
+  Cortex.prototype._shouldUpdate = function(newValue, path) {
+    var key, oldValue, _i, _len;
+    oldValue = this.value;
+    for (_i = 0, _len = path.length; _i < _len; _i++) {
+      key = path[_i];
+      oldValue = oldValue[key];
+    }
+    return this._isDifferent(oldValue, newValue);
   };
 
   Cortex.prototype._isDifferent = function(oldValue, newValue) {
