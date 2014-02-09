@@ -15,6 +15,9 @@ class DataWrapper
 
   getValue: ->
     @value
+    
+  valueOf: ->
+    @value
 
   getPath: ->
     if @path? then @path.getPath() else []
