@@ -34,9 +34,16 @@ gulp.task("test", function() {
 });
 
 gulp.task("react", ["scripts"], function() {
-  gulp.src(["examples/skyline/application.jsx"])
+  var examples = [
+    "file_system",
+    "skyline"
+  ];
+
+  for(var i=0, ii=examples.length;i<ii;i++) {
+    gulp.src(["examples/" + examples[i] + "/application.jsx"])
       .pipe(react())
-      .pipe(gulp.dest("examples/skyline"));
+      .pipe(gulp.dest("examples/" + examples[i]));
+  }
 });
 
 gulp.task("default", function() {

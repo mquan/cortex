@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/react/0.8.0/react-with-addons.js"></script>
+    <script src="../../build/cortex.js"></script>
+    <style>
+      div#filesystem {
+        position: relative;
+      }
+
+      div.folder, div.file {
+        margin-left: 10px;
+        margin-bottom: 7px;
+      }
+
+      div.folder span.icon, div.file span.icon {
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+        margin: 0 5px;
+      }
+
+      div.folder span.icon {
+        background-color: #a3c4d8;
+      }
+
+      div.file span.icon {
+        border: 1px solid #cccccc;
+        background-color: #ffffff;
+      }
+
+      input.edit-name {
+        width: 100px;
+      }
+
+      .hide {
+        display: none;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="filesystem"></div>
+
+    <script type="text/javascript" src="application.js"></script>
+  </body>
+</html>
