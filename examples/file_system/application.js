@@ -58,9 +58,6 @@ var data = {name: "Desktop", children: [
     {name: "Chrome"}, {name: "VLC"}, {name: "Mail"}
   ]},
   {name: "Media", children: [
-    {name: "Videos", children: [
-      {name: "movie1.mov"}, {name: "movie2.mov"}
-    ]},
     {name: "Photos", children: [
       {name: "By locations", children: [
         {name: "United States", children: [
@@ -73,6 +70,9 @@ var data = {name: "Desktop", children: [
           ]}
         ]}
       ]}
+    ]},
+    {name: "Videos", children: [
+      {name: "movie1.mov"}, {name: "movie2.mov"}
     ]}
   ]},
   {name: "readme.txt"},
