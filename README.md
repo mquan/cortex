@@ -13,12 +13,12 @@ In React's world data flows in one direction from the top down. That means if yo
 
 However, this simply isn't sustainable even for trivially nested data. Imagine a Restaurant app in which the Restaurant has many Orders, each has many Items, each of which has many Modifiers. If you want to update a Modifier from 'medium rare' to 'well-done' you'd have to pass the data changes several levels up. This is not only awkward but also creates unnecessary extra code in each component in the chain only for the purpose of passing data upstream.
 
-Cortex's goal is to support arbitrarily deep data structure without requiring you to pass callbacks down the chain while complying to React one-direction data flow. Cortex achieves this by thinly wrap your data in an object that contains the key for locating each nested piece of data as accessed from the top level. When you change the data, internally Cortex passes the new value along with its location key to update the data at the source.
+Cortex's goal is to support arbitrarily deep data structure without requiring you to pass callbacks down the chain. Cortex achieves this by thinly wrap your data in an object that contains the key for locating each nested piece of data as accessed from the top level. When you change the data, internally Cortex passes the new value along with its location key to update the data at the source.
 
 
 # Basic example
 
-Let's look at the following example for Order and Item components. An Order contains an array of Items, and each Item can increase its own quantity attribute.
+The following example has two components Order and Item components. An Order contains an array of Items, and each Item can increase its own quantity attribute.
 
 ```javascript
 var Item = React.createClass({
@@ -67,14 +67,14 @@ orderComponent = React.renderComponent(
 );
 ```
 
-In the above example, we initialize cortex with:
+First we initialize cortex with:
 ```javascript
 var orderCortex = new Cortex(orderData, function(updatedOrder) {
   orderComponent.setProps({order: orderCortex});
 });
 ```
 
-Then it is passed into the Order component to render the Item components.
+Then it's passed into the Order component to render the Item components.
 
 In Item component, note that we display the quantity value with ``this.props.item.get('quantity').getValue()``. This is because ``this.props.item.get('quantity')`` only gives us the wrapper of the ``quantity`` attribute, we need to call ``getValue()`` to get the actual value.
 
