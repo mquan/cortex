@@ -28,6 +28,10 @@ Cortex = (function(_super, _cortexPubSub) {
 
   __extends(Cortex, _super);
 
+  Cortex.prototype.setCallback = function(callback) {
+      this.callback = callback;
+  }
+
   Cortex.prototype.update = function(newValue, path, forceUpdate) {
     if(!forceUpdate && !this._shouldUpdate(newValue, path)) {
       return false;
