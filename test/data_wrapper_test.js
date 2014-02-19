@@ -1,5 +1,8 @@
-var DataWrapper = require("../src/data_wrapper");
-var Cortex = require("../src/cortex");
+var cortexPubSub = require("../src/pubsub"),
+ArrayWrapper = require("../src/wrappers/array"),
+HashWrapper = require("../src/wrappers/hash"),
+DataWrapper = require("../src/data_wrapper")([ArrayWrapper, HashWrapper], cortexPubSub),
+Cortex = require("../src/cortex");
 
 describe("DataWrapper", function() {
   describe("#get", function() {
@@ -48,16 +51,20 @@ describe("DataWrapper", function() {
   });
 
   describe("#set", function() {
-    it("calls update on top level wrapper", function() {
+    it("publishes update event", function() {
       var value = {a: { b: [1, 2, 3] } },
-          wrapper = new DataWrapper(value);
-      wrapper["update"] = function(value) {
-        return value;
-      };
-      update = spyOn(wrapper, "update");
-      wrapper.get("a").get("b").set([100]);
+          topicId = 0,
+          wrapper = new DataWrapper(value, [], topicId),
+          newValue = [100];
 
-      expect(update).toHaveBeenCalled();
+      publish = spyOn(cortexPubSub, "publish");
+      wrapper.get("a").get("b").set(newValue, false);
+
+      expect(publish).toHaveBeenCalledWith("update" + topicId, {
+        value: newValue,
+        path: wrapper.get("a").get("b").getPath(),
+        forceUpdate: false
+      });
     });
   });
 
@@ -107,6 +114,15 @@ describe("DataWrapper", function() {
     });
   });
 
+  describe("#getKey", function() {
+    it("returns current level key", function() {
+      var value = {key1: {key2: 1}},
+          wrapper = new DataWrapper(value);
+
+      expect(wrapper.get("key1").getKey()).toBe("key1");
+    });
+  });
+
   describe("#getValue", function() {
     it("returns input value", function() {
       var value = { key1: 1, key2: 2 },
@@ -147,43 +163,16 @@ describe("DataWrapper", function() {
   });
 
   describe("#remove", function() {
-    describe("when not a root", function() {
-      describe("when parent is an array", function() {
-        it("removes the specified element in parent array", function() {
-          var value = [1, 2, 3, 4, 5],
-              length = value.length,
-              wrapper = new Cortex(value);
+    it("publishes remove event", function() {
+      var value = 1,
+          topicId = 0,
+          wrapper = new DataWrapper(value),
+          publish = spyOn(cortexPubSub, "publish");
 
-          wrapper.get(0).remove();
+      wrapper.eventId = topicId;
+      wrapper.remove();
 
-          expect(wrapper.count()).toBe(length - 1);
-          expect(wrapper.get(0).getValue()).toBe(2);
-        });
-      });
-
-      describe("when parent is a hash", function() {
-        it("removes the specified key and value pair", function() {
-          var value = { a: 1, b: 2, c: 3 },
-              wrapper = new Cortex(value);
-
-          wrapper.get("a").remove();
-
-          expect(wrapper.get("a")).toBe(undefined);
-          expect(wrapper.hasKey("a")).toBe(false);
-        });
-      });
-    });
-
-    describe("when a root", function() {
-      it("removes itself", function() {
-        var wrapper = new Cortex(1);
-
-        wrapper["update"] = this.updateMethod;
-
-        wrapper.remove();
-
-        expect(wrapper.getValue()).toBe(undefined);
-      });
+      expect(publish).toHaveBeenCalledWith("remove" + topicId, {path: wrapper.getPath()});
     });
   });
 });
