@@ -23,6 +23,10 @@ Cortex = (function(_super) {
     this._wrap();
   }
 
+  Cortex.prototype.setCallback = function(callback) {
+      this.callback = callback;
+  }
+
   Cortex.prototype.update = function(newValue, path, forceUpdate) {
     if(forceUpdate == null) {
       forceUpdate = false;
