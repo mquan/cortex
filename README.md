@@ -120,6 +120,7 @@ new Cortex(data, function() {
     `hasKey(key)`                  | Returns boolean value whether the key exists
     `forEach(callback)`            | Iterates over every key and value pair. The callback accepts the following inputs `(key, wrapperElement)`
     `delete(key)`                  | Deletes the specified key and value pair
+    `add(key, value)`              | Adds the specified key and value pair
 
 
 # Install via Bower
