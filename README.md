@@ -122,6 +122,16 @@ new Cortex(data, function() {
     `delete(key)`                  | Deletes the specified key and value pair
 
 
+# Install via Bower
+```console
+bower install bower-cortex
+```
+
+Reference the js file
+```html
+<script src="/bower_components/bower-cortex/build/cortex.js"></script>
+```
+
 # Buidling Cortex
 To build Cortex:
 ```console
