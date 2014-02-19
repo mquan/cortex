@@ -285,4 +285,54 @@ describe("Cortex", function() {
       });
     });
   });
+
+  describe("Update notification", function() {
+    it("calls update method", function() {
+      var cortex = new Cortex(1),
+          update = spyOn(cortex, "update"),
+          newValue = 100;
+      //Call set to trigger update event
+      cortex.set(newValue);
+
+      expect(update).toHaveBeenCalledWith(newValue, cortex.getPath(), undefined);
+    });
+  });
+
+  describe("Remove notification", function() {
+    describe("when not a root", function() {
+      describe("when parent is an array", function() {
+        it("removes the specified element in parent array", function() {
+          var value = [1, 2, 3, 4, 5],
+              length = value.length,
+              cortex = new Cortex(value);
+
+          cortex.get(0).remove();
+
+          expect(cortex.count()).toBe(length - 1);
+          expect(cortex.get(0).getValue()).toBe(2);
+        });
+      });
+
+      describe("when parent is a hash", function() {
+        it("removes the specified key and value pair", function() {
+          var value = { a: 1, b: 2, c: 3 },
+              cortex = new Cortex(value);
+
+          cortex.get("a").remove();
+
+          expect(cortex.get("a")).toBe(undefined);
+          expect(cortex.hasKey("a")).toBe(false);
+        });
+      });
+    });
+
+    describe("when a root", function() {
+      it("removes itself", function() {
+        var cortex = new Cortex(1);
+        cortex.remove();
+
+        expect(cortex.getValue()).toBe(undefined);
+      });
+    });
+  });
 });

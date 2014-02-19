@@ -27,28 +27,28 @@ var ArrayWrapper = {
 
   push: function(value) {
     var length = this.value.push(value);
-    this._forceSet();
+    this._forceUpdate();
     return length;
   },
 
   pop: function() {
     var last = this.value.pop();
-    this._forceSet();
+    this._forceUpdate();
     return last;
   },
 
   insertAt: function(index, value) {
     var args = [index, 0].concat(value);
     Array.prototype.splice.apply(this.value, args);
-    this._forceSet();
+    this._forceUpdate();
   },
 
   removeAt: function(index, howMany) {
     if(howMany == null) {
-      howMany = 1
+      howMany = 1;
     }
     var removed = this.value.splice(index, howMany);
-    this._forceSet();
+    this._forceUpdate();
     return removed;
   }
 };
