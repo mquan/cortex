@@ -36,4 +36,14 @@ describe("HashWrapper", function() {
       expect(this.wrapper.get("c").getValue()).toBe(3);
     });
   });
+
+  describe("#add", function() {
+    it("adds key-value pair", function() {
+      expect(this.wrapper.add("d", 4)).toBe(4);
+      expect(this.wrapper.hasKey("d")).toBe(true);
+      expect(this.wrapper.get("d").getValue()).toBe(4);
+      expect(this.wrapper.keys()).toEqual(["a", "b", "c", "d"]);
+      expect(this.wrapper.values()).toEqual([1, 2, 3, 4]);
+    });
+  });
 });
