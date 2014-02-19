@@ -359,6 +359,12 @@ var HashWrapper = {
     delete this.value[key];
     this.set(this.value, true);
     return removed;
+  },
+
+  add: function(key, value) {
+    this.value[key] = value;
+    this.set(this.value, true);
+    return value;
   }
 };
 
