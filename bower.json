@@ -1,0 +1,24 @@
+{
+  "name": "bower-cortex",
+  "version": "0.3.2",
+  "main": "build/cortex.js",
+  "homepage": "https://github.com/mquan/cortex",
+  "authors": ["Quan Nguyen"],
+  "description": "A data management solution for React",
+  "keywords": [
+    "React",
+    "nested",
+    "data"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "package.json",
+    "gulpfile.js",
+    "node_modules",
+    "bower_components",
+    "src",
+    "examples",
+    "test",
+    "tests"
+  ]
+}
