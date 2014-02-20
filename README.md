@@ -12,7 +12,7 @@ Initialize a cortex object
 ```javascript
 var data = {a: 100, b: [1, 2, 3]};
 
-var cortex = Cortex(data, function() {
+var cortex = new Cortex(data, function() {
   //trigger your React component to update props
 });
 ```
