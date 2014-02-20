@@ -5,7 +5,7 @@ var Node = React.createClass({displayName: 'Node',
     return {editing: false, editText: ""};
   },
   edit: function() {
-    this.setState({editing: true, editText: this.props.node.get("name").getValue()});
+    this.setState({editing: true, editText: this.props.node.name.getValue()});
   },
   handleChange: function(event) {
     this.setState({editText: event.target.value});
@@ -13,7 +13,7 @@ var Node = React.createClass({displayName: 'Node',
   update: function(event) {
     if(event.keyCode === 13) {
       this.setState({editing: false});
-      this.props.node.get("name").set(event.target.value);
+      this.props.node.name.set(event.target.value);
     }
   },
   render: function() {
@@ -28,9 +28,9 @@ var Node = React.createClass({displayName: 'Node',
       "hide": !this.state.editing
     });
 
-    if (this.props.node.get("children")) {
+    if (this.props.node.children) {
       nodeType = "folder";
-      nodes = this.props.node.get("children").map(function(node) {
+      nodes = this.props.node.children.map(function(node) {
         return Node( {node:node} );
       });
     } else {
@@ -41,7 +41,7 @@ var Node = React.createClass({displayName: 'Node',
       React.DOM.div( {className:nodeType}, 
         React.DOM.span( {className:"icon"}),
         React.DOM.span( {className:nameClass, onDoubleClick:this.edit}, 
-          this.props.node.get("name").getValue()
+          this.props.node.name.getValue()
         ),
         React.DOM.input( {className:editClass,
                value:this.state.editText,

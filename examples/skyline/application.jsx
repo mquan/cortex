@@ -2,12 +2,12 @@
 
 var Room = React.createClass({
   toggleLight: function(e) {
-    var current = this.props.room.get("light_on").getValue();
-    this.props.room.get("light_on").set(!current);
+    var current = this.props.room.light_on.getValue();
+    this.props.room.light_on.set(!current);
     return false;
   },
   render: function() {
-    var windowClasses = "window " + (this.props.room.get("light_on").getValue() ? "light-on" : "light-off");
+    var windowClasses = "window " + (this.props.room.light_on.getValue() ? "light-on" : "light-off");
     return(
       <span className="room">
         <a href="#" className={windowClasses} onClick={this.toggleLight}></a>
@@ -18,11 +18,11 @@ var Room = React.createClass({
 
 var Floor = React.createClass({
   addRoom: function(e) {
-    this.props.floor.get("rooms").push({light_on: true});
+    this.props.floor.rooms.push({light_on: true});
     return false;
   },
   render: function() {
-    var rooms = this.props.floor.get("rooms").map(function(room) {
+    var rooms = this.props.floor.rooms.map(function(room) {
       return <Room room={room} />;
     });
     return(
@@ -35,15 +35,15 @@ var Floor = React.createClass({
 
 var Building = React.createClass({
   addFloor: function(e) {
-    var floors = this.props.building.get("floors").getValue(),
+    var floors = this.props.building.floors.getValue(),
         newFloor = floors[0].rooms.map(function() {
           return {light_on: Math.floor(Math.random()*2) % 2 == 0};
         });
-    this.props.building.get("floors").push({rooms: newFloor});
+    this.props.building.floors.push({rooms: newFloor});
     return false;
   },
   render: function() {
-    var floors = this.props.building.get("floors").map(function(floor) {
+    var floors = this.props.building.floors.map(function(floor) {
       return <Floor floor={floor} />;
     });
     return(

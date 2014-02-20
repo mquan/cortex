@@ -39,7 +39,7 @@ describe("Cortex", function() {
     it("sets value of a key", function() {
       var cortex = new Cortex(this.value),
           newValue = 100;
-      cortex.update(newValue, [cortex.get("a").getPath()]);
+      cortex.update(newValue, [cortex.a.getPath()]);
 
       expect(cortex.getValue()["a"]).toEqual(newValue);
     });
@@ -47,7 +47,7 @@ describe("Cortex", function() {
     it("sets value of a nested object", function() {
       var cortex = new Cortex(this.value),
           newValue = { nested: [100, 200, 300]},
-          path = cortex.get("b").get("key2").get("key3").getPath();
+          path = cortex.b.key2.key3.getPath();
       cortex.update(newValue, path);
 
       expect(cortex.getValue()["b"]["key2"]["key3"]).toEqual(newValue);
@@ -56,7 +56,7 @@ describe("Cortex", function() {
     it("sets value of an array element", function() {
       var cortex = new Cortex(this.value),
           newValue = [0, 11, 22],
-          path = cortex.get("c").getPath();
+          path = cortex.c.getPath();
       cortex.update(newValue, path);
 
       expect(cortex.getValue()["c"]).toEqual(newValue);
@@ -65,7 +65,7 @@ describe("Cortex", function() {
     it("sets a primitive value in an array", function() {
       var cortex = new Cortex(this.value),
           newValue = -1,
-          path = cortex.get("c").get(0).getPath();
+          path = cortex.c[0].getPath();
       cortex.update(newValue, path);
 
       expect(cortex.getValue()["c"][0]).toEqual(newValue);
@@ -86,15 +86,14 @@ describe("Cortex", function() {
             expect(called).toBe(true);
 
             for (var i = 0, ii = newValue.length;i < ii;i++) {
-              expect(cortex.get(i).getValue()).toBe(newValue[i]);
+              expect(cortex[i].getValue()).toBe(newValue[i]);
             }
           });
         });
 
         describe("when elements are object", function() {
           it("runs callback and rewraps new value", function() {
-            var called, cortex, newValue, value;
-            varcalled = false,
+            var called = false,
               value = [{a: 1}, {b: 2}],
               newValue = [{a: 1}, {c: 3}],
               cortex = new Cortex(value, (function() {
@@ -103,8 +102,8 @@ describe("Cortex", function() {
             cortex.update(newValue, []);
 
             expect(called).toBe(true);
-            expect(cortex.get(1).get("b")).toBe(void 0);
-            expect(cortex.get(1).get("c").getValue()).toBe(3);
+            expect(cortex[1].b).toBe(undefined);
+            expect(cortex[1].c.getValue()).toBe(3);
           });
         });
       });
@@ -121,7 +120,7 @@ describe("Cortex", function() {
 
             cortex.update(newValue, []);
             expect(called).toBe(true);
-            expect(cortex.get("b").getValue()).toBe(3);
+            expect(cortex.b.getValue()).toBe(3);
           });
         });
 
@@ -136,7 +135,7 @@ describe("Cortex", function() {
 
             cortex.update(newValue, []);
             expect(called).toBe(true);
-            expect(cortex.get("b").getValue()).toEqual([3, 5]);
+            expect(cortex.b.getValue()).toEqual([3, 5]);
           });
         });
       });
@@ -306,10 +305,10 @@ describe("Cortex", function() {
               length = value.length,
               cortex = new Cortex(value);
 
-          cortex.get(0).remove();
+          cortex[0].remove();
 
           expect(cortex.count()).toBe(length - 1);
-          expect(cortex.get(0).getValue()).toBe(2);
+          expect(cortex[0].getValue()).toBe(2);
         });
       });
 
@@ -318,9 +317,9 @@ describe("Cortex", function() {
           var value = { a: 1, b: 2, c: 3 },
               cortex = new Cortex(value);
 
-          cortex.get("a").remove();
+          cortex.a.remove();
 
-          expect(cortex.get("a")).toBe(undefined);
+          expect(cortex.a).toBe(undefined);
           expect(cortex.hasKey("a")).toBe(false);
         });
       });

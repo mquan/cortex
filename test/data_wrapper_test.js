@@ -1,11 +1,10 @@
 var cortexPubSub = require("../src/pubsub"),
 ArrayWrapper = require("../src/wrappers/array"),
 HashWrapper = require("../src/wrappers/hash"),
-DataWrapper = require("../src/data_wrapper")([ArrayWrapper, HashWrapper], cortexPubSub),
-Cortex = require("../src/cortex");
+DataWrapper = require("../src/data_wrapper")([ArrayWrapper, HashWrapper], cortexPubSub);
 
 describe("DataWrapper", function() {
-  describe("#get", function() {
+  describe("accessing nested wrapper", function() {
     describe("when data is a hash", function() {
       beforeEach(function() {
         this.value = {};
@@ -17,13 +16,13 @@ describe("DataWrapper", function() {
       });
 
       it("returns wrapper of nested value", function() {
-        var nestedWrapper = this.wrapper.get(this.key);
+        var nestedWrapper = this.wrapper[this.key];
 
         expect(nestedWrapper.getValue()).toBe(this.val);
       });
 
       it("returns undefined when key is not defined", function() {
-        expect(this.wrapper.get("randomKey")).toBe(void 0);
+        expect(this.wrapper.randomKey).toBe(undefined);
       });
     });
 
@@ -36,16 +35,16 @@ describe("DataWrapper", function() {
 
       it("returns wrapper of an array element", function() {
         var index = 1,
-            nestedWrapper = this.wrapper.get(index);
+            nestedWrapper = this.wrapper[index];
 
         expect(nestedWrapper.getValue()).toBe(this.value[index]);
       });
 
       it("returns undefined when element is not in array", function() {
         var index = this.value.length,
-            nestedWrapper = this.wrapper.get(index);
+            nestedWrapper = this.wrapper[index];
 
-        expect(nestedWrapper).toBe(void 0);
+        expect(nestedWrapper).toBe(undefined);
       });
     });
   });
@@ -58,11 +57,11 @@ describe("DataWrapper", function() {
           newValue = [100];
 
       publish = spyOn(cortexPubSub, "publish");
-      wrapper.get("a").get("b").set(newValue, false);
+      wrapper.a.b.set(newValue, false);
 
       expect(publish).toHaveBeenCalledWith("update" + topicId, {
         value: newValue,
-        path: wrapper.get("a").get("b").getPath(),
+        path: wrapper.a.b.getPath(),
         forceUpdate: false
       });
     });
@@ -84,7 +83,7 @@ describe("DataWrapper", function() {
         value[key] = "bar";
         var wrapper = new DataWrapper(value);
 
-        expect(wrapper.get(key).getPath()).toEqual([key]);
+        expect(wrapper[key].getPath()).toEqual([key]);
       });
     });
 
@@ -94,7 +93,7 @@ describe("DataWrapper", function() {
             wrapper = new DataWrapper(value),
             index = 0;
 
-        expect(wrapper.get(index).getPath()).toEqual([index]);
+        expect(wrapper[index].getPath()).toEqual([index]);
       });
     });
 
@@ -106,7 +105,7 @@ describe("DataWrapper", function() {
           value[key] = "bar";
 
           var wrapper = new DataWrapper(value),
-              childWrapper = wrapper.wrappers[key];
+              childWrapper = wrapper[key];
 
           expect(childWrapper.getPath()).toEqual([key]);
         });
@@ -119,7 +118,7 @@ describe("DataWrapper", function() {
       var value = {key1: {key2: 1}},
           wrapper = new DataWrapper(value);
 
-      expect(wrapper.get("key1").getKey()).toBe("key1");
+      expect(wrapper.key1.getKey()).toBe("key1");
     });
   });
 
@@ -166,10 +165,9 @@ describe("DataWrapper", function() {
     it("publishes remove event", function() {
       var value = 1,
           topicId = 0,
-          wrapper = new DataWrapper(value),
+          wrapper = new DataWrapper(value, [], topicId),
           publish = spyOn(cortexPubSub, "publish");
 
-      wrapper.eventId = topicId;
       wrapper.remove();
 
       expect(publish).toHaveBeenCalledWith("remove" + topicId, {path: wrapper.getPath()});
