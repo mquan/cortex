@@ -1,24 +1,24 @@
 var ArrayWrapper = {
   count: function() {
-    return this.value.length;
+    return this.__value.length;
   },
 
   map: function(callback) {
-    return this.wrappers.map(callback);
+    return this.__wrappers.map(callback);
   },
 
   find: function(callback) {
-    for(var index = 0, length = this.wrappers.length;index < length;index++) {
-      if(callback(this.wrappers[index], index, this.wrappers)) {
-        return this.wrappers[index];
+    for(var index = 0, length = this.__wrappers.length;index < length;index++) {
+      if(callback(this.__wrappers[index], index, this.__wrappers)) {
+        return this.__wrappers[index];
       }
     }
     return null;
   },
 
   findIndex: function(callback) {
-    for(var index = 0, length = this.wrappers.length;index < length;index++) {
-      if(callback(this.wrappers[index], index, this.wrappers)) {
+    for(var index = 0, length = this.__wrappers.length;index < length;index++) {
+      if(callback(this.__wrappers[index], index, this.__wrappers)) {
         return index;
       }
     }
@@ -26,29 +26,29 @@ var ArrayWrapper = {
   },
 
   push: function(value) {
-    var length = this.value.push(value);
-    this._forceUpdate();
+    var length = this.__value.push(value);
+    this.__forceUpdate();
     return length;
   },
 
   pop: function() {
-    var last = this.value.pop();
-    this._forceUpdate();
+    var last = this.__value.pop();
+    this.__forceUpdate();
     return last;
   },
 
   insertAt: function(index, value) {
     var args = [index, 0].concat(value);
-    Array.prototype.splice.apply(this.value, args);
-    this._forceUpdate();
+    Array.prototype.splice.apply(this.__value, args);
+    this.__forceUpdate();
   },
 
   removeAt: function(index, howMany) {
     if(howMany == null) {
       howMany = 1;
     }
-    var removed = this.value.splice(index, howMany);
-    this._forceUpdate();
+    var removed = this.__value.splice(index, howMany);
+    this.__forceUpdate();
     return removed;
   }
 };

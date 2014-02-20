@@ -1,31 +1,31 @@
 var HashWrapper = {
   keys: function() {
-    return Object.keys(this.value);
+    return Object.keys(this.__value);
   },
 
   values: function() {
     var key,
         values = [];
-    for (key in this.value) {
-      values.push(this.value[key]);
+    for (key in this.__value) {
+      values.push(this.__value[key]);
     }
     return values;
   },
 
   hasKey: function(key) {
-    return this.value[key] != null;
+    return this.__value[key] != null;
   },
 
   delete: function(key) {
-    var removed = this.value[key];
-    delete this.value[key];
-    this.set(this.value, true);
+    var removed = this.__value[key];
+    delete this.__value[key];
+    this.__forceUpdate();
     return removed;
   },
 
   add: function(key, value) {
-    this.value[key] = value;
-    this.set(this.value, true);
+    this.__value[key] = value;
+    this.__forceUpdate();
     return value;
   }
 };

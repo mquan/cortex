@@ -19,39 +19,39 @@ __extends = function(child, parent) {
 
 Cortex = (function(_super, _cortexPubSub) {
   function Cortex(value, callback) {
-    this.value = value;
-    this.path = [];
-    this.callback = callback;
-    this._subscribe();
-    this._wrap();
+    this.__value = value;
+    this.__path = [];
+    this.__callback = callback;
+    this.__subscribe();
+    this.__wrap();
   }
 
   __extends(Cortex, _super);
 
   Cortex.prototype.update = function(newValue, path, forceUpdate) {
-    if(!forceUpdate && !this._shouldUpdate(newValue, path)) {
+    if(!forceUpdate && !this.__shouldUpdate(newValue, path)) {
       return false;
     }
 
-    this._setValue(newValue, path);
-    this._wrap();
-    if(this.callback) {
-      return this.callback(this);
+    this.__setValue(newValue, path);
+    this.__wrap();
+    if(this.__callback) {
+      return this.__callback(this);
     }
   };
 
-  Cortex.prototype._subscribe = function() {
-    this.eventId = _cortexPubSub.subscribeToCortex((function(topic, data) {
+  Cortex.prototype.__subscribe = function() {
+    this.__eventId = _cortexPubSub.subscribeToCortex((function(topic, data) {
       this.update(data.value, data.path, data.forceUpdate);
     }).bind(this), (function(topic, data) {
-      this._remove(data.path);
+      this.__remove(data.path);
     }).bind(this));
   };
 
-  Cortex.prototype._remove = function(path) {
+  Cortex.prototype.__remove = function(path) {
     if(path.length) {
       var subPath = path.slice(0, path.length -1),
-          subValue = this._subValue(subPath),
+          subValue = this.__subValue(subPath),
           key = path[path.length - 1],
           removed = subValue[key];
       if(subValue.constructor == Object) {
@@ -62,29 +62,29 @@ Cortex = (function(_super, _cortexPubSub) {
       this.update(subValue, subPath, true);
       return removed;
     } else {
-      delete this.wrappers;
-      delete this.value;
+      delete this.__wrappers;
+      delete this.__value;
     }
   };
 
-  Cortex.prototype._setValue = function(newValue, path) {
+  Cortex.prototype.__setValue = function(newValue, path) {
     /*
       When saving an object to a variable it's pass by reference, but when doing so for a primitive value
       it's pass by value. We avoid this pass by value problem by only setting subValue when path length is greater
       than 2 (meaning it can't never be a primitive). When path length is 0 or 1 we set the value directly.
     */
     if(path.length > 1) {
-      var subValue = this._subValue(path.slice(0, path.length - 1));
+      var subValue = this.__subValue(path.slice(0, path.length - 1));
       subValue[path[path.length-1]] = newValue;
     } else if(path.length == 1) {
-      this.value[path[0]] = newValue;
+      this.__value[path[0]] = newValue;
     } else {
-      this.value = newValue;
+      this.__value = newValue;
     }
   };
 
-  Cortex.prototype._subValue = function(path) {
-    var subValue = this.value;
+  Cortex.prototype.__subValue = function(path) {
+    var subValue = this.__value;
     for(var i=0, ii = path.length;i<ii;i++) {
       subValue = subValue[path[i]];
     }
@@ -92,23 +92,23 @@ Cortex = (function(_super, _cortexPubSub) {
   };
 
   // Check whether newValue is different, if not then return false to bypass rewrap and running callback.
-  Cortex.prototype._shouldUpdate = function(newValue, path) {
-    var oldValue = this.value;
+  Cortex.prototype.__shouldUpdate = function(newValue, path) {
+    var oldValue = this.__value;
     for(var i=0, ii=path.length;i<ii;i++) {
       oldValue = oldValue[path[i]];
     }
-    return this._isDifferent(oldValue, newValue);
+    return this.__isDifferent(oldValue, newValue);
   };
 
   // Recursively performs comparison b/w old and new data
-  Cortex.prototype._isDifferent = function(oldValue, newValue) {
+  Cortex.prototype.__isDifferent = function(oldValue, newValue) {
     if(oldValue.constructor == Object) {
       if(newValue.constructor != Object ||
-          this._isDifferent(Object.keys(oldValue).sort(), Object.keys(newValue).sort())) {
+          this.__isDifferent(Object.keys(oldValue).sort(), Object.keys(newValue).sort())) {
         return true;
       }
       for(var key in oldValue) {
-        if(this._isDifferent(oldValue[key], newValue[key])) {
+        if(this.__isDifferent(oldValue[key], newValue[key])) {
           return true;
         }
       }
@@ -117,7 +117,7 @@ Cortex = (function(_super, _cortexPubSub) {
         return true;
       }
       for(var i=0, ii=oldValue.length;i<ii;i++) {
-        if(this._isDifferent(oldValue[i], newValue[i])) {
+        if(this.__isDifferent(oldValue[i], newValue[i])) {
           return true;
         }
       }

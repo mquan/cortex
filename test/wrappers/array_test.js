@@ -80,7 +80,7 @@ describe("ArrayWrapper", function() {
 
       expect(newLength).toBe(length + 1);
       expect(this.wrapper.count()).toBe(length + 1);
-      expect(this.wrapper.get(length).getValue()).toBe(value);
+      expect(this.wrapper[length].getValue()).toBe(value);
     });
   });
 
@@ -104,7 +104,7 @@ describe("ArrayWrapper", function() {
         this.wrapper.insertAt(index, insertValue);
 
         expect(this.wrapper.count()).toBe(currentLength + 1);
-        expect(this.wrapper.get(index).getValue()).toBe(insertValue);
+        expect(this.wrapper[index].getValue()).toBe(insertValue);
       });
     });
 

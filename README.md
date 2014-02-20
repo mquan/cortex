@@ -7,6 +7,33 @@ Key features:
 
 [Here's a basic demo](http://mquan.github.io/cortex/examples/skyline/)
 
+# Quickstart
+Initialize a cortex object
+```javascript
+var data = {a: 100, b: [1, 2, 3]};
+
+var cortex = Cortex(data, function() {
+  //trigger your React component to update props
+}
+});
+```
+
+Get a nested cortex object
+```javascript
+cortex.a
+```
+
+Get a nested cortex element in an array
+```javascript
+cortex.b[0]
+```
+
+Get the actual value
+```javascript
+cortex.a.getValue()
+// ==> 100
+```
+
 # Overview
 
 In React's world data flows in one direction from the top down. That means if you want to make a change, change it at the source and let it propagate down the chain. But what happen when a child component needs to update the data? React's official guideline is to use callback for communication between parent and child components.
@@ -23,19 +50,21 @@ The following example has two components Order and Item components. An Order con
 ```javascript
 var Item = React.createClass({
   increase: function() {
-    var quantity = this.props.item.get('quantity').getValue();
-    this.props.item.get('quantity').set(quantity + 1);
+    var quantity = this.props.item.quantity.getValue();
+    this.props.item.quantity.set(quantity + 1);
   },
   subTotal: function() {
-    return this.props.item.get('quantity').getValue() * this.props.item.get('price').getValue();
+    return this.props.item.quantity.getValue() * this.props.item.price.getValue();
   },
   render: function() {
-    <div className="item">
-      <a href="#" onClick={this.increase}>+</a>
-      <span>{this.props.item.get('quantity').getValue()}</span>
-      <span>{this.props.item.get('name').getValue()}</span>
-      <span>${this.subTotal()}</span>
-    </div>
+    return(
+      <div className="item">
+        <a href="#" onClick={this.increase}>+</a>
+        <span>{this.props.item.quantity.getValue()}</span>
+        <span>{this.props.item.name.getValue()}</span>
+        <span>${this.subTotal()}</span>
+      </div>
+    );
   }
 });
 
@@ -44,9 +73,9 @@ var Order = React.createClass({
     var items = this.props.order.map(function(item){
       return <Item item={item} />;
     });
-    <div>
-      {items}
-    </div>
+    return(
+      <div>{items}</div>
+    );
   }
 });
 
@@ -76,9 +105,9 @@ var orderCortex = new Cortex(orderData, function(updatedOrder) {
 
 Then it's passed into the Order component to render the Item components.
 
-In Item component, note that we display the quantity value with ``this.props.item.get('quantity').getValue()``. This is because ``this.props.item.get('quantity')`` only gives us the wrapper of the ``quantity`` attribute, we need to call ``getValue()`` to get the actual value.
+In Item component, note that we display the quantity value with ``this.props.item.quantity.getValue()``. This is because ``this.props.item.quantity`` only gives us the wrapper of the ``quantity`` attribute, we need to call ``getValue()`` to get the actual value.
 
-In the `increase()` method, we use ``this.props.item.get('quantity').set(quantity + 1)`` to add 1 to the current quantity value.
+In `increase` method, we use ``this.props.item.quantity.set(quantity + 1)`` to add 1 to the current quantity value.
 
 # Cortex API
 
@@ -94,7 +123,6 @@ new Cortex(data, function() {
 
     Method         | Description
     ---------------|:-------------------
-    `get(key)`     | Returns the wrapper object for the provided key
     `getValue()`   | Returns the actual value
     `set(value)`   | Changes the value and rewrap the entire data tree
 
