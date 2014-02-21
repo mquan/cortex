@@ -90,11 +90,11 @@ module.exports = function(_mixins, _cortexPubSub) {
   };
 
   DataWrapper.prototype.__isObject = function() {
-    return this.__value.constructor == Object;
+    return this.__value !== null && this.__value.constructor == Object;
   };
 
   DataWrapper.prototype.__isArray = function() {
-    return this.__value.constructor == Array;
+    return this.__value !== null && this.__value.constructor == Array;
   };
 
   __include(DataWrapper, _mixins);
@@ -207,7 +207,7 @@ Cortex = (function(_super, _cortexPubSub) {
 
   // Recursively performs comparison b/w old and new data
   Cortex.prototype.__isDifferent = function(oldValue, newValue) {
-    if(oldValue.constructor == Object) {
+    if(oldValue !== null && oldValue.constructor == Object) {
       if(newValue.constructor != Object ||
           this.__isDifferent(Object.keys(oldValue).sort(), Object.keys(newValue).sort())) {
         return true;
@@ -217,7 +217,7 @@ Cortex = (function(_super, _cortexPubSub) {
           return true;
         }
       }
-    } else if(oldValue.constructor == Array) {
+    } else if(oldValue !== null && oldValue.constructor == Array) {
       if(newValue.constructor != Array || oldValue.length != newValue.length) {
         return true;
       }
