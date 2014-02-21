@@ -20,6 +20,9 @@ var cortex = new Cortex(data, function() {
 Get a nested cortex object
 ```javascript
 cortex.a
+
+//The following also works
+cortex['a']
 ```
 
 Get a nested cortex element in an array
