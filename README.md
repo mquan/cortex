@@ -162,12 +162,12 @@ new Cortex(data, function() {
 
 # Install via Bower
 ```console
-bower install bower-cortex
+bower install cortexjs
 ```
 
 Reference the js file
 ```html
-<script src="/bower_components/bower-cortex/build/cortex.js"></script>
+<script src="/bower_components/cortexjs/build/cortex.js"></script>
 ```
 
 # Buidling Cortex
