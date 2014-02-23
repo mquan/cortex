@@ -131,6 +131,15 @@ describe("DataWrapper", function() {
     });
   });
 
+  describe("#val", function() {
+    it("returns same value as .getValue", function() {
+      var value = { key1: 1, key2: 2 },
+          wrapper = new DataWrapper(value);
+
+      expect(wrapper.val()).toBe(wrapper.getValue());
+    });
+  });
+
   describe("#forEach", function() {
     describe("when array", function() {
       it("iterates over all elements of wrapper array", function() {
