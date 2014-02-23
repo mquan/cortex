@@ -102,8 +102,8 @@ Cortex = (function(_super, _cortexPubSub) {
 
   // Recursively performs comparison b/w old and new data
   Cortex.prototype.__isDifferent = function(oldValue, newValue) {
-    if(oldValue !== null && oldValue.constructor == Object) {
-      if(newValue.constructor != Object ||
+    if(oldValue && oldValue.constructor == Object) {
+      if(!newValue || newValue.constructor != Object ||
           this.__isDifferent(Object.keys(oldValue).sort(), Object.keys(newValue).sort())) {
         return true;
       }
@@ -112,8 +112,8 @@ Cortex = (function(_super, _cortexPubSub) {
           return true;
         }
       }
-    } else if(oldValue !== null && oldValue.constructor == Array) {
-      if(newValue.constructor != Array || oldValue.length != newValue.length) {
+    } else if(oldValue && oldValue.constructor == Array) {
+      if(!newValue || newValue.constructor != Array || oldValue.length != newValue.length) {
         return true;
       }
       for(var i=0, ii=oldValue.length;i<ii;i++) {

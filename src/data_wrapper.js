@@ -89,11 +89,11 @@ module.exports = function(_mixins, _cortexPubSub) {
   };
 
   DataWrapper.prototype.__isObject = function() {
-    return this.__value !== null && this.__value.constructor == Object;
+    return this.__value && this.__value.constructor == Object;
   };
 
   DataWrapper.prototype.__isArray = function() {
-    return this.__value !== null && this.__value.constructor == Array;
+    return this.__value && this.__value.constructor == Array;
   };
 
   __include(DataWrapper, _mixins);
