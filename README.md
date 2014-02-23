@@ -21,7 +21,7 @@ Get a nested cortex object
 ```javascript
 cortex.a
 
-//The following also works
+//Also works
 cortex['a']
 ```
 
@@ -34,6 +34,13 @@ Get the actual value
 ```javascript
 cortex.a.getValue()
 // ==> 100
+```
+
+Change data
+```javascript
+cortex.a.set(200);
+cortex.a.getValue();
+// ==> 200
 ```
 
 # Overview
