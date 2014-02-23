@@ -170,6 +170,21 @@ Reference the js file
 <script src="/bower_components/cortexjs/build/cortex.js"></script>
 ```
 
+# Using cortex with node
+```console
+npm install cortexjs
+```
+
+```javascript
+Cortex = require("cortexjs");
+
+wrappedData = new Cortex({mydata: 1});
+console.log(wrappedData.mydata.getValue()); //1
+
+wrappedData.mydata.set(100);
+console.log(wrappedData.mydata.getValue()); //100
+```
+
 # Buidling Cortex
 To build Cortex:
 ```console
