@@ -2,12 +2,12 @@
 
 var Room = React.createClass({displayName: 'Room',
   toggleLight: function(e) {
-    current = this.props.room.get("light_on").getValue();
-    this.props.room.get("light_on").set(!current);
+    var current = this.props.room.light_on.getValue();
+    this.props.room.light_on.set(!current);
     return false;
   },
   render: function() {
-    var windowClasses = "window " + (this.props.room.get("light_on").getValue() ? "light-on" : "light-off");
+    var windowClasses = "window " + (this.props.room.light_on.getValue() ? "light-on" : "light-off");
     return(
       React.DOM.span( {className:"room"}, 
         React.DOM.a( {href:"#", className:windowClasses, onClick:this.toggleLight})
@@ -18,11 +18,11 @@ var Room = React.createClass({displayName: 'Room',
 
 var Floor = React.createClass({displayName: 'Floor',
   addRoom: function(e) {
-    this.props.floor.get("rooms").push({light_on: true});
+    this.props.floor.rooms.push({light_on: true});
     return false;
   },
   render: function() {
-    var rooms = this.props.floor.get("rooms").map(function(room) {
+    var rooms = this.props.floor.rooms.map(function(room) {
       return Room( {room:room} );
     });
     return(
@@ -35,15 +35,15 @@ var Floor = React.createClass({displayName: 'Floor',
 
 var Building = React.createClass({displayName: 'Building',
   addFloor: function(e) {
-    var floors = this.props.building.get("floors").getValue(),
+    var floors = this.props.building.floors.getValue(),
         newFloor = floors[0].rooms.map(function() {
           return {light_on: Math.floor(Math.random()*2) % 2 == 0};
         });
-    this.props.building.get("floors").push({rooms: newFloor});
+    this.props.building.floors.push({rooms: newFloor});
     return false;
   },
   render: function() {
-    var floors = this.props.building.get("floors").map(function(floor) {
+    var floors = this.props.building.floors.map(function(floor) {
       return Floor( {floor:floor} );
     });
     return(
@@ -63,7 +63,7 @@ var City = React.createClass({displayName: 'City',
     this.props.city.push(newBuilding);
     e.preventDefault();
   },
-  removeBuidling: function(e) {
+  removeBuilding: function(e) {
     this.props.city.pop();
     e.preventDefault();
   },
@@ -76,7 +76,7 @@ var City = React.createClass({displayName: 'City',
         buildings,
         React.DOM.div( {className:"city-controls"}, 
           React.DOM.a( {href:"#", onClick:this.addBuilding}, "Add Building"), " | ",
-          React.DOM.a( {href:"#", onClick:this.removeBuidling}, "Remove Building")
+          React.DOM.a( {href:"#", onClick:this.removeBuilding}, "Remove Building")
         )
       )
     );

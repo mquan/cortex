@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/react/0.8.0/react-with-addons.js"></script>
+    <script src="../../javascripts/cortex.js"></script>
+    <style>
+      div#filesystem {
+        position: relative;
+      }
+
+      div.folder, div.file {
+        margin-left: 12px;
+        margin-bottom: 7px;
+      }
+
+      div.folder span.icon, div.file span.icon {
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+        margin: 0 5px;
+      }
+
+      div.folder span.icon {
+        background-color: #a3c4d8;
+      }
+
+      div.file span.icon {
+        border: 1px solid #cccccc;
+        background-color: #ffffff;
+      }
+
+      input.edit-name {
+        width: 100px;
+      }
+
+      .hide {
+        display: none;
+      }
+
+    </style>
+  </head>
+  <body>
+    <h3>File System</h3>
+    <div style="margin-bottom: 10px;">
+      This file system example demonstrates how cortex works with arbitrarily nested data structure. In this case, we use only a single React component type: a node, which can either be a folder or file. Double click on the name of a file/folder to edit and press enter when done.
+    </div>
+    <div id="filesystem"></div>
+
+    <script type="text/javascript" src="application.js"></script>
+  </body>
+</html>

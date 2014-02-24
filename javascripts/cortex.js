@@ -1,267 +1,387 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var DataWrapper, Enumerable, Path, _extend, _include;
+var __include = function(klass, mixins) {
+  for(var i=0,ii=mixins.length;i<ii;i++) {
+    for(var methodName in mixins[i]) {
+      klass.prototype[methodName] = mixins[i][methodName];
+    }
+  }
+};
 
-Path = require("./path");
-
-Enumerable = require("./wrappers/enumerable");
-
-DataWrapper = (function() {
-  function DataWrapper(value, path, parentWrapper) {
-    this.value = value;
-    this.path = path != null ? path : null;
-    this.parentWrapper = parentWrapper != null ? parentWrapper : null;
-    this._wrap();
+module.exports = function(_mixins, _cortexPubSub) {
+  function DataWrapper(value, path, eventId) {
+    this.__eventId = eventId;
+    this.__value = value;
+    this.__path = path || [];
+    this.__wrap();
   }
 
-  DataWrapper.prototype.set = function(value) {
-    return this._getRoot().update({
-      sourceKey: this.sourceKey,
-      value: value,
-      path: this.getPath()
-    });
-  };
-
-  DataWrapper.prototype.get = function(key) {
-    return this.wrappers[key];
+  DataWrapper.prototype.set = function(value, forceUpdate) {
+    _cortexPubSub.publish("update" + this.__eventId, {value: value, path: this.__path, forceUpdate: forceUpdate});
   };
 
   DataWrapper.prototype.getValue = function() {
-    return this.value;
+    return this.__value;
   };
 
   DataWrapper.prototype.getPath = function() {
-    if (this.path != null) {
-      return this.path.getPath();
-    } else {
-      return [];
+    return this.__path;
+  };
+
+  DataWrapper.prototype.getKey = function() {
+    return this.__path[this.__path.length - 1];
+  };
+
+  DataWrapper.prototype.forEach = function(callback) {
+    if(this.__isObject()) {
+      for(var key in this.__wrappers) {
+        callback(key, this.__wrappers[key], this.__wrappers);
+      }
+    } else if(this.__isArray()) {
+      this.__wrappers.forEach(callback);
     }
   };
 
-  DataWrapper.prototype._getRoot = function() {
-    if (this.parentWrapper != null) {
-      return this.parentWrapper._getRoot();
-    } else {
-      return this;
-    }
+  DataWrapper.prototype.remove = function() {
+    _cortexPubSub.publish("remove" + this.__eventId, {path: this.__path});
   };
 
-  DataWrapper.prototype._wrap = function() {
-    var i, key, path, val, _i, _len, _ref, _ref1, _results, _results1;
-    this.wrappers = null;
-    if (typeof this.value === "object") {
-      if (this.value.constructor === Object) {
-        this.wrappers = {};
-        _ref = this.value;
-        _results = [];
-        for (key in _ref) {
-          val = _ref[key];
-          path = new Path(this.path, key);
-          _results.push(this.wrappers[key] = new DataWrapper(val, path, this));
-        }
-        return _results;
-      } else if (this.value.constructor === Array) {
-        this.wrappers = [];
-        _ref1 = this.value;
-        _results1 = [];
-        for (i = _i = 0, _len = _ref1.length; _i < _len; i = ++_i) {
-          val = _ref1[i];
-          path = new Path(this.path, i);
-          _results1.push(this.wrappers.push(new DataWrapper(val, path, this)));
-        }
-        return _results1;
+  // Recursively wrap data if @value is a hash or an array.
+  // Otherwise there's no need to further wrap primitive or other class instances
+  DataWrapper.prototype.__wrap = function() {
+    var path;
+    this.__cleanup();
+
+    if(this.__isObject()) {
+      this.__wrappers = {};
+      for(var key in this.__value) {
+        path = this.__path.slice();
+        path.push(key);
+        this.__wrappers[key] = new DataWrapper(this.__value[key], path, this.__eventId);
+        this[key] = this.__wrappers[key];
+      }
+    } else if (this.__isArray()) {
+      this.__wrappers = [];
+      for(var index = 0, ii = this.__value.length;index < ii; index++) {
+        path = this.__path.slice();
+        path.push(index);
+        this.__wrappers[index] = new DataWrapper(this.__value[index], path, this.__eventId);
+        this[index] = this.__wrappers[index];
       }
     }
   };
+
+  DataWrapper.prototype.__cleanup = function() {
+    if(this.__wrappers) {
+      if(this.__isObject()) {
+        for(var key in this.__wrappers) {
+          delete this[key];
+        }
+      } else if(this.__isArray()) {
+        for(var i=0,ii=this.__wrappers.length;i<ii;i++) {
+          delete this[i];
+        }
+      }
+      delete this.__wrappers;
+    }
+  };
+
+  DataWrapper.prototype.__forceUpdate = function() {
+    this.set(this.__value, true);
+  };
+
+  DataWrapper.prototype.__isObject = function() {
+    return this.__value && this.__value.constructor == Object;
+  };
+
+  DataWrapper.prototype.__isArray = function() {
+    return this.__value && this.__value.constructor == Array;
+  };
+
+  __include(DataWrapper, _mixins);
 
   return DataWrapper;
-
-})();
-
-_extend = function(obj, mixin) {
-  var method, name, _results;
-  _results = [];
-  for (name in mixin) {
-    method = mixin[name];
-    _results.push(obj[name] = method);
-  }
-  return _results;
 };
 
-_include = function(klass, mixins) {
-  var mixin, _i, _len, _results;
-  _results = [];
-  for (_i = 0, _len = mixins.length; _i < _len; _i++) {
-    mixin = mixins[_i];
-    _results.push(_extend(klass.prototype, mixin));
+},{}],2:[function(require,module,exports){
+var cortexPubSub = require("./pubsub"),
+ArrayWrapper = require("./wrappers/array"),
+HashWrapper = require("./wrappers/hash"),
+DataWrapper = require("./data_wrapper")([ArrayWrapper, HashWrapper], cortexPubSub),
+__hasProp = {}.hasOwnProperty,
+__extends = function(child, parent) {
+  for (var key in parent) {
+    if (__hasProp.call(parent, key))
+      child[key] = parent[key];
   }
-  return _results;
-};
+  function ctor() {
+    this.constructor = child;
+  }
+  ctor.prototype = parent.prototype;
+  child.prototype = new ctor();
+  child.__super__ = parent.prototype;
+  return child;
+},
 
-_include(DataWrapper, [Enumerable]);
+Cortex = (function(_super, _cortexPubSub) {
+  function Cortex(value, callback) {
+    this.__value = value;
+    this.__path = [];
+    this.__callback = callback;
+    this.__subscribe();
+    this.__wrap();
+  }
 
-module.exports = DataWrapper;
-
-},{"./path":3,"./wrappers/enumerable":4}],2:[function(require,module,exports){
-var Cortex, DataWrapper,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-DataWrapper = require("./data_wrapper");
-
-Cortex = (function(_super) {
   __extends(Cortex, _super);
 
-  function Cortex(value, callback) {
-    this.value = value;
-    this.callback = callback;
-    this._wrap();
-  }
+  Cortex.prototype.update = function(newValue, path, forceUpdate) {
+    if(!forceUpdate && !this.__shouldUpdate(newValue, path)) {
+      return false;
+    }
 
-  Cortex.prototype.update = function(params) {
-    this._setValue(params.value, params.path);
-    this._wrap();
-    if (this.callback) {
-      return this.callback(this);
+    this.__setValue(newValue, path);
+    this.__wrap();
+    if(this.__callback) {
+      return this.__callback(this);
     }
   };
 
-  Cortex.prototype._setValue = function(newValue, path) {
-    var key, subValue, _i, _len, _ref;
-    if (path.length > 1) {
-      subValue = this.value;
-      _ref = path.slice(0, +(path.length - 2) + 1 || 9e9);
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        key = _ref[_i];
-        subValue = subValue[key];
+  Cortex.prototype.__subscribe = function() {
+    this.__eventId = _cortexPubSub.subscribeToCortex((function(topic, data) {
+      this.update(data.value, data.path, data.forceUpdate);
+    }).bind(this), (function(topic, data) {
+      this.__remove(data.path);
+    }).bind(this));
+  };
+
+  Cortex.prototype.__remove = function(path) {
+    if(path.length) {
+      var subPath = path.slice(0, path.length -1),
+          subValue = this.__subValue(subPath),
+          key = path[path.length - 1],
+          removed = subValue[key];
+      if(subValue.constructor == Object) {
+        delete subValue[key];
+      } else if(subValue.constructor == Array) {
+        subValue.splice(key, 1);
       }
-      return subValue[path[path.length - 1]] = newValue;
-    } else if (path.length === 1) {
-      return this.value[path[0]] = newValue;
+      this.update(subValue, subPath, true);
+      return removed;
     } else {
-      return this.value = newValue;
+      delete this.__wrappers;
+      delete this.__value;
+    }
+  };
+
+  Cortex.prototype.__setValue = function(newValue, path) {
+    /*
+      When saving an object to a variable it's pass by reference, but when doing so for a primitive value
+      it's pass by value. We avoid this pass by value problem by only setting subValue when path length is greater
+      than 2 (meaning it can't never be a primitive). When path length is 0 or 1 we set the value directly.
+    */
+    if(path.length > 1) {
+      var subValue = this.__subValue(path.slice(0, path.length - 1));
+      subValue[path[path.length-1]] = newValue;
+    } else if(path.length == 1) {
+      this.__value[path[0]] = newValue;
+    } else {
+      this.__value = newValue;
+    }
+  };
+
+  Cortex.prototype.__subValue = function(path) {
+    var subValue = this.__value;
+    for(var i=0, ii = path.length;i<ii;i++) {
+      subValue = subValue[path[i]];
+    }
+    return subValue;
+  };
+
+  // Check whether newValue is different, if not then return false to bypass rewrap and running callback.
+  Cortex.prototype.__shouldUpdate = function(newValue, path) {
+    var oldValue = this.__value;
+    for(var i=0, ii=path.length;i<ii;i++) {
+      oldValue = oldValue[path[i]];
+    }
+    return this.__isDifferent(oldValue, newValue);
+  };
+
+  // Recursively performs comparison b/w old and new data
+  Cortex.prototype.__isDifferent = function(oldValue, newValue) {
+    if(oldValue && oldValue.constructor == Object) {
+      if(!newValue || newValue.constructor != Object ||
+          this.__isDifferent(Object.keys(oldValue).sort(), Object.keys(newValue).sort())) {
+        return true;
+      }
+      for(var key in oldValue) {
+        if(this.__isDifferent(oldValue[key], newValue[key])) {
+          return true;
+        }
+      }
+    } else if(oldValue && oldValue.constructor == Array) {
+      if(!newValue || newValue.constructor != Array || oldValue.length != newValue.length) {
+        return true;
+      }
+      for(var i=0, ii=oldValue.length;i<ii;i++) {
+        if(this.__isDifferent(oldValue[i], newValue[i])) {
+          return true;
+        }
+      }
+    } else {
+      return oldValue != newValue;
     }
   };
 
   return Cortex;
+})(DataWrapper, cortexPubSub);
 
-})(DataWrapper);
-
-if (typeof window !== "undefined" && window !== null) {
+if(typeof window !== "undefined" && window !== null) {
   window.Cortex = Cortex;
 }
 
 module.exports = Cortex;
 
-},{"./data_wrapper":1}],3:[function(require,module,exports){
-var Path;
-
-Path = (function() {
-  function Path(parent, key) {
-    this.parent = parent;
-    this.key = key;
+},{"./data_wrapper":1,"./pubsub":3,"./wrappers/array":4,"./wrappers/hash":5}],3:[function(require,module,exports){
+var PubSub = (function() {
+  function PubSub() {
+    this.uid = -1;
+    this.topics = {};
   }
 
-  Path.prototype.getKey = function() {
-    return this.key;
-  };
-
-  Path.prototype.getParent = function() {
-    return this.parent;
-  };
-
-  Path.prototype.getPath = function(path) {
-    if (path == null) {
-      path = [];
+  PubSub.prototype.subscribe = function(topic, callback) {
+    if(!this.topics.hasOwnProperty(topic)) {
+      this.topics[topic] = [];
     }
-    path.splice(0, 0, this.key);
-    if (this.parent != null) {
-      return this.parent.getPath(path);
-    } else {
-      return path;
-    }
+    this.topics[topic].push({callback: callback});
   };
 
-  return Path;
 
+  PubSub.prototype.publish = function(topic, data) {
+    if(!this.topics.hasOwnProperty(topic)) {
+      return false;
+    }
+
+    var subscribers = this.topics[topic];
+    var notify = function() {
+      for(var i=0, ii=subscribers.length;i < ii;i++) {
+        subscribers[i].callback(topic, data);
+      }
+    };
+
+    notify();
+
+    return true;
+  };
+
+  // Add both update and remove subscriptions with 1 call.
+  // Return the unique id so each cortex can handle its own event id.
+  PubSub.prototype.subscribeToCortex = function(updateCallback, removeCallback) {
+    this.uid += 1;
+    this.subscribe("update" + this.uid, updateCallback);
+    this.subscribe("remove" + this.uid, removeCallback);
+    return this.uid;
+  };
+
+  PubSub.prototype.unsubscribeFromCortex = function(topicId) {
+    delete this.topics["update" + topicId];
+    delete this.topics["remove" + topicId];
+  };
+
+  return PubSub;
 })();
 
-module.exports = Path;
+module.exports = new PubSub();
 
 },{}],4:[function(require,module,exports){
-var EnumerableWrapper;
+var ArrayWrapper = {
+  count: function() {
+    return this.__value.length;
+  },
 
-EnumerableWrapper = {
-  getLength: function() {
-    return this.value.length;
-  },
-  forEach: function(callback) {
-    var key, wrapper, _ref, _results;
-    if (this.wrappers.constructor === Object) {
-      _ref = this.wrappers;
-      _results = [];
-      for (key in _ref) {
-        wrapper = _ref[key];
-        _results.push(callback(key, wrapper));
-      }
-      return _results;
-    } else if (this.wrappers.constructor === Array) {
-      return this.wrappers.forEach(callback);
-    }
-  },
   map: function(callback) {
-    return this.wrappers.map(callback);
+    return this.__wrappers.map(callback);
   },
+
   find: function(callback) {
-    var index, wrapper, _i, _len, _ref;
-    _ref = this.wrappers;
-    for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
-      wrapper = _ref[index];
-      if (callback(wrapper, index, this.wrappers)) {
-        return wrapper;
+    for(var index = 0, length = this.__wrappers.length;index < length;index++) {
+      if(callback(this.__wrappers[index], index, this.__wrappers)) {
+        return this.__wrappers[index];
       }
     }
     return null;
   },
+
   findIndex: function(callback) {
-    var index, wrapper, _i, _len, _ref;
-    _ref = this.wrappers;
-    for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
-      wrapper = _ref[index];
-      if (callback(wrapper, index, this.wrappers)) {
+    for(var index = 0, length = this.__wrappers.length;index < length;index++) {
+      if(callback(this.__wrappers[index], index, this.__wrappers)) {
         return index;
       }
     }
     return -1;
   },
+
   push: function(value) {
-    var length;
-    length = this.value.push(value);
-    this.set(this.value);
+    var length = this.__value.push(value);
+    this.__forceUpdate();
     return length;
   },
+
   pop: function() {
-    var last;
-    last = this.value.pop();
-    this.set(this.value);
+    var last = this.__value.pop();
+    this.__forceUpdate();
     return last;
   },
+
   insertAt: function(index, value) {
-    var args;
-    args = [index, 0].concat(value);
-    Array.prototype.splice.apply(this.value, args);
-    return this.set(this.value);
+    var args = [index, 0].concat(value);
+    Array.prototype.splice.apply(this.__value, args);
+    this.__forceUpdate();
   },
+
   removeAt: function(index, howMany) {
-    var removed;
-    if (howMany == null) {
+    if(howMany == null) {
       howMany = 1;
     }
-    removed = this.value.splice(index, howMany);
-    this.set(this.value);
+    var removed = this.__value.splice(index, howMany);
+    this.__forceUpdate();
     return removed;
   }
 };
 
-module.exports = EnumerableWrapper;
+module.exports = ArrayWrapper;
+
+},{}],5:[function(require,module,exports){
+var HashWrapper = {
+  keys: function() {
+    return Object.keys(this.__value);
+  },
+
+  values: function() {
+    var key,
+        values = [];
+    for (key in this.__value) {
+      values.push(this.__value[key]);
+    }
+    return values;
+  },
+
+  hasKey: function(key) {
+    return this.__value[key] != null;
+  },
+
+  delete: function(key) {
+    var removed = this.__value[key];
+    delete this.__value[key];
+    this.__forceUpdate();
+    return removed;
+  },
+
+  add: function(key, value) {
+    this.__value[key] = value;
+    this.__forceUpdate();
+    return value;
+  }
+};
+
+module.exports = HashWrapper;
 
 },{}]},{},[2])
