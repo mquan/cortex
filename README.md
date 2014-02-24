@@ -5,7 +5,11 @@ Key features:
 - performs old and new data comparison out of the box so you don't have to implement shouldComponentUpdate
 - has built-in methods for working with arrays and hashes data
 
-[Here's a basic demo](http://mquan.github.io/cortex/examples/skyline/)
+** Basic demos **
+
+[skyline (4-level nested components)](http://mquan.github.io/cortex/examples/skyline/)
+
+[file system (arbitrarily deep structure of a single component type)](http://mquan.github.io/cortex/examples/file_system/)
 
 # Quickstart
 Initialize a cortex object
@@ -170,11 +174,13 @@ Reference the js file
 <script src="/bower_components/cortexjs/build/cortex.js"></script>
 ```
 
-# Using cortex with node
+# Using cortex with node.js
+Install via npm
 ```console
 npm install cortexjs
 ```
 
+Use it:
 ```javascript
 Cortex = require("cortexjs");
 
