@@ -6,6 +6,7 @@ Cortex is a Javascript library for centrally managing data with React.
 - has built-in methods for working with arrays and hashes data
 
 **Basic demos**
+
 [skyline (4-level nested components)](http://mquan.github.io/cortex/examples/skyline/)
 
 [file system (arbitrarily deep structure of a single component type)](http://mquan.github.io/cortex/examples/file_system/)
