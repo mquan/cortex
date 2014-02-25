@@ -137,7 +137,9 @@ new Cortex(data, function() {
     Method         | Description
     ---------------|:-------------------
     `getValue()`   | Returns the actual value
+    `val()`        | Alias for `getValue`
     `set(value)`   | Changes the value and rewrap the entire data tree
+    `remove()`     | Self destruct method: remove self from parent if a nested object or array, set value to undefined if root level.
 
 ### Cortex wrapper of array data has the following methods:
 
