@@ -44,7 +44,7 @@ var ArrayWrapper = {
   },
 
   removeAt: function(index, howMany) {
-    if(howMany == null) {
+    if(isNaN(howMany) || howMany <= 0) {
       howMany = 1;
     }
     var removed = this.__value.splice(index, howMany);

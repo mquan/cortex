@@ -93,11 +93,11 @@ module.exports = function(_mixins, _cortexPubSub) {
   };
 
   DataWrapper.prototype.__isObject = function() {
-    return this.__value && this.__value.constructor == Object;
+    return this.__value && this.__value.constructor === Object;
   };
 
   DataWrapper.prototype.__isArray = function() {
-    return this.__value && this.__value.constructor == Array;
+    return this.__value && this.__value.constructor === Array;
   };
 
   __include(DataWrapper, _mixins);
@@ -162,9 +162,9 @@ Cortex = (function(_super, _cortexPubSub) {
           subValue = this.__subValue(subPath),
           key = path[path.length - 1],
           removed = subValue[key];
-      if(subValue.constructor == Object) {
+      if(subValue.constructor === Object) {
         delete subValue[key];
-      } else if(subValue.constructor == Array) {
+      } else if(subValue.constructor === Array) {
         subValue.splice(key, 1);
       }
       this.update(subValue, subPath, true);
@@ -184,7 +184,7 @@ Cortex = (function(_super, _cortexPubSub) {
     if(path.length > 1) {
       var subValue = this.__subValue(path.slice(0, path.length - 1));
       subValue[path[path.length-1]] = newValue;
-    } else if(path.length == 1) {
+    } else if(path.length === 1) {
       this.__value[path[0]] = newValue;
     } else {
       this.__value = newValue;
@@ -210,8 +210,8 @@ Cortex = (function(_super, _cortexPubSub) {
 
   // Recursively performs comparison b/w old and new data
   Cortex.prototype.__isDifferent = function(oldValue, newValue) {
-    if(oldValue && oldValue.constructor == Object) {
-      if(!newValue || newValue.constructor != Object ||
+    if(oldValue && oldValue.constructor === Object) {
+      if(!newValue || newValue.constructor !== Object ||
           this.__isDifferent(Object.keys(oldValue).sort(), Object.keys(newValue).sort())) {
         return true;
       }
@@ -220,8 +220,8 @@ Cortex = (function(_super, _cortexPubSub) {
           return true;
         }
       }
-    } else if(oldValue && oldValue.constructor == Array) {
-      if(!newValue || newValue.constructor != Array || oldValue.length != newValue.length) {
+    } else if(oldValue && oldValue.constructor === Array) {
+      if(!newValue || newValue.constructor !== Array || oldValue.length !== newValue.length) {
         return true;
       }
       for(var i=0, ii=oldValue.length;i<ii;i++) {
@@ -230,7 +230,7 @@ Cortex = (function(_super, _cortexPubSub) {
         }
       }
     } else {
-      return oldValue != newValue;
+      return oldValue !== newValue;
     }
   };
 
@@ -341,7 +341,7 @@ var ArrayWrapper = {
   },
 
   removeAt: function(index, howMany) {
-    if(howMany == null) {
+    if(isNaN(howMany) || howMany <= 0) {
       howMany = 1;
     }
     var removed = this.__value.splice(index, howMany);
