@@ -23,6 +23,9 @@ module.exports = function(_mixins, _cortexPubSub) {
     return this.__value;
   };
 
+  // Short alias for getValue
+  DataWrapper.prototype.val = DataWrapper.prototype.getValue;
+
   DataWrapper.prototype.getPath = function() {
     return this.__path;
   };
