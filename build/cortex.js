@@ -142,7 +142,8 @@ Cortex = (function(_super, _cortexPubSub) {
     }
 
     this.__setValue(newValue, path);
-    this.__wrap();
+    this.__rewrap(path);
+
     if(this.__callback) {
       return this.__callback(this);
     }
@@ -173,6 +174,16 @@ Cortex = (function(_super, _cortexPubSub) {
       delete this.__wrappers;
       delete this.__value;
     }
+  };
+
+  // Re-wrap starting at the parent of the subtree of target node.
+  Cortex.prototype.__rewrap = function(path) {
+    var subPath = path.slice(0, path.length - 1),
+        subWrapper = this;
+    for(var i=0, ii = subPath.length;i<ii;i++) {
+      subWrapper = subWrapper[subPath[i]];
+    }
+    subWrapper.__wrap();
   };
 
   Cortex.prototype.__setValue = function(newValue, path) {

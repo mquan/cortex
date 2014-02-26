@@ -104,6 +104,7 @@ describe("Cortex", function() {
             expect(called).toBe(true);
             expect(cortex[1].b).toBe(undefined);
             expect(cortex[1].c.getValue()).toBe(3);
+            expect(cortex.getValue()).toBe(newValue);
           });
         });
       });
