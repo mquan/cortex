@@ -152,6 +152,8 @@ new Cortex(data, function() {
     `findIndex(callback)`          | Returns index of first wrapper element that meets condition returned callback. Callback accepts same input as forEach callback.
     `push(value)`                  | Inserts and rewrap the value at the end of the array.
     `pop()`                        | Removes the last element in the array
+    `unshift(value)`               | Inserts and rewrap the value at the front of the array.
+    `shift()`                      | Removes the first element in the array
     `insertAt(index, [value])`     | Inserts a value or an array of values starting at specified index.
     `removeAt(index, howMany = 1)` | Removes specified number of elements starting at index location. By default it removes 1 element if number of elements to be removed isn't specified.
 
