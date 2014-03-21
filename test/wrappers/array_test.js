@@ -98,8 +98,8 @@ describe("ArrayWrapper", function() {
   describe("#unshift", function() {
     it("inserts a new wrapper with value at the beginning", function() {
       var reversed = this.value.reverse(),
-          length = this.value.length,
-          value = this.value[0] + this.value[1],
+          length = reversed.length,
+          value = reversed[0] + reversed[1],
           newLength = this.wrapper.unshift(value);
 
       expect(newLength).toBe(length + 1);
