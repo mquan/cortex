@@ -95,6 +95,30 @@ describe("ArrayWrapper", function() {
     });
   });
 
+  describe("#unshift", function() {
+    it("inserts a new wrapper with value at the beginning", function() {
+      var reversed = this.value.reverse(),
+          length = reversed.length,
+          value = reversed[0] + reversed[1],
+          newLength = this.wrapper.unshift(value);
+
+      expect(newLength).toBe(length + 1);
+      expect(this.wrapper.count()).toBe(length + 1);
+      expect(this.wrapper[0].getValue()).toBe(value);
+    });
+  });
+
+  describe("#shift", function() {
+    it("removes the first element in the array", function() {
+      var currentLength = this.value.length,
+          value = this.value[0],
+          removed = this.wrapper.shift();
+
+      expect(removed).toBe(value);
+      expect(this.wrapper.count()).toBe(currentLength - 1);
+    });
+  });
+
   describe("#insertAt", function() {
     describe("when insert value is not an array", function() {
       it("inserts a wrapper with value at specified index", function() {

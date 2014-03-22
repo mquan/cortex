@@ -37,6 +37,18 @@ var ArrayWrapper = {
     return last;
   },
 
+  unshift: function(value) {
+    var length = this.__value.unshift(value);
+    this.__forceUpdate();
+    return length;
+  },
+
+  shift: function() {
+    var last = this.__value.shift();
+    this.__forceUpdate();
+    return last;
+  },
+
   insertAt: function(index, value) {
     var args = [index, 0].concat(value);
     Array.prototype.splice.apply(this.__value, args);
