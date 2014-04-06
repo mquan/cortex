@@ -16,7 +16,7 @@ var HashWrapper = {
     return this.__value[key] != null;
   },
 
-  delete: function(key) {
+  'delete': function(key) {
     var removed = this.__value[key];
     delete this.__value[key];
     this.__forceUpdate();
