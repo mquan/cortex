@@ -394,11 +394,16 @@ var HashWrapper = {
     return this.__value[key] != null;
   },
 
-  delete: function(key) {
+  destroy: function(key) {
     var removed = this.__value[key];
     delete this.__value[key];
     this.__forceUpdate();
     return removed;
+  },
+
+  'delete': function(key) {
+    console.warn("Method deprecated! Please use .destroy(key) method");
+    return this.remove(key);
   },
 
   add: function(key, value) {

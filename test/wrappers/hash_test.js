@@ -28,9 +28,9 @@ describe("HashWrapper", function() {
     });
   });
 
-  describe("#delete", function() {
+  describe("#destroy", function() {
     it("removes specified key value pair", function() {
-      expect(this.wrapper.delete("a")).toBe(1);
+      expect(this.wrapper.destroy("a")).toBe(1);
       expect(this.wrapper.a).toBe(undefined);
       expect(this.wrapper.b.getValue()).toBe(2);
       expect(this.wrapper.c.getValue()).toBe(3);

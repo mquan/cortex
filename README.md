@@ -164,7 +164,7 @@ new Cortex(data, function() {
     `values()`                     | Returns the array of values
     `hasKey(key)`                  | Returns boolean value whether the key exists
     `forEach(callback)`            | Iterates over every key and value pair. The callback accepts the following inputs `(key, wrapperElement)`
-    `delete(key)`                  | Deletes the specified key and value pair
+    `destroy(key)`                 | Removes the specified key and value pair
     `add(key, value)`              | Adds the specified key and value pair
 
 
