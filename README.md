@@ -195,7 +195,7 @@ wrappedData.mydata.set(100);
 console.log(wrappedData.mydata.getValue()); //100
 ```
 
-# Buidling Cortex
+# Building Cortex
 To build Cortex:
 ```console
 gulp
