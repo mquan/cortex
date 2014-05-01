@@ -112,7 +112,7 @@ orderComponent = React.renderComponent(
 First we initialize cortex with:
 ```javascript
 var orderCortex = new Cortex(orderData, function(updatedOrder) {
-  orderComponent.setProps({order: orderCortex});
+  orderComponent.setProps({order: updatedOrder});
 });
 ```
 
