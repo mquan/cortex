@@ -1,3 +1,8 @@
+# 0.5.2 (May 2, 2014)
+
+Features:
+- Add ``.on("update", callback)
+
 # 0.5.1 (April 16, 2014)
 
 Features:

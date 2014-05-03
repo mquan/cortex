@@ -134,12 +134,13 @@ new Cortex(data, function() {
 
 ### Instance methods:
 
-    Method         | Description
-    ---------------|:-------------------
-    `getValue()`   | Returns the actual value
-    `val()`        | Alias for `getValue`
-    `set(value)`   | Changes the value and rewrap the entire data tree
-    `remove()`     | Self destruct method: remove self from parent if nested, set value to undefined if root level.
+    Method                    | Description
+    --------------------------|:-------------------
+    `getValue()`              | Returns the actual value
+    `val()`                   | Alias for `getValue`
+    `set(value)`              | Changes the value and rewrap the entire data tree
+    `remove()`                | Self destruct method: remove self from parent if nested, set value to undefined if root level.
+    `.on("update", callback)` | Sets callback to run on update event. If a previous callback was set, the new callback will replace the old one.
 
 ### Cortex wrapper of array data has the following methods:
 

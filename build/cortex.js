@@ -136,6 +136,12 @@ Cortex = (function(_super, _cortexPubSub) {
 
   __extends(Cortex, _super);
 
+  Cortex.prototype.on = function(event, callback) {
+    if(event === "update") {
+      this.__callback = callback;
+    }
+  };
+
   Cortex.prototype.update = function(newValue, path, forceUpdate) {
     if(!forceUpdate && !this.__shouldUpdate(newValue, path)) {
       return false;

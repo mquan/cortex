@@ -16,6 +16,46 @@ describe("Cortex", function() {
     };
   });
 
+  describe("#on", function() {
+    describe("when update event", function() {
+      it("sets new callback", function() {
+        var called1 = false,
+            called2 = false,
+            cortex = new Cortex(this.value, function() {
+              called1 = true;
+            });
+
+        cortex.on("update", function() {
+          called2 = true;
+        });
+
+        cortex.update({}, []);
+
+        expect(called1).toBe(false);
+        expect(called2).toBe(true);
+      });
+    });
+
+    describe("when not update event", function() {
+      it("does not change callback", function() {
+        var called1 = false,
+            called2 = false,
+            cortex = new Cortex(this.value, function() {
+              called1 = true;
+            });
+
+        cortex.on("notupdate", function() {
+          called2 = true;
+        });
+
+        cortex.update({}, []);
+
+        expect(called1).toBe(true);
+        expect(called2).toBe(false);
+      });
+    });
+  });
+
   describe("#update", function() {
     it("runs callback", function() {
       var called = false,
