@@ -92,31 +92,37 @@ var Order = React.createClass({
   }
 });
 
-var orderComponent,
-    orderData = [
+var orderData = [
       {name: "Burger", quantity: 2, price: 5.0},
       {name: "Salad", quantity: 1, price: 4.50},
       {name: "Coke", quantity: 3, price: 1.50}
     ];
 
 //Initialize cortex with data and pass in a callback to run when data is updated.
-var orderCortex = new Cortex(orderData, function(updatedOrder) {
-  orderComponent.setProps({order: orderCortex});
-});
+var orderCortex = new Cortex(orderData);
 
 orderComponent = React.renderComponent(
   <Order order={orderCortex} />, document.getElementById("order")
 );
+
+orderCortex.on("update", function(updatedOrder) {
+  orderComponent.setProps({order: orderCortex});
+});
 ```
 
 First we initialize cortex with:
 ```javascript
-var orderCortex = new Cortex(orderData, function(updatedOrder) {
-  orderComponent.setProps({order: updatedOrder});
-});
+var orderCortex = new Cortex(orderData);
 ```
 
 Then it's passed into the Order component to render the Item components.
+
+We set a callback to run on update event using
+```
+orderCortex.on("update", function(updatedOrder) {
+  orderComponent.setProps({order: orderCortex});
+});
+```
 
 In Item component, note that we display the quantity value with ``this.props.item.quantity.getValue()``. This is because ``this.props.item.quantity`` only gives us the wrapper of the ``quantity`` attribute, we need to call ``getValue()`` to get the actual value.
 

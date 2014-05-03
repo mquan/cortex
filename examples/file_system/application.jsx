@@ -78,10 +78,11 @@ var data = {name: "Desktop", children: [
   {name: "readme.txt"},
 ]};
 
-var cortexData = new Cortex(data, function(updatedCortex) {
-  fileSystemComponent.setProps({children: updatedCortex});
-});
-
+var cortexData = new Cortex(data);
 var fileSystemComponent = React.renderComponent(
   <Node node={cortexData} />, document.getElementById("filesystem")
 );
+
+cortexData.on("update", function(updatedCortex) {
+  fileSystemComponent.setProps({children: updatedCortex});
+});
