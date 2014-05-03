@@ -101,7 +101,7 @@ var orderData = [
 //Initialize cortex with data and pass in a callback to run when data is updated.
 var orderCortex = new Cortex(orderData);
 
-orderComponent = React.renderComponent(
+var orderComponent = React.renderComponent(
   <Order order={orderCortex} />, document.getElementById("order")
 );
 
