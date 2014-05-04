@@ -31,7 +31,7 @@ describe("Cortex", function() {
 
         cortex.update({}, []);
 
-        expect(called1).toBe(false);
+        expect(called1).toBe(true);
         expect(called2).toBe(true);
       });
     });

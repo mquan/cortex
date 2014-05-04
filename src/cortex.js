@@ -21,7 +21,7 @@ Cortex = (function(_super, _cortexPubSub) {
   function Cortex(value, callback) {
     this.__value = value;
     this.__path = [];
-    this.__callback = callback;
+    this.__callbacks = callback ? [callback] : [];
     this.__subscribe();
     this.__wrap();
   }
@@ -30,7 +30,7 @@ Cortex = (function(_super, _cortexPubSub) {
 
   Cortex.prototype.on = function(event, callback) {
     if(event === "update") {
-      this.__callback = callback;
+      this.__callbacks.push(callback);
     }
   };
 
@@ -42,9 +42,13 @@ Cortex = (function(_super, _cortexPubSub) {
     this.__setValue(newValue, path);
     this.__rewrap(path);
 
-    if(this.__callback) {
-      return this.__callback(this);
-    }
+    this.__callbacks.forEach(function (callback) {
+        if(callback) {
+            callback(this);
+        }
+    });
+    return true;
+
   };
 
   Cortex.prototype.__subscribe = function() {
