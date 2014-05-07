@@ -1,12 +1,12 @@
 # 0.5.3 (May 6, 2014)
 Features:
 - Support multiple callbacks
-- Add ``.off("update", callback)`` method
+- Add ``off("update", callback)`` method
 
 # 0.5.2 (May 2, 2014)
 
 Features:
-- Add ``.on("update", callback)
+- Add ``on("update", callback)``
 
 # 0.5.1 (April 16, 2014)
 
