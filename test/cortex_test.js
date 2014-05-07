@@ -19,39 +19,109 @@ describe("Cortex", function() {
   describe("#on", function() {
     describe("when update event", function() {
       it("sets new callback", function() {
-        var called1 = false,
-            called2 = false,
-            cortex = new Cortex(this.value, function() {
-              called1 = true;
+        var called1 = null,
+            called2 = null,
+            cortex = new Cortex(this.value, function(updatedCortex) {
+              called1 = updatedCortex.updatedValue.getValue();
             });
 
-        cortex.on("update", function() {
-          called2 = true;
+        cortex.on("update", function(updatedCortex) {
+          called2 = updatedCortex.updatedValue.getValue();
         });
 
-        cortex.update({}, []);
+        cortex.update({updatedValue: 123}, []);
 
-        expect(called1).toBe(true);
-        expect(called2).toBe(true);
+        expect(called1).toBe(cortex.updatedValue.getValue());
+        expect(called2).toBe(cortex.updatedValue.getValue());
       });
     });
 
     describe("when not update event", function() {
       it("does not change callback", function() {
-        var called1 = false,
-            called2 = false,
-            cortex = new Cortex(this.value, function() {
-              called1 = true;
+        var called1 = null,
+            called2 = null,
+            cortex = new Cortex(this.value, function(updatedCortex) {
+              called1 = updatedCortex.updatedValue.getValue();
             });
 
-        cortex.on("notupdate", function() {
-          called2 = true;
+        cortex.on("notupdate", function(updatedCortex) {
+          called2 = updatedCortex.updatedValue.getValue();
         });
 
-        cortex.update({}, []);
+        cortex.update({updatedValue: 123}, []);
 
-        expect(called1).toBe(true);
-        expect(called2).toBe(false);
+        expect(called1).toBe(cortex.updatedValue.getValue());
+        expect(called2).toBe(null);
+      });
+    });
+  });
+
+  describe("#off", function() {
+    describe("when update event", function() {
+      describe("when no callback specified", function() {
+        it("removes all callbacks", function() {
+          var called1 = null,
+            called2 = null,
+            callback1 = function(updatedCortex) {
+              called1 = updatedCortex.updatedValue.getValue();
+            },
+            callback2 = function(updatedCortex) {
+              called2 = updatedCortex.updatedValue.getValue();
+            },
+            cortex = new Cortex(this.value, callback1);
+
+          cortex.on("update", callback2);
+          cortex.off("update");
+
+          cortex.update({updatedValue: 123}, []);
+
+          expect(called1).toBe(null);
+          expect(called2).toBe(null);
+        });
+      });
+
+      describe("when callback is specified", function() {
+        it("removes specified callback", function() {
+          var called1 = null,
+            called2 = null,
+            callback1 = function(updatedCortex) {
+              called1 = updatedCortex.updatedValue.getValue();
+            },
+            callback2 = function(updatedCortex) {
+              called2 = updatedCortex.updatedValue.getValue();
+            },
+            cortex = new Cortex(this.value, callback1);
+
+          cortex.on("update", callback2);
+          cortex.off("update", callback1);
+
+          cortex.update({updatedValue: 123}, []);
+
+          expect(called1).toBe(null);
+          expect(called2).toBe(cortex.updatedValue.getValue());
+        });
+      });
+    });
+
+    describe("when not update event", function() {
+      it("does not remove any callback", function() {
+        var called1 = null,
+            called2 = null,
+            callback1 = function(updatedCortex) {
+              called1 = updatedCortex.updatedValue.getValue();
+            },
+            callback2 = function(updatedCortex) {
+              called2 = updatedCortex.updatedValue.getValue();
+            },
+            cortex = new Cortex(this.value, callback1);
+
+        cortex.on("update", callback2);
+        cortex.off("notupdate");
+
+        cortex.update({updatedValue: 123}, []);
+
+        expect(called1).toBe(cortex.updatedValue.getValue());
+        expect(called2).toBe(cortex.updatedValue.getValue());
       });
     });
   });

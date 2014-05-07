@@ -129,16 +129,31 @@ Cortex = (function(_super, _cortexPubSub) {
   function Cortex(value, callback) {
     this.__value = value;
     this.__path = [];
-    this.__callback = callback;
+    this.__callbacks = callback ? [callback] : [];
     this.__subscribe();
     this.__wrap();
   }
 
   __extends(Cortex, _super);
 
-  Cortex.prototype.on = function(event, callback) {
-    if(event === "update") {
-      this.__callback = callback;
+  Cortex.prototype.on = function(eventName, callback) {
+    if(eventName === "update") {
+      this.__callbacks.push(callback);
+    }
+  };
+
+  Cortex.prototype.off = function(eventName, callback) {
+    if(eventName === "update") {
+      if(callback) {
+        for(var i=0, ii=this.__callbacks.length;i < ii;i++) {
+          if(callback === this.__callbacks[i]) {
+            this.__callbacks.splice(i, 1);
+            break;
+          }
+        }
+      } else {
+        this.__callbacks = [];
+      }
     }
   };
 
@@ -150,9 +165,13 @@ Cortex = (function(_super, _cortexPubSub) {
     this.__setValue(newValue, path);
     this.__rewrap(path);
 
-    if(this.__callback) {
-      return this.__callback(this);
+    for(var i=0, ii=this.__callbacks.length;i < ii;i++) {
+      if(this.__callbacks[i]) {
+        this.__callbacks[i](this);
+      }
     }
+
+    return true;
   };
 
   Cortex.prototype.__subscribe = function() {

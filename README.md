@@ -47,6 +47,21 @@ cortex.a.getValue();
 // ==> 200
 ```
 
+Add callbacks
+```javascript
+cortex.on("update", myCallback);
+```
+
+Remove callback
+```javascript
+cortex.off("update", myCallback);
+```
+
+Remove all callbacks
+```javascript
+cortex.off("update");
+```
+
 # Overview
 
 In React's world data flows in one direction from the top down. That means if you want to make a change, change it at the source and let it propagate down the chain. But what happen when a child component needs to update the data? React's official guideline is to use callback for communication between parent and child components.
@@ -146,7 +161,8 @@ new Cortex(data, function() {
     `val()`                   | Alias for `getValue`
     `set(value)`              | Changes the value and rewrap the entire data tree
     `remove()`                | Self destruct method: remove self from parent if nested, set value to undefined if root level.
-    `.on("update", callback)` | Sets callback to run on update event. If a previous callback was set, the new callback will replace the old one.
+    `.on("update", callback)` | Add a callback to run on update event.
+    `.off("update", callback)`| Remove a callback. If no callback is specified, all existing callbacks will be removed.
 
 ### Cortex wrapper of array data has the following methods:
 
