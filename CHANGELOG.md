@@ -1,3 +1,7 @@
+# 0.6.0 (May 14, 2014)
+Features:
+- Run callbacks in batch so that multiple updates in the same run loop result in a single callbacks run.
+
 # 0.5.3 (May 6, 2014)
 Features:
 - Support multiple callbacks

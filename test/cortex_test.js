@@ -2,6 +2,8 @@ var Cortex = require("../src/cortex");
 
 describe("Cortex", function() {
   beforeEach(function() {
+    jasmine.Clock.useMock();
+
     this.value = {
       a: 1,
       b: {
@@ -31,6 +33,8 @@ describe("Cortex", function() {
 
         cortex.update({updatedValue: 123}, []);
 
+        jasmine.Clock.tick(1);
+
         expect(called1).toBe(cortex.updatedValue.getValue());
         expect(called2).toBe(cortex.updatedValue.getValue());
       });
@@ -49,6 +53,8 @@ describe("Cortex", function() {
         });
 
         cortex.update({updatedValue: 123}, []);
+
+        jasmine.Clock.tick(1);
 
         expect(called1).toBe(cortex.updatedValue.getValue());
         expect(called2).toBe(null);
@@ -75,6 +81,8 @@ describe("Cortex", function() {
 
           cortex.update({updatedValue: 123}, []);
 
+          jasmine.Clock.tick(1);
+
           expect(called1).toBe(null);
           expect(called2).toBe(null);
         });
@@ -96,6 +104,8 @@ describe("Cortex", function() {
           cortex.off("update", callback1);
 
           cortex.update({updatedValue: 123}, []);
+
+          jasmine.Clock.tick(1);
 
           expect(called1).toBe(null);
           expect(called2).toBe(cortex.updatedValue.getValue());
@@ -120,6 +130,8 @@ describe("Cortex", function() {
 
         cortex.update({updatedValue: 123}, []);
 
+        jasmine.Clock.tick(1);
+
         expect(called1).toBe(cortex.updatedValue.getValue());
         expect(called2).toBe(cortex.updatedValue.getValue());
       });
@@ -135,7 +147,25 @@ describe("Cortex", function() {
 
       cortex.update({}, []);
 
+      jasmine.Clock.tick(1);
+
       expect(called).toBe(true);
+    });
+
+    it("runs callbacks once for multiple updates", function() {
+      var called = 0,
+          cortex = new Cortex([1, 2, 3, 4, 5], function() {
+            called += 1;
+          });
+
+      cortex.forEach(function(wrapper) {
+        wrapper.set(wrapper.getValue()*10);
+      });
+
+      jasmine.Clock.tick(1);
+
+      expect(called).toBe(1);
+      expect(cortex.getValue()).toEqual([10, 20, 30, 40, 50]);
     });
 
     it("sets value to new data", function() {
@@ -193,6 +223,8 @@ describe("Cortex", function() {
                 }));
             cortex.update(newValue, []);
 
+            jasmine.Clock.tick(1);
+
             expect(called).toBe(true);
 
             for (var i = 0, ii = newValue.length;i < ii;i++) {
@@ -210,6 +242,8 @@ describe("Cortex", function() {
                 called = true;
               }));
             cortex.update(newValue, []);
+
+            jasmine.Clock.tick(1);
 
             expect(called).toBe(true);
             expect(cortex[1].b).toBe(undefined);
@@ -230,6 +264,9 @@ describe("Cortex", function() {
             }));
 
             cortex.update(newValue, []);
+
+            jasmine.Clock.tick(1);
+
             expect(called).toBe(true);
             expect(cortex.b.getValue()).toBe(3);
           });
@@ -245,6 +282,9 @@ describe("Cortex", function() {
                 }));
 
             cortex.update(newValue, []);
+
+            jasmine.Clock.tick(1);
+
             expect(called).toBe(true);
             expect(cortex.b.getValue()).toEqual([3, 5]);
           });
@@ -263,6 +303,8 @@ describe("Cortex", function() {
                 }));
             cortex.update(value, []);
 
+            jasmine.Clock.tick(1);
+
             expect(called).toBe(false);
           });
         });
@@ -276,6 +318,8 @@ describe("Cortex", function() {
                 }));
             cortex.update(1, ["a"]);
 
+            jasmine.Clock.tick(1);
+
             expect(called).toBe(false);
           });
         });
@@ -288,6 +332,8 @@ describe("Cortex", function() {
                   called = true;
                 }));
             cortex.update(1, ["a", "b"]);
+
+            jasmine.Clock.tick(1);
 
             expect(called).toBe(false);
           });
@@ -305,6 +351,8 @@ describe("Cortex", function() {
                   }));
               cortex.update(value.slice(), []);
 
+              jasmine.Clock.tick(1);
+
               expect(called).toBe(false);
             });
           });
@@ -317,6 +365,8 @@ describe("Cortex", function() {
                     called = true;
                   }));
               cortex.update([{a: 1}, {b: 2}], []);
+
+              jasmine.Clock.tick(1);
 
               expect(called).toBe(false);
             });
@@ -332,6 +382,8 @@ describe("Cortex", function() {
                 }));
             cortex.update([1, 2, 3], ["arr"]);
 
+            jasmine.Clock.tick(1);
+
             expect(called).toBe(false);
           });
         });
@@ -344,6 +396,8 @@ describe("Cortex", function() {
                   called = true;
                 }));
             cortex.update([1, 2, 3], ["a", "b"]);
+
+            jasmine.Clock.tick(1);
 
             expect(called).toBe(false);
           });
@@ -361,6 +415,8 @@ describe("Cortex", function() {
                   }));
               cortex.update({c: 3, b: 2, a: 1}, []);
 
+              jasmine.Clock.tick(1);
+
               expect(called).toBe(false);
             });
           });
@@ -375,6 +431,8 @@ describe("Cortex", function() {
 
               cortex.update({a: {aa: 1}, b: { bb: 2 } }, []);
 
+              jasmine.Clock.tick(1);
+
               expect(called).toBe(false);
             });
           });
@@ -387,6 +445,8 @@ describe("Cortex", function() {
                     called = true;
                   }));
               cortex.update({ a: [1, 2], b: [1, 2] }, []);
+
+              jasmine.Clock.tick(1);
 
               expect(called).toBe(false);
             });

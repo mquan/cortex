@@ -22,6 +22,7 @@ Cortex = (function(_super, _cortexPubSub) {
     this.__value = value;
     this.__path = [];
     this.__callbacks = callback ? [callback] : [];
+    this.__callbacksQueued = false;
     this.__subscribe();
     this.__wrap();
   }
@@ -55,15 +56,30 @@ Cortex = (function(_super, _cortexPubSub) {
     }
 
     this.__setValue(newValue, path);
+
+    // TODO: Batch rewrap into a single call
+    // rewrap starting from highest level subtree(s)
     this.__rewrap(path);
 
+    // Schedule callbacks run in batch so that multiple updates
+    // in same run loop only result in a single call to runCallbacks.
+    if(!this.__callbacksQueued) {
+      this.__callbacksQueued = true;
+      setTimeout((function() {
+        this.__runCallbacks();
+      }).bind(this), 0);
+    }
+
+    return true;
+  };
+
+  Cortex.prototype.__runCallbacks = function() {
     for(var i=0, ii=this.__callbacks.length;i < ii;i++) {
       if(this.__callbacks[i]) {
         this.__callbacks[i](this);
       }
     }
-
-    return true;
+    this.__callbacksQueued = false;
   };
 
   Cortex.prototype.__subscribe = function() {

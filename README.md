@@ -3,7 +3,8 @@ Cortex is a Javascript library for centrally managing data with React.
 **Key features:**
 - supports deeply nested data with a simple API
 - performs old and new data comparison out of the box so you don't have to implement shouldComponentUpdate
-- has built-in methods for working with arrays and hashes data
+- performs batch updates and efficiently rewraps only the affected subtree.
+- has built-in methods for working with arrays and hashes
 
 **Basic demos**
 
@@ -159,7 +160,7 @@ new Cortex(data, function() {
     --------------------------|:-------------------
     `getValue()`              | Returns the actual value
     `val()`                   | Alias for `getValue`
-    `set(value)`              | Changes the value and rewrap the entire data tree
+    `set(value)`              | Changes the value and rewrap the subtree.
     `remove()`                | Self destruct method: remove self from parent if nested, set value to undefined if root level.
     `.on("update", callback)` | Add a callback to run on update event.
     `.off("update", callback)`| Remove a callback. If no callback is specified, all existing callbacks will be removed.
