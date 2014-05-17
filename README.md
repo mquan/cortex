@@ -122,7 +122,7 @@ var orderComponent = React.renderComponent(
 );
 
 orderCortex.on("update", function(updatedOrder) {
-  orderComponent.setProps({order: orderCortex});
+  orderComponent.setProps({order: updatedOrder});
 });
 ```
 
