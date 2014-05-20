@@ -1,3 +1,7 @@
+# 0.6.1 (May 19, 2012)
+Features:
+-Add `filter` method
+
 # 0.6.0 (May 14, 2014)
 Features:
 - Run callbacks in batch so that multiple updates in the same run loop result in a single callbacks run.

@@ -24,6 +24,16 @@ describe("ArrayWrapper", function() {
     });
   });
 
+  describe("#filter", function() {
+    it("creates a new array whose elements satisfy condition in callback", function() {
+      var out = this.wrapper.filter(function(elem) {
+        return elem.getValue() % 2 === 0;
+      });
+
+      expect(out).toEqual([this.wrapper[2], this.wrapper[5]]);
+    });
+  });
+
   describe("#find", function() {
     it("returns wrapper element that matches condition of input function", function() {
       var value = this.value[this.value.length - 1],

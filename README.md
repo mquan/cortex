@@ -172,6 +172,7 @@ new Cortex(data, function() {
     `count()`                      | Returns length of nested wrappers
     `forEach(callback)`            | Iterates over all elements. The callback accepts the following input `(wrapperElement, index, wrapperArray)`
     `map(callback)`                | Returns a new array as returned by the callback. Callback accepts same input as forEach callback
+    `filter(callback, thisArg)`    | Returns a new array of wrappers whose elements satisfy condition return by callback.
     `find(callback)`               | Returns the first wrapper element that meets the condition returned by callback. Callback accepts same input as forEach callback.
     `findIndex(callback)`          | Returns index of first wrapper element that meets condition returned callback. Callback accepts same input as forEach callback.
     `push(value)`                  | Inserts and rewrap the value at the end of the array.

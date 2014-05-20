@@ -7,6 +7,10 @@ var ArrayWrapper = {
     return this.__wrappers.map(callback);
   },
 
+  filter: function(callback, thisArg) {
+    return this.__wrappers.filter(callback, thisArg);
+  },
+
   find: function(callback) {
     for(var index = 0, length = this.__wrappers.length;index < length;index++) {
       if(callback(this.__wrappers[index], index, this.__wrappers)) {
