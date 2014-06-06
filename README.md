@@ -162,8 +162,8 @@ new Cortex(data, function() {
     `val()`                   | Alias for `getValue`
     `set(value)`              | Changes the value and rewrap the subtree.
     `remove()`                | Self destruct method: remove self from parent if nested, set value to undefined if root level.
-    `.on("update", callback)` | Add a callback to run on update event.
-    `.off("update", callback)`| Remove a callback. If no callback is specified, all existing callbacks will be removed.
+    `.on("update", callback)` | Add a callback to run on update event (only available on root object)
+    `.off("update", callback)`| Remove a callback. If no callback is specified, all existing callbacks will be removed (only available on root object)
 
 ### Cortex wrapper of array data has the following methods:
 
