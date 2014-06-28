@@ -136,7 +136,7 @@ Then it's passed into the Order component to render the Item components.
 We set a callback to run on update event using
 ```
 orderCortex.on("update", function(updatedOrder) {
-  orderComponent.setProps({order: orderCortex});
+  orderComponent.setProps({order: updatedOrder});
 });
 ```
 
