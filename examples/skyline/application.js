@@ -75,7 +75,7 @@ var City = React.createClass({displayName: 'City',
       React.DOM.div( {className:"city-container"}, 
         buildings,
         React.DOM.div( {className:"city-controls"}, 
-          React.DOM.a( {href:"#", onClick:this.addBuilding}, "Add Building"), " | ",
+          React.DOM.a( {href:"#", onClick:this.addBuilding}, "Add Building"), " |",
           React.DOM.a( {href:"#", onClick:this.removeBuilding}, "Remove Building")
         )
       )
