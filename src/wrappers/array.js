@@ -29,6 +29,16 @@ var ArrayWrapper = {
     return -1;
   },
 
+  findIndices: function(callback) {
+    var indices = [];
+    for(var index = 0, length = this.__wrappers.length;index < length;index++) {
+      if(callback(this.__wrappers[index], index, this.__wrappers)) {
+        indices.push(index);
+      }
+    }
+    return indices;
+  },
+
   push: function(value) {
     var length = this.__value.push(value);
     this.__forceUpdate();
@@ -64,6 +74,16 @@ var ArrayWrapper = {
       howMany = 1;
     }
     var removed = this.__value.splice(index, howMany);
+    this.__forceUpdate();
+    return removed;
+  },
+
+  removeSeveral: function(indices) {
+    var removed = []
+    for(var i = indices.length-1;i >= 0;i--) {
+      // go backwards to ensure that the array is mutated properly
+      removed.push(this.__value.splice(indices[i], 1));
+    }
     this.__forceUpdate();
     return removed;
   }
