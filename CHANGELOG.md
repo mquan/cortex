@@ -1,6 +1,9 @@
-# 0.6.1 (May 19, 2012)
+# 0.6.2 (August 13, 2014)
+- Fix batch callback bug
+
+# 0.6.1 (May 19, 2014)
 Features:
--Add `filter` method
+- Add `filter` method
 
 # 0.6.0 (May 14, 2014)
 Features:

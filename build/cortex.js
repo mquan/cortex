@@ -182,12 +182,13 @@ Cortex = (function(_super, _cortexPubSub) {
   };
 
   Cortex.prototype.__runCallbacks = function() {
+    this.__callbacksQueued = false;
+
     for(var i=0, ii=this.__callbacks.length;i < ii;i++) {
       if(this.__callbacks[i]) {
         this.__callbacks[i](this);
       }
     }
-    this.__callbacksQueued = false;
   };
 
   Cortex.prototype.__subscribe = function() {
