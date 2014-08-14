@@ -168,6 +168,21 @@ describe("Cortex", function() {
       expect(cortex.getValue()).toEqual([10, 20, 30, 40, 50]);
     });
 
+    it("update inside a callback call should be queued", function() {
+      var called = 0,
+          cortex = new Cortex(this.value, function(updatedCortex) {
+            updatedCortex.set({calledFrom: "callback"});
+            called += 1;
+          });
+
+      cortex.set({calledFrom: "outside"});
+
+      jasmine.Clock.tick(1);
+
+      expect(called).toBe(2);
+      expect(cortex.getValue()).toEqual({calledFrom: "callback"});
+    });
+
     it("sets value to new data", function() {
       var cortex = new Cortex(this.value),
           newValue = { foo: "bar" };
