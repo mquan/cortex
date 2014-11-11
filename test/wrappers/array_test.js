@@ -180,5 +180,13 @@ describe("ArrayWrapper", function() {
 
       expect(this.wrapper.removeAt.bind(0)).toThrow();
     });
+
+    it("doesn't remove anything when negative index", function() {
+      var originalLength = this.wrapper.count(),
+          removed = this.wrapper.removeAt(-1);
+
+      expect(this.wrapper.count()).toBe(originalLength);
+      expect(removed).toBe(undefined);
+    });
   });
 });

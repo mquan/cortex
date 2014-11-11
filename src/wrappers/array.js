@@ -60,6 +60,9 @@ var ArrayWrapper = {
   },
 
   removeAt: function(index, howMany) {
+    if(!isNaN(index) && index < 0) {
+      return void 0;
+    }
     if(isNaN(howMany) || howMany <= 0) {
       howMany = 1;
     }
