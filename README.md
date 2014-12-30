@@ -48,6 +48,13 @@ cortex.a.getValue();
 // ==> 200
 ```
 
+Change data from root object
+```javascript
+cortex.set({a: 300})
+cortex.getValue()
+// ==> {a: 300}
+```
+
 Add callbacks
 ```javascript
 cortex.on("update", myCallback);
