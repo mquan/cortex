@@ -15,7 +15,7 @@ gulp.task("scripts", function() {
     .pipe(source("cortex.js"))
     .pipe(gulp.dest("./build"))
     .pipe(streamify(uglify()))
-    .pipe(rename({ext: ".min.js"}))
+    .pipe(rename("cortex.min.js"))
     .pipe(gulp.dest("build"));
 });
 
