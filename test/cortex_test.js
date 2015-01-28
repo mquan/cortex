@@ -2,7 +2,7 @@ var Cortex = require("../src/cortex");
 
 describe("Cortex", function() {
   beforeEach(function() {
-    jasmine.Clock.useMock();
+    jasmine.clock().install();
 
     this.value = {
       a: 1,
@@ -16,6 +16,10 @@ describe("Cortex", function() {
       },
       c: [0, 1, 2]
     };
+  });
+
+  afterEach(function() {
+    jasmine.clock().uninstall();
   });
 
   describe("#on", function() {
@@ -33,7 +37,7 @@ describe("Cortex", function() {
 
         cortex.update({updatedValue: 123}, []);
 
-        jasmine.Clock.tick(1);
+        jasmine.clock().tick(1);
 
         expect(called1).toBe(cortex.updatedValue.getValue());
         expect(called2).toBe(cortex.updatedValue.getValue());
@@ -54,7 +58,7 @@ describe("Cortex", function() {
 
         cortex.update({updatedValue: 123}, []);
 
-        jasmine.Clock.tick(1);
+        jasmine.clock().tick(1);
 
         expect(called1).toBe(cortex.updatedValue.getValue());
         expect(called2).toBe(null);
@@ -81,7 +85,7 @@ describe("Cortex", function() {
 
           cortex.update({updatedValue: 123}, []);
 
-          jasmine.Clock.tick(1);
+          jasmine.clock().tick(1);
 
           expect(called1).toBe(null);
           expect(called2).toBe(null);
@@ -105,7 +109,7 @@ describe("Cortex", function() {
 
           cortex.update({updatedValue: 123}, []);
 
-          jasmine.Clock.tick(1);
+          jasmine.clock().tick(1);
 
           expect(called1).toBe(null);
           expect(called2).toBe(cortex.updatedValue.getValue());
@@ -130,7 +134,7 @@ describe("Cortex", function() {
 
         cortex.update({updatedValue: 123}, []);
 
-        jasmine.Clock.tick(1);
+        jasmine.clock().tick(1);
 
         expect(called1).toBe(cortex.updatedValue.getValue());
         expect(called2).toBe(cortex.updatedValue.getValue());
@@ -147,7 +151,7 @@ describe("Cortex", function() {
 
       cortex.update({}, []);
 
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
 
       expect(called).toBe(true);
     });
@@ -162,7 +166,7 @@ describe("Cortex", function() {
         wrapper.set(wrapper.getValue()*10);
       });
 
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
 
       expect(called).toBe(1);
       expect(cortex.getValue()).toEqual([10, 20, 30, 40, 50]);
@@ -177,7 +181,7 @@ describe("Cortex", function() {
 
       cortex.set({calledFrom: "outside"});
 
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
 
       expect(called).toBe(2);
       expect(cortex.getValue()).toEqual({calledFrom: "callback"});
@@ -238,7 +242,7 @@ describe("Cortex", function() {
                 }));
             cortex.update(newValue, []);
 
-            jasmine.Clock.tick(1);
+            jasmine.clock().tick(1);
 
             expect(called).toBe(true);
 
@@ -258,7 +262,7 @@ describe("Cortex", function() {
               }));
             cortex.update(newValue, []);
 
-            jasmine.Clock.tick(1);
+            jasmine.clock().tick(1);
 
             expect(called).toBe(true);
             expect(cortex[1].b).toBe(undefined);
@@ -280,7 +284,7 @@ describe("Cortex", function() {
 
             cortex.update(newValue, []);
 
-            jasmine.Clock.tick(1);
+            jasmine.clock().tick(1);
 
             expect(called).toBe(true);
             expect(cortex.b.getValue()).toBe(3);
@@ -298,7 +302,7 @@ describe("Cortex", function() {
 
             cortex.update(newValue, []);
 
-            jasmine.Clock.tick(1);
+            jasmine.clock().tick(1);
 
             expect(called).toBe(true);
             expect(cortex.b.getValue()).toEqual([3, 5]);
@@ -318,7 +322,7 @@ describe("Cortex", function() {
                 }));
             cortex.update(value, []);
 
-            jasmine.Clock.tick(1);
+            jasmine.clock().tick(1);
 
             expect(called).toBe(false);
           });
@@ -333,7 +337,7 @@ describe("Cortex", function() {
                 }));
             cortex.update(1, ["a"]);
 
-            jasmine.Clock.tick(1);
+            jasmine.clock().tick(1);
 
             expect(called).toBe(false);
           });
@@ -348,7 +352,7 @@ describe("Cortex", function() {
                 }));
             cortex.update(1, ["a", "b"]);
 
-            jasmine.Clock.tick(1);
+            jasmine.clock().tick(1);
 
             expect(called).toBe(false);
           });
@@ -366,7 +370,7 @@ describe("Cortex", function() {
                   }));
               cortex.update(value.slice(), []);
 
-              jasmine.Clock.tick(1);
+              jasmine.clock().tick(1);
 
               expect(called).toBe(false);
             });
@@ -381,7 +385,7 @@ describe("Cortex", function() {
                   }));
               cortex.update([{a: 1}, {b: 2}], []);
 
-              jasmine.Clock.tick(1);
+              jasmine.clock().tick(1);
 
               expect(called).toBe(false);
             });
@@ -397,7 +401,7 @@ describe("Cortex", function() {
                 }));
             cortex.update([1, 2, 3], ["arr"]);
 
-            jasmine.Clock.tick(1);
+            jasmine.clock().tick(1);
 
             expect(called).toBe(false);
           });
@@ -412,7 +416,7 @@ describe("Cortex", function() {
                 }));
             cortex.update([1, 2, 3], ["a", "b"]);
 
-            jasmine.Clock.tick(1);
+            jasmine.clock().tick(1);
 
             expect(called).toBe(false);
           });
@@ -430,7 +434,7 @@ describe("Cortex", function() {
                   }));
               cortex.update({c: 3, b: 2, a: 1}, []);
 
-              jasmine.Clock.tick(1);
+              jasmine.clock().tick(1);
 
               expect(called).toBe(false);
             });
@@ -446,7 +450,7 @@ describe("Cortex", function() {
 
               cortex.update({a: {aa: 1}, b: { bb: 2 } }, []);
 
-              jasmine.Clock.tick(1);
+              jasmine.clock().tick(1);
 
               expect(called).toBe(false);
             });
@@ -461,7 +465,7 @@ describe("Cortex", function() {
                   }));
               cortex.update({ a: [1, 2], b: [1, 2] }, []);
 
-              jasmine.Clock.tick(1);
+              jasmine.clock().tick(1);
 
               expect(called).toBe(false);
             });
