@@ -9,13 +9,15 @@
     "url": "http://github.com/mquan/cortex.git"
   },
   "devDependencies": {
-    "gulp": "~3.8.6",
-    "gulp-util": "~2.2.20",
-    "gulp-browserify": "~0.2.3",
+    "browserify": "~8.1.1",
+    "gulp": "~3.8.10",
+    "gulp-util": "~3.0.2",
     "gulp-uglify": "~0.3.1",
     "gulp-rename": "~0.2.0",
     "gulp-react": "~0.4.0",
-    "gulp-jasmine": "~0.2.0"
+    "gulp-jasmine": "~2.0.0",
+    "gulp-streamify": "~0.0.4",
+    "vinyl-source-stream": "~1.0.0"
   },
   "main": "./src/cortex",
   "engines": {

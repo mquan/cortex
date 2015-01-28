@@ -1,25 +1,28 @@
 var gulp = require("gulp"),
     gutil = require("gulp-util"),
-    browserify = require("gulp-browserify"),
+    browserify = require("browserify"),
+    source = require('vinyl-source-stream'),
     uglify = require("gulp-uglify"),
+    streamify = require("gulp-streamify"),
     rename = require("gulp-rename"),
     react = require("gulp-react"),
     jasmine = require("gulp-jasmine");
 
 gulp.task("scripts", function() {
-  gulp.src("src/cortex.js")
-      .pipe(browserify())
-      .pipe(gulp.dest("build"));
-
-  gulp.src("build/cortex.js")
-      .pipe(uglify())
-      .pipe(rename({ext: ".min.js"}))
-      .pipe(gulp.dest("build"));
+  browserify("./src/cortex.js")
+    .bundle()
+    .on("error", gutil.log.bind(gutil, 'Browserify Error'))
+    .pipe(source("cortex.js"))
+    .pipe(gulp.dest("./build"))
+    .pipe(streamify(uglify()))
+    .pipe(rename({ext: ".min.js"}))
+    .pipe(gulp.dest("build"));
 });
 
 gulp.task("test", function() {
   var tests = [
     "test/pubsub_test.js",
+    "test/data_wrapper_test.js",
     "test/data_wrapper_test.js",
     "test/wrappers/array_test.js",
     "test/wrappers/hash_test.js",
@@ -27,9 +30,11 @@ gulp.task("test", function() {
   ];
 
   for(var i=0,ii=tests.length;i<ii;i++) {
-    gulp.src([tests[i]])
-        .pipe(browserify())
-        .pipe(jasmine());
+    browserify("./" + tests[i])
+      .bundle()
+      .on("error", gutil.log.bind(gutil, 'Browserify Error'))
+      .pipe(source(tests[i]))
+      .pipe(streamify(jasmine()));
   }
 });
 
@@ -46,10 +51,6 @@ gulp.task("react", ["scripts"], function() {
   }
 });
 
-gulp.task("default", function() {
-  gulp.run("scripts");
-
-  gulp.watch("src/**", function(event) {
-    gulp.run("scripts");
-  });
+gulp.task("default", ["scripts"], function() {
+  gulp.watch("src/**", ["scripts"]);
 });
