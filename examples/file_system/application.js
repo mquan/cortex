@@ -46,7 +46,7 @@ var Node = React.createClass({displayName: "Node",
         React.createElement("input", {className: editClass, 
                value: this.state.editText, 
                onChange: this.handleChange, 
-               onKeyPress: this.update}), 
+               onKeyUp: this.update}), 
         nodes
       )
     );
