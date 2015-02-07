@@ -200,6 +200,12 @@ new Cortex(data, function() {
     `add(key, value)`              | Adds the specified key and value pair
 
 
+# CDN
+
+[cortex.0.6.2.js](https://cdn.rawgit.com/mquan/cortex/master/build/cortex.js)
+[cortex.0.6.2.min.js](https://cdn.rawgit.com/mquan/cortex/master/build/cortex.min.js)
+
+
 # Install via Bower
 ```console
 bower install cortexjs
