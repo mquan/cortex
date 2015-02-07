@@ -1,6 +1,6 @@
 /** @jsx React.DOM */
 
-var Node = React.createClass({displayName: 'Node',
+var Node = React.createClass({displayName: "Node",
   getInitialState: function() {
     return {editing: false, editText: ""};
   },
@@ -31,22 +31,22 @@ var Node = React.createClass({displayName: 'Node',
     if (this.props.node.children) {
       nodeType = "folder";
       nodes = this.props.node.children.map(function(node) {
-        return Node( {node:node} );
+        return React.createElement(Node, {node: node});
       });
     } else {
       nodeType = "file";
     }
 
     return(
-      React.DOM.div( {className:nodeType}, 
-        React.DOM.span( {className:"icon"}),
-        React.DOM.span( {className:nameClass, onDoubleClick:this.edit}, 
+      React.createElement("div", {className: nodeType},
+        React.createElement("span", {className: "icon"}),
+        React.createElement("span", {className: nameClass, onDoubleClick: this.edit},
           this.props.node.name.getValue()
         ),
-        React.DOM.input( {className:editClass,
-               value:this.state.editText,
-               onChange:this.handleChange,
-               onKeyPress:this.update} ),
+        React.createElement("input", {className: editClass,
+               value: this.state.editText,
+               onChange: this.handleChange,
+               onKeyUp: this.update}),
         nodes
       )
     );
@@ -78,10 +78,11 @@ var data = {name: "Desktop", children: [
   {name: "readme.txt"},
 ]};
 
-var cortexData = new Cortex(data, function(updatedCortex) {
+var cortexData = new Cortex(data);
+var fileSystemComponent = React.renderComponent(
+  React.createElement(Node, {node: cortexData}), document.getElementById("filesystem")
+);
+
+cortexData.on("update", function(updatedCortex) {
   fileSystemComponent.setProps({children: updatedCortex});
 });
-
-var fileSystemComponent = React.renderComponent(
-  Node( {node:cortexData} ), document.getElementById("filesystem")
-);
