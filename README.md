@@ -251,21 +251,21 @@ gulp react
 
 # Design & Optimizations
 
-Besides providing the convenience of allowing you to update data from any level Cortex also has several optimizations that help boost performance.
+Besides providing the convenience of allowing you to update data from any level, Cortex also has several optimizations that help boost performance.
 
 ### 1. Deep comparison between old and new values
 
-When you issue a `set(newValue)` call, no data actually change at that point. What happens internally is the wrapper being called publishes a notification to the master cortex wrapper passing along a payload consisting of the path for locating the data and the new value (Yes, there is a pub/sub system within Cortex.) The master wrapper then performs a deep comparison between the old and new data to determine whether it should trigger the update action. If no change was made, the process just exits without touching the data nor invoking the callbacks.
+When you issue a `set(newValue)` call, no data actually changes at that point. What happens internally is the wrapper being called publishes a notification to the master cortex wrapper passing along a payload consisting of the path for locating the data and the new value (Yes, there is a pub/sub system within Cortex.) The master wrapper then performs a deep comparison between the old and new data to determine whether it should trigger the update action. If no change was made, the process just exits without touching the data nor invoking the callbacks.
 
 Deep comparison may sound costly but in practice when you call `set(newValue)` the newValue usually isn't deeply nested (if it is and the actual change is many layers deep then you should consider calling `set(newValue)` on the wrapper at the level that the change actually occurs.) In some situations where you have to pass in arbirarily deeply nested value the comparison work is still worth it because it can potentially save you from unnecessarily rewrapping and triggering React to update.
 
 ### 2. Rewrapping only the affected subtree
 
-After the newValue is determined to be different, besides updating the raw data Cortex will need to rebuild the nested wrapper objects. This process is called rewrapping. Since rewrapping the entire data tree is inefficient and unnecessary, and since cortex already has the path to locate the affected piece of data it simply rewraps the affected subtree.
+After the newValue is determined to be different, besides updating the raw data, Cortex will need to rebuild the nested wrapper objects. This process is called rewrapping. Since rewrapping the entire data tree is inefficient and unnecessary, and since cortex already has the path to locate the affected piece of data it simply rewraps the affected subtree.
 
 ### 3. Invoke callbacks once for multiple updates
 
-When multiple updates occur at the same time, it will result in the same number of callback invocations, which usually involve triggering React to update that same number of times. While React has good diffing algorithm for efficiently redrawing the DOM it would be even more efficient if React doesn't have to perform DOM comparison mutliple times. Cortex avoid triggering React by running callback only once for updates happening at the same time.
+When multiple updates occur at the same time, it will result in the same number of callback invocations, which usually involve triggering React to update that same number of times. While React has good diffing algorithm for efficiently redrawing the DOM it would be even more efficient if React doesn't have to perform DOM comparison mutliple times. Cortex avoids triggering React by running callback only once for updates happening at the same time.
 
 ### 4. Batch rewrapping (not yet implemented)
 
