@@ -8,9 +8,9 @@ Cortex is a Javascript library for centrally managing data with React.
 
 **Demos**
 
-[skyline (4-level nested components)](http://mquan.github.io/cortex/examples/skyline/)
+[skyline (4-level nested components)](https://mquan.github.io/cortex/examples/skyline/)
 
-[file system (arbitrarily deep structure of a single component type)](http://mquan.github.io/cortex/examples/file_system/)
+[file system (arbitrarily deep structure of a single component type)](https://mquan.github.io/cortex/examples/file_system/)
 
 # Quickstart
 Initialize a cortex object
