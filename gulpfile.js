@@ -21,15 +21,15 @@ gulp.task("scripts", function() {
 
 gulp.task("test", function() {
   var tests = [
+    "test/cortex_test.js",
+    "test/data_wrapper_test.js",
     "test/pubsub_test.js",
-    "test/data_wrapper_test.js",
-    "test/data_wrapper_test.js",
     "test/wrappers/array_test.js",
-    "test/wrappers/hash_test.js",
-    "test/cortex_test.js"
+    "test/wrappers/hash_test.js"
   ];
 
   for(var i=0,ii=tests.length;i<ii;i++) {
+    console.log(tests[i]);
     browserify("./" + tests[i])
       .bundle()
       .on("error", gutil.log.bind(gutil, 'Browserify Error'))
