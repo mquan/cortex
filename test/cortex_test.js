@@ -192,6 +192,8 @@ describe("Cortex", function() {
           newValue = { foo: "bar" };
       cortex.update(newValue, []);
 
+      jasmine.clock().tick(1);
+
       expect(cortex.getValue()).toEqual(newValue);
     });
 
@@ -199,6 +201,8 @@ describe("Cortex", function() {
       var cortex = new Cortex(this.value),
           newValue = 100;
       cortex.update(newValue, [cortex.a.getPath()]);
+
+      jasmine.clock().tick(1);
 
       expect(cortex.getValue()["a"]).toEqual(newValue);
     });
@@ -209,6 +213,8 @@ describe("Cortex", function() {
           path = cortex.b.key2.key3.getPath();
       cortex.update(newValue, path);
 
+      jasmine.clock().tick(1);
+
       expect(cortex.getValue()["b"]["key2"]["key3"]).toEqual(newValue);
     });
 
@@ -218,6 +224,8 @@ describe("Cortex", function() {
           path = cortex.c.getPath();
       cortex.update(newValue, path);
 
+      jasmine.clock().tick(1);
+
       expect(cortex.getValue()["c"]).toEqual(newValue);
     });
 
@@ -226,6 +234,7 @@ describe("Cortex", function() {
           newValue = -1,
           path = cortex.c[0].getPath();
       cortex.update(newValue, path);
+      jasmine.clock().tick(1);
 
       expect(cortex.getValue()["c"][0]).toEqual(newValue);
     });
@@ -482,6 +491,7 @@ describe("Cortex", function() {
           newValue = 100;
       //Call set to trigger update event
       cortex.set(newValue);
+      jasmine.clock().tick(1);
 
       expect(update).toHaveBeenCalledWith(newValue, cortex.getPath(), undefined);
     });
@@ -497,6 +507,8 @@ describe("Cortex", function() {
 
           cortex[0].remove();
 
+          jasmine.clock().tick(1);
+
           expect(cortex.count()).toBe(length - 1);
           expect(cortex[0].getValue()).toBe(2);
         });
@@ -509,6 +521,8 @@ describe("Cortex", function() {
 
           cortex.a.remove();
 
+          jasmine.clock().tick(1);
+
           expect(cortex.a).toBe(undefined);
           expect(cortex.hasKey("a")).toBe(false);
         });
@@ -519,6 +533,7 @@ describe("Cortex", function() {
       it("removes itself", function() {
         var cortex = new Cortex(1);
         cortex.remove();
+        jasmine.clock().tick(1);
 
         expect(cortex.getValue()).toBe(undefined);
       });

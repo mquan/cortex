@@ -2,8 +2,13 @@ var Cortex = require("../../src/cortex");
 
 describe("HashWrapper", function() {
   beforeEach(function() {
+    jasmine.clock().install();
     this.value = {a: 1, b: 2, c: 3};
     this.wrapper = new Cortex(this.value);
+  });
+
+  afterEach(function() {
+    jasmine.clock().uninstall();
   });
 
   describe("#keys", function() {
@@ -31,6 +36,9 @@ describe("HashWrapper", function() {
   describe("#destroy", function() {
     it("removes specified key value pair", function() {
       expect(this.wrapper.destroy("a")).toBe(1);
+
+      jasmine.clock().tick(1);
+
       expect(this.wrapper.a).toBe(undefined);
       expect(this.wrapper.b.getValue()).toBe(2);
       expect(this.wrapper.c.getValue()).toBe(3);
@@ -40,6 +48,9 @@ describe("HashWrapper", function() {
   describe("#add", function() {
     it("adds key-value pair", function() {
       expect(this.wrapper.add("d", 4)).toBe(4);
+
+      jasmine.clock().tick(1);
+
       expect(this.wrapper.hasKey("d")).toBe(true);
       expect(this.wrapper.d.getValue()).toBe(4);
     });

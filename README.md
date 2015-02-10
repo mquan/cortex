@@ -259,14 +259,7 @@ When you issue a `set(newValue)` call, no data actually changes at that point. W
 
 Deep comparison may sound costly but in practice when you call `set(newValue)` the newValue usually isn't deeply nested (if it is and the actual change is many layers deep then you should consider calling `set(newValue)` on the wrapper at the level that the change actually occurs.) In some situations where you have to pass in arbirarily deeply nested value the comparison work is still worth it because it can potentially save you from unnecessarily rewrapping and triggering React to update.
 
-### 2. Rewrapping only the affected subtree
 
-After the newValue is determined to be different, besides updating the raw data, Cortex will need to rebuild the nested wrapper objects. This process is called rewrapping. Since rewrapping the entire data tree is inefficient and unnecessary, and since cortex already has the path to locate the affected piece of data it simply rewraps the affected subtree.
+### 2. Batch rewrap and invoke callbacks once for multiple updates
 
-### 3. Invoke callbacks once for multiple updates
-
-When multiple updates occur at the same time, it will result in the same number of callback invocations, which usually involve triggering React to update that same number of times. While React has good diffing algorithm for efficiently redrawing the DOM it would be even more efficient if React doesn't have to perform DOM comparison mutliple times. Cortex avoids triggering React by running callback only once for updates happening at the same time.
-
-### 4. Batch rewrapping (not yet implemented)
-
-If multiple updates happen in the same subtree, then it's possible to deduce the least deep node (the node closest to the root) that contains all the changes and rewrap at that node's subtree. This is especially useful when an array is being updated one element at a time or a deeply nested piece of data change at multiple levels. Under this scheme, we only have to rewrap once at the top node instead individually rewrapping every updated element subtrees.
+When multiple updates occur at the same time, it will result in the same number of data rewrapping and callback invocations, which usually involve triggering React to update that same number of times. While React has good diffing algorithm for efficiently redrawing the DOM it would be even more efficient if React doesn't have to perform DOM comparison mutliple times. Cortex avoids triggering React by running callback only once for updates happening at the same time. This is especially useful when an array is being updated one element at a time or a deeply nested piece of data change at multiple levels.

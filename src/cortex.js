@@ -57,15 +57,12 @@ Cortex = (function(_super, _cortexPubSub) {
 
     this.__setValue(newValue, path);
 
-    // TODO: Batch rewrap into a single call
-    // rewrap starting from highest level subtree(s)
-    this.__rewrap(path);
-
-    // Schedule callbacks run in batch so that multiple updates
-    // in same run loop only result in a single call to runCallbacks.
+    // Schedule wrapping & callbacks run in batch so that multiple updates
+    // in same run loop only result in a single wrap and callbacks run.
     if(!this.__callbacksQueued) {
       this.__callbacksQueued = true;
       setTimeout((function() {
+        this.__wrap();
         this.__runCallbacks();
       }).bind(this), 0);
     }
@@ -110,16 +107,6 @@ Cortex = (function(_super, _cortexPubSub) {
     }
   };
 
-  // Re-wrap starting at the parent of the subtree of target node.
-  Cortex.prototype.__rewrap = function(path) {
-    var subPath = path.slice(0, path.length - 1),
-        subWrapper = this;
-    for(var i=0, ii = subPath.length;i<ii;i++) {
-      subWrapper = subWrapper[subPath[i]];
-    }
-    subWrapper.__wrap();
-  };
-
   Cortex.prototype.__setValue = function(newValue, path) {
     /*
       When saving an object to a variable it's pass by reference, but when doing so for a primitive value
@@ -145,6 +132,7 @@ Cortex = (function(_super, _cortexPubSub) {
   };
 
   // Check whether newValue is different, if not then return false to bypass rewrap and running callback.
+  // Note that we cannot compare stringified values of old and new data because order of keys cannot be guaranteed.
   Cortex.prototype.__shouldUpdate = function(newValue, path) {
     var oldValue = this.__value;
     for(var i=0, ii=path.length;i<ii;i++) {

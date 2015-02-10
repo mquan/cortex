@@ -2,8 +2,14 @@ var Cortex = require("../../src/cortex");
 
 describe("ArrayWrapper", function() {
   beforeEach(function() {
+    jasmine.clock().install();
+
     this.value = [1, 1, 2, 3, 5, 8, 13];
     this.wrapper = new Cortex(this.value);
+  });
+
+  afterEach(function() {
+    jasmine.clock().uninstall();
   });
 
   describe("#count", function() {
@@ -88,6 +94,8 @@ describe("ArrayWrapper", function() {
           value = this.value[this.value.length - 1] + this.value[this.value.length - 2],
           newLength = this.wrapper.push(value);
 
+      jasmine.clock().tick(1);
+
       expect(newLength).toBe(length + 1);
       expect(this.wrapper.count()).toBe(length + 1);
       expect(this.wrapper[length].getValue()).toBe(value);
@@ -99,6 +107,8 @@ describe("ArrayWrapper", function() {
       var currentLength = this.value.length,
           value = this.value[currentLength - 1],
           removed = this.wrapper.pop();
+
+      jasmine.clock().tick(1);
 
       expect(removed).toBe(value);
       expect(this.wrapper.count()).toBe(currentLength - 1);
@@ -112,6 +122,8 @@ describe("ArrayWrapper", function() {
           value = reversed[0] + reversed[1],
           newLength = this.wrapper.unshift(value);
 
+      jasmine.clock().tick(1);
+
       expect(newLength).toBe(length + 1);
       expect(this.wrapper.count()).toBe(length + 1);
       expect(this.wrapper[0].getValue()).toBe(value);
@@ -123,6 +135,8 @@ describe("ArrayWrapper", function() {
       var currentLength = this.value.length,
           value = this.value[0],
           removed = this.wrapper.shift();
+
+      jasmine.clock().tick(1);
 
       expect(removed).toBe(value);
       expect(this.wrapper.count()).toBe(currentLength - 1);
@@ -137,6 +151,8 @@ describe("ArrayWrapper", function() {
             index = Math.floor(currentLength / 2);
         this.wrapper.insertAt(index, insertValue);
 
+        jasmine.clock().tick(1);
+
         expect(this.wrapper.count()).toBe(currentLength + 1);
         expect(this.wrapper[index].getValue()).toBe(insertValue);
       });
@@ -150,6 +166,8 @@ describe("ArrayWrapper", function() {
             newArray = this.value.slice(0);
         Array.prototype.splice.apply(newArray, [index, 0].concat(insertArray));
         this.wrapper.insertAt(index, insertArray);
+
+        jasmine.clock().tick(1);
 
         expect(this.wrapper.count()).toBe(currentLength + insertArray.length);
         this.wrapper.forEach(function(wrapperElement, i) {
@@ -167,6 +185,8 @@ describe("ArrayWrapper", function() {
           newArray = this.value.slice(0),
           expectedRemoved = newArray.splice(index, howMany),
           removed = this.wrapper.removeAt(index, howMany);
+
+      jasmine.clock().tick(1);
 
       expect(removed).toEqual(expectedRemoved);
       expect(this.wrapper.count()).toBe(currentLength - howMany);
