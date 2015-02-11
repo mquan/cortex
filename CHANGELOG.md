@@ -1,3 +1,6 @@
+# 0.6.3 (February 9, 2014)
+- Batch rewrap
+
 # 0.6.2 (August 13, 2014)
 - Fix batch callback bug
 
