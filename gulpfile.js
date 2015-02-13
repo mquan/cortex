@@ -6,10 +6,12 @@ var gulp = require("gulp"),
     streamify = require("gulp-streamify"),
     rename = require("gulp-rename"),
     react = require("gulp-react"),
+    to5ify = require('6to5ify'),
     jasmine = require("gulp-jasmine");
 
 gulp.task("scripts", function() {
   browserify("./src/cortex.js")
+    .transform(to5ify)
     .bundle()
     .on("error", gutil.log.bind(gutil, 'Browserify Error'))
     .pipe(source("cortex.js"))
