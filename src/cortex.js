@@ -21,8 +21,9 @@ Cortex = (function(_super, _cortexPubSub) {
   function Cortex(value, callback) {
     this.__value = value;
     this.__path = [];
+    this.__updates = [];
     this.__callbacks = callback ? [callback] : [];
-    this.__callbacksQueued = false;
+    this.__loopProcessing = false;
     this.__subscribe();
     this.__wrap();
   }
@@ -55,24 +56,37 @@ Cortex = (function(_super, _cortexPubSub) {
       return false;
     }
 
-    this.__setValue(newValue, path);
+    this.__updates.push({newValue: newValue, path: path});
 
-    // Schedule wrapping & callbacks run in batch so that multiple updates
-    // in same run loop only result in a single wrap and callbacks run.
-    if(!this.__callbacksQueued) {
-      this.__callbacksQueued = true;
-      setTimeout((function() {
-        this.__wrap();
-        this.__runCallbacks();
-      }).bind(this), 0);
+    // Schedule value setting, rewrapping, and running callbacks in batch so that multiple updates
+    // in same event loop only result in a single rewrap and callbacks run.
+    if(!this.__loopProcessing) {
+      this.__loopProcessing = true;
+      setTimeout((this.__batchAll).bind(this), 0);
     }
 
     return true;
   };
 
-  Cortex.prototype.__runCallbacks = function() {
-    this.__callbacksQueued = false;
+  Cortex.prototype.__batchAll = function() {
+    this.__batchSetValue();
+    this.__wrap();
 
+    // Set processing to false so that update from inside a cortex callback
+    // takes place in the next event loop.
+    this.__loopProcessing = false;
+    this.__runCallbacks();
+  };
+
+  Cortex.prototype.__batchSetValue = function() {
+    for(var i = 0, ii = this.__updates.length; i < ii; i++) {
+      var currentUpdate = this.__updates[i];
+      this.__setValue(currentUpdate.newValue, currentUpdate.path);
+    }
+    this.__updates = [];
+  };
+
+  Cortex.prototype.__runCallbacks = function() {
     for(var i=0, ii=this.__callbacks.length;i < ii;i++) {
       if(this.__callbacks[i]) {
         this.__callbacks[i](this);
