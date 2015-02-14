@@ -3,8 +3,9 @@ Cortex is a Javascript library for centrally managing data with React.
 **Key features:**
 - supports deeply nested data with a simple API
 - performs old and new data comparison out of the box so you don't have to implement shouldComponentUpdate
-- performs batch updates and efficiently rewraps only the affected subtree.
+- performs efficient batch updates and rewrapping
 - has built-in methods for working with arrays and hashes
+- written in ES6
 
 **Demos**
 

@@ -1,356 +1,463 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
-var cortexPubSub = require("./pubsub"),
-    ArrayWrapper = require("./wrappers/array"),
-    HashWrapper = require("./wrappers/hash"),
-    DataWrapper = require("./data_wrapper")([ArrayWrapper, HashWrapper], cortexPubSub),
-    __hasProp = ({}).hasOwnProperty,
-    __extends = function (child, parent) {
-  for (var key in parent) {
-    if (__hasProp.call(parent, key)) child[key] = parent[key];
-  }
-  function ctor() {
-    this.constructor = child;
-  }
-  ctor.prototype = parent.prototype;
-  child.prototype = new ctor();
-  child.__super__ = parent.prototype;
-  return child;
-},
-    Cortex = (function (_super, _cortexPubSub) {
-  function Cortex(value, callback) {
-    this.__value = value;
-    this.__path = [];
-    this.__updates = [];
-    this.__callbacks = callback ? [callback] : [];
-    this.__loopProcessing = false;
-    this.__subscribe();
-    this.__wrap();
-  }
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
 
-  __extends(Cortex, _super);
+var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
-  Cortex.prototype.on = function (eventName, callback) {
-    if (eventName === "update") {
-      this.__callbacks.push(callback);
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+module.exports = (function () {
+  var _cortexPubSub = require("./pubsub"),
+      DataWrapper = require("./data_wrapper")(_cortexPubSub);
+
+  var Cortex = (function (DataWrapper) {
+    function Cortex(value, callback) {
+      _classCallCheck(this, Cortex);
+
+      this.__value = value;
+      this.__path = [];
+      this.__updates = [];
+      this.__callbacks = callback ? [callback] : [];
+      this.__loopProcessing = false;
+      this.__subscribe();
+      this.__wrap();
     }
-  };
 
-  Cortex.prototype.off = function (eventName, callback) {
-    if (eventName === "update") {
-      if (callback) {
-        for (var i = 0, ii = this.__callbacks.length; i < ii; i++) {
-          if (callback === this.__callbacks[i]) {
-            this.__callbacks.splice(i, 1);
-            break;
+    _inherits(Cortex, DataWrapper);
+
+    _prototypeProperties(Cortex, null, {
+      on: {
+        value: function on(eventName, callback) {
+          if (eventName === "update") {
+            this.__callbacks.push(callback);
           }
-        }
-      } else {
-        this.__callbacks = [];
-      }
-    }
-  };
+        },
+        writable: true,
+        configurable: true
+      },
+      off: {
+        value: function off(eventName, callback) {
+          if (eventName === "update") {
+            if (callback) {
+              for (var i = 0, ii = this.__callbacks.length; i < ii; i++) {
+                if (callback === this.__callbacks[i]) {
+                  this.__callbacks.splice(i, 1);
+                  break;
+                }
+              }
+            } else {
+              this.__callbacks = [];
+            }
+          }
+        },
+        writable: true,
+        configurable: true
+      },
+      update: {
+        value: function update(newValue, path, forceUpdate) {
+          if (!forceUpdate && !this.__shouldUpdate(newValue, path)) {
+            return false;
+          }
 
-  Cortex.prototype.update = function (newValue, path, forceUpdate) {
-    if (!forceUpdate && !this.__shouldUpdate(newValue, path)) {
-      return false;
-    }
+          this.__updates.push({ newValue: newValue, path: path });
 
-    this.__updates.push({ newValue: newValue, path: path });
+          // Schedule value setting, rewrapping, and running callbacks in batch so that multiple updates
+          // in same event loop only result in a single rewrap and callbacks run.
+          if (!this.__loopProcessing) {
+            this.__loopProcessing = true;
+            setTimeout(this.__batchAll.bind(this), 0);
+          }
 
-    // Schedule value setting, rewrapping, and running callbacks in batch so that multiple updates
-    // in same event loop only result in a single rewrap and callbacks run.
-    if (!this.__loopProcessing) {
-      this.__loopProcessing = true;
-      setTimeout(this.__batchAll.bind(this), 0);
-    }
-
-    return true;
-  };
-
-  Cortex.prototype.__batchAll = function () {
-    this.__batchSetValue();
-    this.__wrap();
-
-    // Set processing to false so that update from inside a cortex callback
-    // takes place in the next event loop.
-    this.__loopProcessing = false;
-    this.__runCallbacks();
-  };
-
-  Cortex.prototype.__batchSetValue = function () {
-    for (var i = 0, ii = this.__updates.length; i < ii; i++) {
-      var currentUpdate = this.__updates[i];
-      this.__setValue(currentUpdate.newValue, currentUpdate.path);
-    }
-    this.__updates = [];
-  };
-
-  Cortex.prototype.__runCallbacks = function () {
-    for (var i = 0, ii = this.__callbacks.length; i < ii; i++) {
-      if (this.__callbacks[i]) {
-        this.__callbacks[i](this);
-      }
-    }
-  };
-
-  Cortex.prototype.__subscribe = function () {
-    this.__eventId = _cortexPubSub.subscribeToCortex((function (topic, data) {
-      this.update(data.value, data.path, data.forceUpdate);
-    }).bind(this), (function (topic, data) {
-      this.__remove(data.path);
-    }).bind(this));
-  };
-
-  Cortex.prototype.__remove = function (path) {
-    if (path.length) {
-      var subPath = path.slice(0, path.length - 1),
-          subValue = this.__subValue(subPath),
-          key = path[path.length - 1],
-          removed = subValue[key];
-      if (subValue.constructor === Object) {
-        delete subValue[key];
-      } else if (subValue.constructor === Array) {
-        subValue.splice(key, 1);
-      }
-      this.update(subValue, subPath, true);
-      return removed;
-    } else {
-      delete this.__wrappers;
-      delete this.__value;
-    }
-  };
-
-  Cortex.prototype.__setValue = function (newValue, path) {
-    /*
-      When saving an object to a variable it's pass by reference, but when doing so for a primitive value
-      it's pass by value. We avoid this pass by value problem by only setting subValue when path length is greater
-      than 2 (meaning it can't never be a primitive). When path length is 0 or 1 we set the value directly.
-    */
-    if (path.length > 1) {
-      var subValue = this.__subValue(path.slice(0, path.length - 1));
-      subValue[path[path.length - 1]] = newValue;
-    } else if (path.length === 1) {
-      this.__value[path[0]] = newValue;
-    } else {
-      this.__value = newValue;
-    }
-  };
-
-  Cortex.prototype.__subValue = function (path) {
-    var subValue = this.__value;
-    for (var i = 0, ii = path.length; i < ii; i++) {
-      subValue = subValue[path[i]];
-    }
-    return subValue;
-  };
-
-  // Check whether newValue is different, if not then return false to bypass rewrap and running callback.
-  // Note that we cannot compare stringified values of old and new data because order of keys cannot be guaranteed.
-  Cortex.prototype.__shouldUpdate = function (newValue, path) {
-    var oldValue = this.__value;
-    for (var i = 0, ii = path.length; i < ii; i++) {
-      oldValue = oldValue[path[i]];
-    }
-    return this.__isDifferent(oldValue, newValue);
-  };
-
-  // Recursively performs comparison b/w old and new data
-  Cortex.prototype.__isDifferent = function (oldValue, newValue) {
-    if (oldValue && oldValue.constructor === Object) {
-      if (!newValue || newValue.constructor !== Object || this.__isDifferent(Object.keys(oldValue).sort(), Object.keys(newValue).sort())) {
-        return true;
-      }
-      for (var key in oldValue) {
-        if (this.__isDifferent(oldValue[key], newValue[key])) {
           return true;
-        }
+        },
+        writable: true,
+        configurable: true
+      },
+      __batchAll: {
+        value: function __batchAll() {
+          this.__batchSetValue();
+          this.__wrap();
+
+          // Set processing to false so that update from inside a cortex callback
+          // takes place in the next event loop.
+          this.__loopProcessing = false;
+          this.__runCallbacks();
+        },
+        writable: true,
+        configurable: true
+      },
+      __batchSetValue: {
+        value: function __batchSetValue() {
+          for (var _iterator = this.__updates[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
+            var currentUpdate = _step.value;
+            this.__setValue(currentUpdate.newValue, currentUpdate.path);
+          }
+
+          this.__updates = [];
+        },
+        writable: true,
+        configurable: true
+      },
+      __runCallbacks: {
+        value: function __runCallbacks() {
+          for (var _iterator = this.__callbacks[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
+            var callback = _step.value;
+            if (callback) callback(this);
+          }
+        },
+        writable: true,
+        configurable: true
+      },
+      __subscribe: {
+        value: function __subscribe() {
+          this.__eventId = _cortexPubSub.subscribeToCortex((function (topic, data) {
+            this.update(data.value, data.path, data.forceUpdate);
+          }).bind(this), (function (topic, data) {
+            this.__remove(data.path);
+          }).bind(this));
+        },
+        writable: true,
+        configurable: true
+      },
+      __remove: {
+        value: function __remove(path) {
+          if (path.length) {
+            var subPath = path.slice(0, path.length - 1),
+                subValue = this.__subValue(subPath),
+                key = path[path.length - 1],
+                removed = subValue[key];
+            if (subValue.constructor === Object) {
+              delete subValue[key];
+            } else if (subValue.constructor === Array) {
+              subValue.splice(key, 1);
+            }
+            this.update(subValue, subPath, true);
+            return removed;
+          } else {
+            delete this.__wrappers;
+            delete this.__value;
+          }
+        },
+        writable: true,
+        configurable: true
+      },
+      __setValue: {
+        value: function __setValue(newValue, path) {
+          /*
+            When saving an object to a variable it's pass by reference, but when doing so for a primitive value
+            it's pass by value. We avoid this pass by value problem by only setting subValue when path length is greater
+            than 2 (meaning it can't never be a primitive). When path length is 0 or 1 we set the value directly.
+          */
+          if (path.length > 1) {
+            var subValue = this.__subValue(path.slice(0, path.length - 1));
+            subValue[path[path.length - 1]] = newValue;
+          } else if (path.length === 1) {
+            this.__value[path[0]] = newValue;
+          } else {
+            this.__value = newValue;
+          }
+        },
+        writable: true,
+        configurable: true
+      },
+      __subValue: {
+        value: function __subValue(path) {
+          var subValue = this.__value;
+          for (var i = 0, ii = path.length; i < ii; i++) {
+            subValue = subValue[path[i]];
+          }
+          return subValue;
+        },
+        writable: true,
+        configurable: true
+      },
+      __shouldUpdate: {
+
+        // Check whether newValue is different, if not then return false to bypass rewrap and running callback.
+        // Note that we cannot compare stringified values of old and new data because order of keys cannot be guaranteed.
+        value: function __shouldUpdate(newValue, path) {
+          var oldValue = this.__value;
+          for (var i = 0, ii = path.length; i < ii; i++) {
+            oldValue = oldValue[path[i]];
+          }
+          return this.__isDifferent(oldValue, newValue);
+        },
+        writable: true,
+        configurable: true
+      },
+      __isDifferent: {
+
+        // Recursively performs comparison b/w old and new data
+        value: function __isDifferent(oldValue, newValue) {
+          if (oldValue && oldValue.constructor === Object) {
+            if (!newValue || newValue.constructor !== Object || this.__isDifferent(Object.keys(oldValue).sort(), Object.keys(newValue).sort())) {
+              return true;
+            }
+            for (var key in oldValue) {
+              if (this.__isDifferent(oldValue[key], newValue[key])) {
+                return true;
+              }
+            }
+          } else if (oldValue && oldValue.constructor === Array) {
+            if (!newValue || newValue.constructor !== Array || oldValue.length !== newValue.length) {
+              return true;
+            }
+            for (var i = 0, ii = oldValue.length; i < ii; i++) {
+              if (this.__isDifferent(oldValue[i], newValue[i])) {
+                return true;
+              }
+            }
+          } else {
+            return oldValue !== newValue;
+          }
+        },
+        writable: true,
+        configurable: true
       }
-    } else if (oldValue && oldValue.constructor === Array) {
-      if (!newValue || newValue.constructor !== Array || oldValue.length !== newValue.length) {
-        return true;
-      }
-      for (var i = 0, ii = oldValue.length; i < ii; i++) {
-        if (this.__isDifferent(oldValue[i], newValue[i])) {
-          return true;
-        }
-      }
-    } else {
-      return oldValue !== newValue;
-    }
-  };
+    });
+
+    return Cortex;
+  })(DataWrapper);
+
+  if (typeof window !== "undefined" && window !== null) {
+    window.Cortex = Cortex;
+  }
 
   return Cortex;
-})(DataWrapper, cortexPubSub);
+})();
 
-if (typeof window !== "undefined" && window !== null) {
-  window.Cortex = Cortex;
-}
-
-module.exports = Cortex;
-
-},{"./data_wrapper":2,"./pubsub":3,"./wrappers/array":4,"./wrappers/hash":5}],2:[function(require,module,exports){
+},{"./data_wrapper":2,"./pubsub":3}],2:[function(require,module,exports){
 "use strict";
 
-var __include = function (klass, mixins) {
-  for (var i = 0, ii = mixins.length; i < ii; i++) {
-    for (var methodName in mixins[i]) {
-      klass.prototype[methodName] = mixins[i][methodName];
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+module.exports = function (_cortexPubSub) {
+  var DataWrapper = (function () {
+    function DataWrapper(value, path, eventId) {
+      _classCallCheck(this, DataWrapper);
+
+      this.__eventId = eventId;
+      this.__value = value;
+      this.__path = path || [];
+      this.__wrap();
+
+      this.val = this.getValue;
     }
-  }
-};
 
-module.exports = function (_mixins, _cortexPubSub) {
-  function DataWrapper(value, path, eventId) {
-    this.__eventId = eventId;
-    this.__value = value;
-    this.__path = path || [];
-    this.__wrap();
-  }
+    _prototypeProperties(DataWrapper, null, {
+      set: {
+        value: function set(value, forceUpdate) {
+          _cortexPubSub.publish("update" + this.__eventId, { value: value, path: this.__path, forceUpdate: forceUpdate });
+        },
+        writable: true,
+        configurable: true
+      },
+      getValue: {
+        value: function getValue() {
+          return this.__value;
+        },
+        writable: true,
+        configurable: true
+      },
+      getPath: {
+        value: function getPath() {
+          return this.__path;
+        },
+        writable: true,
+        configurable: true
+      },
+      getKey: {
+        value: function getKey() {
+          return this.__path[this.__path.length - 1];
+        },
+        writable: true,
+        configurable: true
+      },
+      forEach: {
+        value: function forEach(callback) {
+          if (this.__isObject()) {
+            for (var key in this.__wrappers) {
+              callback(key, this.__wrappers[key], this.__wrappers);
+            }
+          } else if (this.__isArray()) {
+            this.__wrappers.forEach(callback);
+          }
+        },
+        writable: true,
+        configurable: true
+      },
+      remove: {
+        value: function remove() {
+          _cortexPubSub.publish("remove" + this.__eventId, { path: this.__path });
+        },
+        writable: true,
+        configurable: true
+      },
+      __wrap: {
 
-  DataWrapper.prototype.set = function (value, forceUpdate) {
-    _cortexPubSub.publish("update" + this.__eventId, { value: value, path: this.__path, forceUpdate: forceUpdate });
-  };
+        // Recursively wrap data if @value is a hash or an array.
+        // Otherwise there's no need to further wrap primitive or other class instances
+        value: function __wrap() {
+          var path;
+          this.__cleanup();
 
-  DataWrapper.prototype.getValue = function () {
-    return this.__value;
-  };
-
-  // Short alias for getValue
-  DataWrapper.prototype.val = DataWrapper.prototype.getValue;
-
-  DataWrapper.prototype.getPath = function () {
-    return this.__path;
-  };
-
-  DataWrapper.prototype.getKey = function () {
-    return this.__path[this.__path.length - 1];
-  };
-
-  DataWrapper.prototype.forEach = function (callback) {
-    if (this.__isObject()) {
-      for (var key in this.__wrappers) {
-        callback(key, this.__wrappers[key], this.__wrappers);
+          if (this.__isObject()) {
+            this.__wrappers = {};
+            for (var key in this.__value) {
+              path = this.__path.slice();
+              path.push(key);
+              this.__wrappers[key] = new DataWrapper(this.__value[key], path, this.__eventId);
+              this[key] = this.__wrappers[key];
+            }
+          } else if (this.__isArray()) {
+            this.__wrappers = [];
+            for (var index = 0, ii = this.__value.length; index < ii; index++) {
+              path = this.__path.slice();
+              path.push(index);
+              this.__wrappers[index] = new DataWrapper(this.__value[index], path, this.__eventId);
+              this[index] = this.__wrappers[index];
+            }
+          }
+        },
+        writable: true,
+        configurable: true
+      },
+      __cleanup: {
+        value: function __cleanup() {
+          if (this.__wrappers) {
+            if (this.__isObject()) {
+              for (var key in this.__wrappers) {
+                delete this[key];
+              }
+            } else if (this.__isArray()) {
+              for (var i = 0, ii = this.__wrappers.length; i < ii; i++) {
+                delete this[i];
+              }
+            }
+            delete this.__wrappers;
+          }
+        },
+        writable: true,
+        configurable: true
+      },
+      __forceUpdate: {
+        value: function __forceUpdate() {
+          this.set(this.__value, true);
+        },
+        writable: true,
+        configurable: true
+      },
+      __isObject: {
+        value: function __isObject() {
+          return this.__value && this.__value.constructor === Object;
+        },
+        writable: true,
+        configurable: true
+      },
+      __isArray: {
+        value: function __isArray() {
+          return this.__value && this.__value.constructor === Array;
+        },
+        writable: true,
+        configurable: true
       }
-    } else if (this.__isArray()) {
-      this.__wrappers.forEach(callback);
+    });
+
+    return DataWrapper;
+  })();
+
+  // Mixin Array and Hash behaviors
+  var ArrayWrapper = require("./wrappers/array"),
+      HashWrapper = require("./wrappers/hash");
+  var __include = function (klass, mixins) {
+    for (var _iterator = mixins[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
+      var mixin = _step.value;
+      for (var methodName in mixin) {
+        klass.prototype[methodName] = mixin[methodName];
+      }
     }
   };
 
-  DataWrapper.prototype.remove = function () {
-    _cortexPubSub.publish("remove" + this.__eventId, { path: this.__path });
-  };
-
-  // Recursively wrap data if @value is a hash or an array.
-  // Otherwise there's no need to further wrap primitive or other class instances
-  DataWrapper.prototype.__wrap = function () {
-    var path;
-    this.__cleanup();
-
-    if (this.__isObject()) {
-      this.__wrappers = {};
-      for (var key in this.__value) {
-        path = this.__path.slice();
-        path.push(key);
-        this.__wrappers[key] = new DataWrapper(this.__value[key], path, this.__eventId);
-        this[key] = this.__wrappers[key];
-      }
-    } else if (this.__isArray()) {
-      this.__wrappers = [];
-      for (var index = 0, ii = this.__value.length; index < ii; index++) {
-        path = this.__path.slice();
-        path.push(index);
-        this.__wrappers[index] = new DataWrapper(this.__value[index], path, this.__eventId);
-        this[index] = this.__wrappers[index];
-      }
-    }
-  };
-
-  DataWrapper.prototype.__cleanup = function () {
-    if (this.__wrappers) {
-      if (this.__isObject()) {
-        for (var key in this.__wrappers) {
-          delete this[key];
-        }
-      } else if (this.__isArray()) {
-        for (var i = 0, ii = this.__wrappers.length; i < ii; i++) {
-          delete this[i];
-        }
-      }
-      delete this.__wrappers;
-    }
-  };
-
-  DataWrapper.prototype.__forceUpdate = function () {
-    this.set(this.__value, true);
-  };
-
-  DataWrapper.prototype.__isObject = function () {
-    return this.__value && this.__value.constructor === Object;
-  };
-
-  DataWrapper.prototype.__isArray = function () {
-    return this.__value && this.__value.constructor === Array;
-  };
-
-  __include(DataWrapper, _mixins);
+  __include(DataWrapper, [ArrayWrapper, HashWrapper]);
 
   return DataWrapper;
 };
 
-},{}],3:[function(require,module,exports){
+},{"./wrappers/array":4,"./wrappers/hash":5}],3:[function(require,module,exports){
 "use strict";
 
-var PubSub = (function () {
-  function PubSub() {
-    this.uid = -1;
-    this.topics = {};
-  }
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
 
-  PubSub.prototype.subscribe = function (topic, callback) {
-    if (!this.topics.hasOwnProperty(topic)) {
-      this.topics[topic] = [];
-    }
-    this.topics[topic].push({ callback: callback });
-  };
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
+module.exports = (function () {
+  var PubSub = (function () {
+    function PubSub() {
+      _classCallCheck(this, PubSub);
 
-  PubSub.prototype.publish = function (topic, data) {
-    if (!this.topics.hasOwnProperty(topic)) {
-      return false;
+      this.uid = -1;
+      this.topics = {};
     }
 
-    var subscribers = this.topics[topic];
-    var notify = function () {
-      for (var i = 0, ii = subscribers.length; i < ii; i++) {
-        subscribers[i].callback(topic, data);
+    _prototypeProperties(PubSub, null, {
+      subscribe: {
+        value: function subscribe(topic, callback) {
+          if (!this.topics.hasOwnProperty(topic)) {
+            this.topics[topic] = [];
+          }
+          this.topics[topic].push({ callback: callback });
+        },
+        writable: true,
+        configurable: true
+      },
+      publish: {
+        value: function publish(topic, data) {
+          if (!this.topics.hasOwnProperty(topic)) {
+            return false;
+          }
+
+          var subscribers = this.topics[topic];
+          var notify = function () {
+            for (var i = 0, ii = subscribers.length; i < ii; i++) {
+              subscribers[i].callback(topic, data);
+            }
+          };
+
+          notify();
+
+          return true;
+        },
+        writable: true,
+        configurable: true
+      },
+      subscribeToCortex: {
+        value: function subscribeToCortex(updateCallback, removeCallback) {
+          this.uid += 1;
+          this.subscribe("update" + this.uid, updateCallback);
+          this.subscribe("remove" + this.uid, removeCallback);
+          return this.uid;
+        },
+        writable: true,
+        configurable: true
+      },
+      unsubscribeFromCortex: {
+        value: function unsubscribeFromCortex(topicId) {
+          delete this.topics["update" + topicId];
+          delete this.topics["remove" + topicId];
+        },
+        writable: true,
+        configurable: true
       }
-    };
+    });
 
-    notify();
+    return PubSub;
+  })();
 
-    return true;
-  };
-
-  // Add both update and remove subscriptions with 1 call.
-  // Return the unique id so each cortex can handle its own event id.
-  PubSub.prototype.subscribeToCortex = function (updateCallback, removeCallback) {
-    this.uid += 1;
-    this.subscribe("update" + this.uid, updateCallback);
-    this.subscribe("remove" + this.uid, removeCallback);
-    return this.uid;
-  };
-
-  PubSub.prototype.unsubscribeFromCortex = function (topicId) {
-    delete this.topics["update" + topicId];
-    delete this.topics["remove" + topicId];
-  };
-
-  return PubSub;
+  return new PubSub();
 })();
-
-module.exports = new PubSub();
 
 },{}],4:[function(require,module,exports){
 "use strict";

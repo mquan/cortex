@@ -31,11 +31,12 @@ gulp.task("test", function() {
   ];
 
   for(var i=0,ii=tests.length;i<ii;i++) {
-    console.log(tests[i]);
     browserify("./" + tests[i])
+      .transform(to5ify)
       .bundle()
       .on("error", gutil.log.bind(gutil, 'Browserify Error'))
       .pipe(source(tests[i]))
+      .pipe(gulp.dest("temp")) // output to temp b/c node does not recognize es6 feature,
       .pipe(streamify(jasmine()));
   }
 });

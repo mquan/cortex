@@ -1,4 +1,7 @@
-# 0.6.3 (February 9, 2014)
+# 0.7.0 (February 14, 2015)
+- ES6 rewrite
+
+# 0.6.3 (February 9, 2015)
 - Batch rewrap
 
 # 0.6.2 (August 13, 2014)

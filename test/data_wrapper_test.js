@@ -1,7 +1,5 @@
 var cortexPubSub = require("../src/pubsub"),
-ArrayWrapper = require("../src/wrappers/array"),
-HashWrapper = require("../src/wrappers/hash"),
-DataWrapper = require("../src/data_wrapper")([ArrayWrapper, HashWrapper], cortexPubSub);
+    DataWrapper = require("../src/data_wrapper")(cortexPubSub);
 
 describe("DataWrapper", function() {
   describe("accessing nested wrapper", function() {
@@ -56,7 +54,7 @@ describe("DataWrapper", function() {
           wrapper = new DataWrapper(value, [], topicId),
           newValue = [100];
 
-      publish = spyOn(cortexPubSub, "publish");
+      var publish = spyOn(cortexPubSub, "publish");
       wrapper.a.b.set(newValue, false);
 
       expect(publish).toHaveBeenCalledWith("update" + topicId, {
