@@ -17,20 +17,17 @@ var HashWrapper = {
   },
 
   destroy: function(key) {
-    var removed = this.__value[key];
+    var oldValue = this.__clone(this.__value),
+        removed = this.__value[key];
     delete this.__value[key];
-    this.__forceUpdate();
+    this.set(this.__value, {oldValue: oldValue});
     return removed;
   },
 
-  'delete': function(key) {
-    console.warn("Method deprecated! Please use .destroy(key) method");
-    return this.remove(key);
-  },
-
   add: function(key, value) {
+    var oldValue = this.__clone(this.__value);
     this.__value[key] = value;
-    this.__forceUpdate();
+    this.set(this.__value, {oldValue: oldValue});
     return value;
   }
 };

@@ -79,7 +79,7 @@ var data = {name: "Desktop", children: [
 ]};
 
 var cortexData = new Cortex(data);
-var fileSystemComponent = React.renderComponent(
+var fileSystemComponent = React.render(
   <Node node={cortexData} />, document.getElementById("filesystem")
 );
 

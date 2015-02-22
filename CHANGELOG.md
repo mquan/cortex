@@ -1,3 +1,7 @@
+# 0.8.0
+- expose changes
+- `getChagnes` and `didChange` methods
+
 # 0.7.0 (February 14, 2015)
 - ES6 rewrite
 

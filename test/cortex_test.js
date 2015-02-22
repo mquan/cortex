@@ -35,7 +35,7 @@ describe("Cortex", function() {
           called2 = updatedCortex.updatedValue.getValue();
         });
 
-        cortex.update({updatedValue: 123}, []);
+        cortex.update({value: {updatedValue: 123}, path: []});
 
         jasmine.clock().tick(1);
 
@@ -56,7 +56,7 @@ describe("Cortex", function() {
           called2 = updatedCortex.updatedValue.getValue();
         });
 
-        cortex.update({updatedValue: 123}, []);
+        cortex.update({value: {updatedValue: 123}, path: []});
 
         jasmine.clock().tick(1);
 
@@ -83,7 +83,7 @@ describe("Cortex", function() {
           cortex.on("update", callback2);
           cortex.off("update");
 
-          cortex.update({updatedValue: 123}, []);
+          cortex.update({value: {updatedValue: 123}, path: []});
 
           jasmine.clock().tick(1);
 
@@ -107,7 +107,7 @@ describe("Cortex", function() {
           cortex.on("update", callback2);
           cortex.off("update", callback1);
 
-          cortex.update({updatedValue: 123}, []);
+          cortex.update({value: {updatedValue: 123}, path: []});
 
           jasmine.clock().tick(1);
 
@@ -132,7 +132,7 @@ describe("Cortex", function() {
         cortex.on("update", callback2);
         cortex.off("notupdate");
 
-        cortex.update({updatedValue: 123}, []);
+        cortex.update({value: {updatedValue: 123}, path: []});
 
         jasmine.clock().tick(1);
 
@@ -145,11 +145,12 @@ describe("Cortex", function() {
   describe("#update", function() {
     it("runs callback", function() {
       var called = false,
+          data = { value: {}, path: []},
           cortex = new Cortex(this.value, function() {
             called = true;
           });
 
-      cortex.update({}, []);
+      cortex.update({value: {}, path: []});
 
       jasmine.clock().tick(1);
 
@@ -190,7 +191,7 @@ describe("Cortex", function() {
     it("sets value to new data", function() {
       var cortex = new Cortex(this.value),
           newValue = { foo: "bar" };
-      cortex.update(newValue, []);
+      cortex.update({ value: newValue, path: []});
 
       jasmine.clock().tick(1);
 
@@ -200,7 +201,7 @@ describe("Cortex", function() {
     it("sets value of a key", function() {
       var cortex = new Cortex(this.value),
           newValue = 100;
-      cortex.update(newValue, [cortex.a.getPath()]);
+      cortex.update({value: newValue, path: [cortex.a.getPath()]});
 
       jasmine.clock().tick(1);
 
@@ -211,7 +212,7 @@ describe("Cortex", function() {
       var cortex = new Cortex(this.value),
           newValue = { nested: [100, 200, 300]},
           path = cortex.b.key2.key3.getPath();
-      cortex.update(newValue, path);
+      cortex.update({value: newValue, path: path});
 
       jasmine.clock().tick(1);
 
@@ -222,7 +223,7 @@ describe("Cortex", function() {
       var cortex = new Cortex(this.value),
           newValue = [0, 11, 22],
           path = cortex.c.getPath();
-      cortex.update(newValue, path);
+      cortex.update({value: newValue, path: path});
 
       jasmine.clock().tick(1);
 
@@ -233,7 +234,7 @@ describe("Cortex", function() {
       var cortex = new Cortex(this.value),
           newValue = -1,
           path = cortex.c[0].getPath();
-      cortex.update(newValue, path);
+      cortex.update({value: newValue, path: path});
       jasmine.clock().tick(1);
 
       expect(cortex.getValue()["c"][0]).toEqual(newValue);
@@ -249,7 +250,7 @@ describe("Cortex", function() {
                 cortex = new Cortex(value, (function() {
                   called = true;
                 }));
-            cortex.update(newValue, []);
+            cortex.update({value: newValue, path: []});
 
             jasmine.clock().tick(1);
 
@@ -269,7 +270,7 @@ describe("Cortex", function() {
               cortex = new Cortex(value, (function() {
                 called = true;
               }));
-            cortex.update(newValue, []);
+            cortex.update({value: newValue, path: []});
 
             jasmine.clock().tick(1);
 
@@ -291,7 +292,7 @@ describe("Cortex", function() {
               called = true;
             }));
 
-            cortex.update(newValue, []);
+            cortex.update({value: newValue, path: []});
 
             jasmine.clock().tick(1);
 
@@ -309,7 +310,7 @@ describe("Cortex", function() {
                   called = true;
                 }));
 
-            cortex.update(newValue, []);
+            cortex.update({value: newValue, path: []});
 
             jasmine.clock().tick(1);
 
@@ -329,7 +330,7 @@ describe("Cortex", function() {
                 cortex = new Cortex(value, (function() {
                   called = true;
                 }));
-            cortex.update(value, []);
+            cortex.update({value: value, path: []});
 
             jasmine.clock().tick(1);
 
@@ -344,7 +345,7 @@ describe("Cortex", function() {
                 cortex = new Cortex(value, (function() {
                   called = true;
                 }));
-            cortex.update(1, ["a"]);
+            cortex.update({value: 1, path: ["a"]});
 
             jasmine.clock().tick(1);
 
@@ -359,7 +360,7 @@ describe("Cortex", function() {
                 cortex = new Cortex(value, (function() {
                   called = true;
                 }));
-            cortex.update(1, ["a", "b"]);
+            cortex.update({value: 1, path: ["a", "b"]});
 
             jasmine.clock().tick(1);
 
@@ -377,7 +378,7 @@ describe("Cortex", function() {
                   cortex = new Cortex(value, (function() {
                     called = true;
                   }));
-              cortex.update(value.slice(), []);
+              cortex.update({value: value.slice(), path: []});
 
               jasmine.clock().tick(1);
 
@@ -392,7 +393,7 @@ describe("Cortex", function() {
                   cortex = new Cortex(value, (function() {
                     called = true;
                   }));
-              cortex.update([{a: 1}, {b: 2}], []);
+              cortex.update({value: [{a: 1}, {b: 2}], path: []});
 
               jasmine.clock().tick(1);
 
@@ -408,7 +409,7 @@ describe("Cortex", function() {
                 cortex = new Cortex(value, (function() {
                   called = true;
                 }));
-            cortex.update([1, 2, 3], ["arr"]);
+            cortex.update({value: [1, 2, 3], path: ["arr"]});
 
             jasmine.clock().tick(1);
 
@@ -423,7 +424,7 @@ describe("Cortex", function() {
                 cortex = new Cortex(value, (function() {
                   called = true;
                 }));
-            cortex.update([1, 2, 3], ["a", "b"]);
+            cortex.update({value: [1, 2, 3], path: ["a", "b"]});
 
             jasmine.clock().tick(1);
 
@@ -441,7 +442,7 @@ describe("Cortex", function() {
                   cortex = new Cortex(value, (function() {
                     called = true;
                   }));
-              cortex.update({c: 3, b: 2, a: 1}, []);
+              cortex.update({value: {c: 3, b: 2, a: 1}, path: []});
 
               jasmine.clock().tick(1);
 
@@ -457,7 +458,7 @@ describe("Cortex", function() {
                     called = true;
                   }));
 
-              cortex.update({a: {aa: 1}, b: { bb: 2 } }, []);
+              cortex.update({value: {a: {aa: 1}, b: { bb: 2 } }, path: []});
 
               jasmine.clock().tick(1);
 
@@ -472,7 +473,7 @@ describe("Cortex", function() {
                   cortex = new Cortex(value, (function() {
                     called = true;
                   }));
-              cortex.update({ a: [1, 2], b: [1, 2] }, []);
+              cortex.update({value: { a: [1, 2], b: [1, 2] }, path: []});
 
               jasmine.clock().tick(1);
 
@@ -481,6 +482,82 @@ describe("Cortex", function() {
           });
         });
       });
+    });
+  });
+
+  describe("#getChanges", function() {
+    beforeEach(function() {
+      this.cortex = new Cortex(this.value);
+    });
+
+    describe("on initialization", function() {
+      it("returns no changes", function() {
+         expect(this.cortex.getChanges()).toEqual([]);
+      });
+    });
+
+    describe("on update", function() {
+      describe("when no change was made", function() {
+        it("retains the same changes", function() {
+          var changes = this.cortex.getChanges();
+          this.cortex.set(this.cortex.getValue());
+
+          expect(this.cortex.getChanges()).toBe(changes);
+        });
+      });
+
+      describe("when updating a value", function() {
+        it("returns update changes", function() {
+          var oldValue = this.value['a'],
+              newValue = oldValue + 1;
+          this.cortex.a.set(newValue);
+
+          expect(this.cortex.getChanges()).toEqual([{type: 'update', path: ['a'], oldValue: oldValue, newValue: newValue}]);
+        });
+      });
+
+      describe("when adding an element to array", function() {
+        it("returns new change", function() {
+          var newValue = 4;
+          this.cortex.b.key2.key3.nested.push(newValue);
+
+          expect(this.cortex.getChanges()).toEqual([{type: 'new', path: ['b', 'key2', 'key3', 'nested', 3], oldValue: undefined, newValue: newValue}])
+        });
+      });
+
+      describe("when removing an element from array", function() {
+        it("returns delete change", function() {
+          this.cortex.c.pop();
+
+          expect(this.cortex.getChanges()).toEqual([{type: 'delete', path: ['c', 2], oldValue: 2, newValue: undefined}]);
+        })
+      });
+
+      describe("when adding a new key", function() {
+        it("returns new change", function() {
+          this.cortex.b.key2.add("d", "val");
+
+          expect(this.cortex.getChanges()).toEqual([{type: 'new', path: ["b", "key2", "d"], oldValue: undefined, newValue: "val"}]);
+        });
+      });
+
+      describe("when removing a key", function() {
+        it("returns delete change", function() {
+          var oldValue = this.cortex.__clone(this.cortex.b.getValue());
+          this.cortex.destroy("b");
+
+          expect(this.cortex.getChanges()).toEqual([{type: 'delete', path: ['b'], oldValue: oldValue, newValue: undefined}]);
+        });
+      });
+
+      describe("when removing self", function() {
+        it("returns delete change", function() {
+          var oldValue = this.cortex.__clone(this.cortex.a.getValue());
+          this.cortex.a.remove();
+
+          expect(this.cortex.getChanges()).toEqual([{type: 'delete', path: ['a'], oldValue: oldValue, newValue: undefined}]);
+        })
+      })
     });
   });
 
@@ -493,7 +570,7 @@ describe("Cortex", function() {
       cortex.set(newValue);
       jasmine.clock().tick(1);
 
-      expect(update).toHaveBeenCalledWith(newValue, cortex.getPath(), undefined);
+      expect(update).toHaveBeenCalledWith({value: newValue, path: cortex.getPath()});
     });
   });
 

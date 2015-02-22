@@ -1,8 +1,8 @@
 Cortex is a Javascript library for centrally managing data with React.
 
 **Key features:**
-- supports deeply nested data with a simple API
-- performs old and new data comparison out of the box so you don't have to implement shouldComponentUpdate
+- supports deeply nested data
+- exposes changes for every data node
 - performs efficient batch updates and rewrapping
 - has built-in methods for working with arrays and hashes
 - written in ES6
@@ -18,7 +18,7 @@ Initialize a cortex object
 ```javascript
 var data = {a: 100, b: [1, 2, 3]};
 
-var cortex = new Cortex(data, function() {
+var cortex = new Cortex(data, function(updatedCortex) {
   //trigger your React component to update props
 });
 ```
@@ -55,6 +55,31 @@ cortex.set({a: 300})
 cortex.getValue()
 // ==> {a: 300}
 ```
+
+Get the changes
+```javascript
+cortex.getChanges(); // => [{type: "update", path: ['a'], oldValue: 200, newValue: 300}]
+
+// changes are available at every node at any level. Note the difference in path
+cortex.a.getChanges(); // => [{type: "update", path: [], oldValue: 200, newValue: 300}]
+
+// subtree without changes returns empty array
+cortex.b.getChanges(); // => []
+```
+
+Alternatively you can also check whether a node changes
+```javascript
+cortex.didChange() // => true
+
+cortex.didChange('a') // => true
+cortex.didChange('b') // => false
+
+//same as above
+cortex.a.didChange()  // => true
+cortex.b.didChange()  // => false
+```
+
+** You SHOULD NOT use `getChanges` and `didChange` to implement `shouldComponentUpdate` unless your components ONLY rely on cortex object to rerender. The reason is these changes are computed on cortex update and retained until the next update, so if your non-cortex props or state change then your nextProps, nextState would still contain the cortex changes of the previous cycle. This may incorrectly return true and results in your components updating more frequent than they should be.
 
 Add callbacks
 ```javascript
@@ -170,8 +195,10 @@ new Cortex(data, function() {
     `val()`                   | Alias for `getValue`
     `set(value)`              | Changes the value and rewrap the subtree.
     `remove()`                | Self destruct method: remove self from parent if nested, set value to undefined if root level.
-    `.on("update", callback)` | Add a callback to run on update event (only available on root object)
-    `.off("update", callback)`| Remove a callback. If no callback is specified, all existing callbacks will be removed (only available on root object)
+    `on("update", callback)` | Add a callback to run on update event (only available on root object)
+    `off("update", callback)`| Remove a callback. If no callback is specified, all existing callbacks will be removed (only available on root object)
+    `getChanges()`            | Returns array of changes. Each change include the change type (either 'new', 'update', or 'delete'), the path (array of keys to the changed subtree), oldValue, and newValue
+    `didChange(key)`          | Returns boolean value whether a change was made. key is an optional argument. When key provided, it checks whether changes occur in the key subtree. When not provided, it checks whether any change was made on the current node.
 
 ### Cortex wrapper of array data has the following methods:
 

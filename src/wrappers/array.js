@@ -30,41 +30,46 @@ var ArrayWrapper = {
   },
 
   push: function(value) {
-    var length = this.__value.push(value);
-    this.__forceUpdate();
+    var oldValue = this.__clone(this.__value),
+        length = this.__value.push(value);
+    this.set(this.__value, {oldValue: oldValue});
     return length;
   },
 
   pop: function() {
-    var last = this.__value.pop();
-    this.__forceUpdate();
+    var oldValue = this.__clone(this.__value),
+        last = this.__value.pop();
+    this.set(this.__value, {oldValue: oldValue});
     return last;
   },
 
   unshift: function(value) {
-    var length = this.__value.unshift(value);
-    this.__forceUpdate();
+    var oldValue = this.__clone(this.__value),
+        length = this.__value.unshift(value);
+    this.set(this.__value, {oldValue: oldValue});
     return length;
   },
 
   shift: function() {
-    var last = this.__value.shift();
-    this.__forceUpdate();
+    var oldValue = this.__clone(this.__value),
+        last = this.__value.shift();
+    this.set(this.__value, {oldValue: oldValue});
     return last;
   },
 
   insertAt: function(index, value) {
-    var args = [index, 0].concat(value);
+    var oldValue = this.__clone(this.__value),
+        args = [index, 0].concat(value);
+
     Array.prototype.splice.apply(this.__value, args);
-    this.__forceUpdate();
+    this.set(this.__value, {oldValue: oldValue});
   },
 
-  removeAt: function(index, howMany) {
-    if(isNaN(howMany) || howMany <= 0) {
-      howMany = 1;
-    }
-    var removed = this.__value.splice(index, howMany);
-    this.__forceUpdate();
+  removeAt: function(index, howMany = 1) {
+    var oldValue = this.__clone(this.__value),
+        removed = this.__value.splice(index, howMany);
+
+    this.set(this.__value, {oldValue: oldValue});
     return removed;
   }
 };

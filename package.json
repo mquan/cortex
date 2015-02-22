@@ -1,12 +1,15 @@
 {
   "name": "cortexjs",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "A data managment solution for React",
   "author": "Quan Nguyen",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "http://github.com/mquan/cortex.git"
+  },
+  "dependencies": {
+    "deep-diff": "~0.3.0"
   },
   "devDependencies": {
     "6to5ify": "~4.1.0",

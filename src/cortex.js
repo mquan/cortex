@@ -1,6 +1,7 @@
 module.exports = (function() {
-  var _cortexPubSub = require("./pubsub"),
-      DataWrapper = require("./data_wrapper")(_cortexPubSub);
+  var cortexPubSub = require("./pubsub"),
+      DataWrapper = require("./data_wrapper")(cortexPubSub),
+      changeMappings = {"N": "new", "E": "update", "A": "update", "D": "delete"};
 
   class Cortex extends DataWrapper {
     constructor(value, callback) {
@@ -10,6 +11,12 @@ module.exports = (function() {
       this.__callbacks = callback ? [callback] : [];
       this.__loopProcessing = false;
       this.__subscribe();
+
+      // Set initial changes to empty because we don't want any component rerendering to misinterpret available changes.
+      // For instance, if a new cortex initialization is considered a change from undefined to its current value then a setState call
+      // would trigger shouldComponentUpdate, which would return the changes even though no cortex update actually happens.
+      // The changes would incorrectly persist until an actual cortex rewrap occurs.
+      this.__changes = [];
       this.__wrap();
     }
 
@@ -34,21 +41,20 @@ module.exports = (function() {
       }
     }
 
-    update(newValue, path, forceUpdate) {
-      if(!forceUpdate && !this.__shouldUpdate(newValue, path)) {
+    update(data) {
+      if(this.__checkUpdate(data.oldValue, data.value, data.path)) {
+        // Schedule value setting, rewrapping, and running callbacks in batch so that multiple updates
+        // in the same event loop only result in a single rewrap and callbacks run.
+        if(!this.__loopProcessing) {
+          this.__loopProcessing = true;
+
+          setTimeout((this.__batchAll).bind(this), 0);
+        }
+
+        return true;
+      } else {
         return false;
       }
-
-      this.__updates.push({newValue: newValue, path: path});
-
-      // Schedule value setting, rewrapping, and running callbacks in batch so that multiple updates
-      // in same event loop only result in a single rewrap and callbacks run.
-      if(!this.__loopProcessing) {
-        this.__loopProcessing = true;
-        setTimeout((this.__batchAll).bind(this), 0);
-      }
-
-      return true;
     }
 
     __batchAll() {
@@ -77,8 +83,8 @@ module.exports = (function() {
     };
 
     __subscribe() {
-      this.__eventId = _cortexPubSub.subscribeToCortex((function(topic, data) {
-        this.update(data.value, data.path, data.forceUpdate);
+      this.__eventId = cortexPubSub.subscribeToCortex((function(topic, data) {
+        this.update(data);
       }).bind(this), (function(topic, data) {
         this.__remove(data.path);
       }).bind(this));
@@ -86,16 +92,18 @@ module.exports = (function() {
 
     __remove(path) {
       if(path.length) {
-        var subPath = path.slice(0, path.length -1),
+        var subPath = path.slice(0, path.length - 1),
             subValue = this.__subValue(subPath),
             key = path[path.length - 1],
-            removed = subValue[key];
+            removed = subValue[key],
+            oldValue = this.__clone(subValue);
+
         if(subValue.constructor === Object) {
           delete subValue[key];
         } else if(subValue.constructor === Array) {
           subValue.splice(key, 1);
         }
-        this.update(subValue, subPath, true);
+        this.update({value: subValue, path: subPath, oldValue: oldValue});
         return removed;
       } else {
         delete this.__wrappers;
@@ -119,47 +127,62 @@ module.exports = (function() {
       }
     }
 
-    __subValue(path) {
-      var subValue = this.__value;
-      for(var i = 0, ii = path.length; i < ii; i++) {
-        subValue = subValue[path[i]];
-      }
-      return subValue;
-    }
-
-    // Check whether newValue is different, if not then return false to bypass rewrap and running callback.
+    // Check whether newValue is different, if not then return false to bypass rewrap and running callbacks.
     // Note that we cannot compare stringified values of old and new data because order of keys cannot be guaranteed.
-    __shouldUpdate(newValue, path) {
-      var oldValue = this.__value;
-      for(var i = 0, ii = path.length; i < ii; i++) {
-        oldValue = oldValue[path[i]];
+    __checkUpdate(oldValue, newValue, path) {
+      var diffs;
+
+      if(oldValue) {
+        diffs = this.__diff(oldValue, newValue);
+        this.__computeChanges(diffs, path);
+        return true;
+      } else {
+        var oldValue = this.__subValue(path);
+        diffs = this.__diff(oldValue, newValue);
+
+        if(diffs) {
+          // Add to queue to update in batch later.
+          this.__updates.push({newValue: newValue, path: path});
+
+          this.__computeChanges(diffs, path);
+          return true;
+        } else {
+          return false
+        }
       }
-      return this.__isDifferent(oldValue, newValue);
     }
 
-    // Recursively performs comparison b/w old and new data
-    __isDifferent(oldValue, newValue) {
-      if(oldValue && oldValue.constructor === Object) {
-        if(!newValue || newValue.constructor !== Object ||
-            this.__isDifferent(Object.keys(oldValue).sort(), Object.keys(newValue).sort())) {
-          return true;
+    // changes = [{kind: ('new' || 'update' || 'delete'), path: [...], oldValue: ..., newValue: ...}]
+    __computeChanges(diffs, path) {
+      var changeType, diffPath;
+
+      // Reset changes at beginning of event loop. This has to be done after new changes are detected because
+      // we don't want to override previous changes if current update does not result in any new change.
+      if(!this.__loopProcessing) {
+        this.__changes = [];
+      }
+
+      for (var diff of diffs) {
+        // Raw deep diff sample: {"kind":"A","path":[1,"b"],"index":1,"item":{"kind":"N","rhs":1}}
+        // Use the change type closest to the change.
+        changeType = changeMappings[diff.item ? diff.item.kind : diff.kind];
+
+        diffPath = path;
+
+        if(diff.path) {
+          diffPath = diffPath.concat(diff.path);
         }
-        for(var key in oldValue) {
-          if(this.__isDifferent(oldValue[key], newValue[key])) {
-            return true;
-          }
+
+        if(diff.index) {
+          diffPath.push(diff.index);
         }
-      } else if(oldValue && oldValue.constructor === Array) {
-        if(!newValue || newValue.constructor !== Array || oldValue.length !== newValue.length) {
-          return true;
-        }
-        for(var i = 0, ii = oldValue.length;i < ii; i++) {
-          if(this.__isDifferent(oldValue[i], newValue[i])) {
-            return true;
-          }
-        }
-      } else {
-        return oldValue !== newValue;
+
+        this.__changes.push({
+          type: changeType,
+          path: diffPath,
+          oldValue: diff.item ? diff.item.lhs : diff.lhs,
+          newValue: diff.item ? diff.item.rhs : diff.rhs
+        });
       }
     }
   }

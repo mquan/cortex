@@ -4,7 +4,7 @@ var Room = React.createClass({displayName: "Room",
   toggleLight: function(e) {
     var current = this.props.room.light_on.getValue();
     this.props.room.light_on.set(!current);
-    return false;
+    e.stopPropagation();
   },
   render: function() {
     var windowClasses = "window " + (this.props.room.light_on.getValue() ? "light-on" : "light-off");
@@ -19,7 +19,7 @@ var Room = React.createClass({displayName: "Room",
 var Floor = React.createClass({displayName: "Floor",
   addRoom: function(e) {
     this.props.floor.rooms.push({light_on: true});
-    return false;
+    e.stopPropagation();
   },
   render: function() {
     var rooms = this.props.floor.rooms.map(function(room) {
@@ -40,7 +40,7 @@ var Building = React.createClass({displayName: "Building",
           return {light_on: Math.floor(Math.random()*2) % 2 == 0};
         });
     this.props.building.floors.push({rooms: newFloor});
-    return false;
+    e.stopPropagation();
   },
   render: function() {
     var floors = this.props.building.floors.map(function(floor) {
@@ -100,7 +100,7 @@ var cityData = [{"floors":[{"rooms":[{"light_on":false},{"light_on":false},{"lig
 
 var cortexData = new Cortex(cityData);
 
-var cityComponent = React.renderComponent(
+var cityComponent = React.render(
   React.createElement(City, {city: cortexData}), document.getElementById("city")
 );
 
