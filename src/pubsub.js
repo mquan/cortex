@@ -19,8 +19,8 @@ module.exports = (function() {
 
       var subscribers = this.topics[topic];
 
-      for(var subscriber of subscribers) {
-        subscriber.callback(topic, data);
+      for(var i = 0, ii = subscribers.length; i < ii; i++) {
+        subscribers[i].callback(topic, data);
       }
 
       return true;

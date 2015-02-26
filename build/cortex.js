@@ -95,9 +95,8 @@ module.exports = (function () {
       },
       __batchSetValue: {
         value: function __batchSetValue() {
-          for (var _iterator = this.__updates[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
-            var currentUpdate = _step.value;
-            this.__setValue(currentUpdate.newValue, currentUpdate.path);
+          for (var i = 0, ii = this.__updates.length; i < ii; i++) {
+            this.__setValue(this.__updates[i].newValue, this.__updates[i].path);
           }
 
           this.__updates = [];
@@ -107,9 +106,8 @@ module.exports = (function () {
       },
       __runCallbacks: {
         value: function __runCallbacks() {
-          for (var _iterator = this.__callbacks[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
-            var callback = _step.value;
-            if (callback) callback(this);
+          for (var i = 0, ii = this.__callbacks.length; i < ii; i++) {
+            if (this.__callbacks[i]) this.__callbacks[i](this);
           }
         },
         writable: true,
@@ -202,7 +200,7 @@ module.exports = (function () {
 
         // changes = [{kind: ('new' || 'update' || 'delete'), path: [...], oldValue: ..., newValue: ...}]
         value: function __computeChanges(diffs, path) {
-          var changeType, diffPath;
+          var changeType, diffPath, diff;
 
           // Reset changes at beginning of event loop. This has to be done after new changes are detected because
           // we don't want to override previous changes if current update does not result in any new change.
@@ -210,8 +208,8 @@ module.exports = (function () {
             this.__changes = [];
           }
 
-          for (var _iterator = diffs[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
-            var diff = _step.value;
+          for (var i = 0, ii = diffs.length; i < ii; i++) {
+            diff = diffs[i];
             // Raw deep diff sample: {"kind":"A","path":[1,"b"],"index":1,"item":{"kind":"N","rhs":1}}
             // Use the change type closest to the change.
             changeType = changeMappings[diff.item ? diff.item.kind : diff.kind];
@@ -649,8 +647,8 @@ module.exports = function (cortexPubSub) {
             return this.__changes.length > 0;
           }
 
-          for (var _iterator = this.__changes[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
-            var change = _step.value;
+          for (var i = 0, ii = this.__changes.length; i < ii; i++) {
+            var change = this.__changes[i];
             if (change.path[0] === key || this.__hasChange(change, key)) {
               return true;
             }
@@ -730,9 +728,10 @@ module.exports = function (cortexPubSub) {
       },
       __childChanges: {
         value: function __childChanges(key) {
-          var childChanges = [];
-          for (var _iterator = this.__changes[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
-            var change = _step.value;
+          var childChanges = [],
+              change;
+          for (var i = 0, ii = this.__changes.length; i < ii; i++) {
+            change = this.__changes[i];
             if (change.path[0] === key) {
               childChanges.push({
                 type: change.type,
@@ -852,10 +851,9 @@ module.exports = function (cortexPubSub) {
       HashWrapper = require("./wrappers/hash");
 
   var __include = function (klass, mixins) {
-    for (var _iterator = mixins[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
-      var mixin = _step.value;
-      for (var methodName in mixin) {
-        klass.prototype[methodName] = mixin[methodName];
+    for (var i = 0, ii = mixins.length; i < ii; i++) {
+      for (var methodName in mixins[i]) {
+        klass.prototype[methodName] = mixins[i][methodName];
       }
     }
   };
@@ -900,9 +898,8 @@ module.exports = (function () {
 
           var subscribers = this.topics[topic];
 
-          for (var _iterator = subscribers[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
-            var subscriber = _step.value;
-            subscriber.callback(topic, data);
+          for (var i = 0, ii = subscribers.length; i < ii; i++) {
+            subscribers[i].callback(topic, data);
           }
 
           return true;

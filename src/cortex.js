@@ -68,17 +68,17 @@ module.exports = (function() {
     }
 
     __batchSetValue() {
-      for(var currentUpdate of this.__updates) {
-        this.__setValue(currentUpdate.newValue, currentUpdate.path);
+      for(var i = 0, ii = this.__updates.length; i < ii; i++) {
+        this.__setValue(this.__updates[i].newValue, this.__updates[i].path);
       }
 
       this.__updates = [];
     }
 
     __runCallbacks() {
-      for(var callback of this.__callbacks) {
-        if (callback)
-          callback(this);
+      for (var i = 0, ii = this.__callbacks.length; i < ii; i++) {
+        if(this.__callbacks[i])
+          this.__callbacks[i](this);
       }
     };
 
@@ -154,7 +154,7 @@ module.exports = (function() {
 
     // changes = [{kind: ('new' || 'update' || 'delete'), path: [...], oldValue: ..., newValue: ...}]
     __computeChanges(diffs, path) {
-      var changeType, diffPath;
+      var changeType, diffPath, diff;
 
       // Reset changes at beginning of event loop. This has to be done after new changes are detected because
       // we don't want to override previous changes if current update does not result in any new change.
@@ -162,7 +162,8 @@ module.exports = (function() {
         this.__changes = [];
       }
 
-      for (var diff of diffs) {
+      for(var i = 0, ii = diffs.length; i < ii; i++) {
+        diff = diffs[i];
         // Raw deep diff sample: {"kind":"A","path":[1,"b"],"index":1,"item":{"kind":"N","rhs":1}}
         // Use the change type closest to the change.
         changeType = changeMappings[diff.item ? diff.item.kind : diff.kind];

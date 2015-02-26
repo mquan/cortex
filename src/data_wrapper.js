@@ -41,7 +41,8 @@ module.exports = function(cortexPubSub) {
         return this.__changes.length > 0;
       }
 
-      for (var change of this.__changes) {
+      for(var i = 0, ii = this.__changes.length; i < ii; i++) {
+        var change = this.__changes[i];
         if(change.path[0] === key || this.__hasChange(change, key)) {
           return true;
         }
@@ -102,8 +103,9 @@ module.exports = function(cortexPubSub) {
     }
 
     __childChanges(key) {
-      var childChanges = [];
-      for (var change of this.__changes) {
+      var childChanges = [], change;
+      for(var i = 0, ii = this.__changes.length; i < ii; i++) {
+        change = this.__changes[i];
         if(change.path[0] === key) {
           childChanges.push({
             type: change.type,
@@ -198,9 +200,9 @@ module.exports = function(cortexPubSub) {
       HashWrapper = require("./wrappers/hash");
 
   var __include = function(klass, mixins) {
-    for (var mixin of mixins) {
-      for(var methodName in mixin) {
-        klass.prototype[methodName] = mixin[methodName];
+    for(var i = 0, ii = mixins.length; i < ii; i++) {
+      for(var methodName in mixins[i]) {
+        klass.prototype[methodName] = mixins[i][methodName];
       }
     }
   };
