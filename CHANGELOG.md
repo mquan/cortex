@@ -1,3 +1,6 @@
+# 0.8.1
+- revert back to regular for loop (instead of es6 for...of) to remove polyfill dependency
+
 # 0.8.0
 - expose changes
 - `getChagnes` and `didChange` methods
