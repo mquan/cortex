@@ -171,6 +171,7 @@ module.exports = (function () {
 
         // Check whether newValue is different, if not then return false to bypass rewrap and running callbacks.
         // Note that we cannot compare stringified values of old and new data because order of keys cannot be guaranteed.
+
         value: function __checkUpdate(oldValue, newValue, path) {
           var diffs;
 
@@ -199,6 +200,7 @@ module.exports = (function () {
       __computeChanges: {
 
         // changes = [{kind: ('new' || 'update' || 'delete'), path: [...], oldValue: ..., newValue: ...}]
+
         value: function __computeChanges(diffs, path) {
           var changeType, diffPath, diff;
 
@@ -693,6 +695,7 @@ module.exports = function (cortexPubSub) {
 
         // Recursively wrap data if @value is a hash or an array.
         // Otherwise there's no need to further wrap primitive or other class instances
+
         value: function __wrap() {
           this.__cleanup();
 
@@ -805,13 +808,14 @@ module.exports = function (cortexPubSub) {
       __clone: {
 
         // source: http://stackoverflow.com/a/728694
+
         value: function __clone(obj) {
           var copy;
 
           // Handle the 3 simple types, and null or undefined
-          if (null == obj || "object" != typeof obj) return obj;
-
-          // Handle Date
+          if (null == obj || "object" != typeof obj) {
+            return obj;
+          } // Handle Date
           if (obj instanceof Date) {
             copy = new Date();
             copy.setTime(obj.getTime());
@@ -850,7 +854,7 @@ module.exports = function (cortexPubSub) {
   var ArrayWrapper = require("./wrappers/array"),
       HashWrapper = require("./wrappers/hash");
 
-  var __include = function (klass, mixins) {
+  var __include = function __include(klass, mixins) {
     for (var i = 0, ii = mixins.length; i < ii; i++) {
       for (var methodName in mixins[i]) {
         klass.prototype[methodName] = mixins[i][methodName];
@@ -937,19 +941,19 @@ module.exports = (function () {
 "use strict";
 
 var ArrayWrapper = {
-  count: function () {
+  count: function count() {
     return this.__value.length;
   },
 
-  map: function (callback) {
+  map: function map(callback) {
     return this.__wrappers.map(callback);
   },
 
-  filter: function (callback, thisArg) {
+  filter: function filter(callback, thisArg) {
     return this.__wrappers.filter(callback, thisArg);
   },
 
-  find: function (callback) {
+  find: function find(callback) {
     for (var index = 0, length = this.__wrappers.length; index < length; index++) {
       if (callback(this.__wrappers[index], index, this.__wrappers)) {
         return this.__wrappers[index];
@@ -958,7 +962,7 @@ var ArrayWrapper = {
     return null;
   },
 
-  findIndex: function (callback) {
+  findIndex: function findIndex(callback) {
     for (var index = 0, length = this.__wrappers.length; index < length; index++) {
       if (callback(this.__wrappers[index], index, this.__wrappers)) {
         return index;
@@ -967,35 +971,35 @@ var ArrayWrapper = {
     return -1;
   },
 
-  push: function (value) {
+  push: function push(value) {
     var oldValue = this.__clone(this.__value),
         length = this.__value.push(value);
     this.set(this.__value, { oldValue: oldValue });
     return length;
   },
 
-  pop: function () {
+  pop: function pop() {
     var oldValue = this.__clone(this.__value),
         last = this.__value.pop();
     this.set(this.__value, { oldValue: oldValue });
     return last;
   },
 
-  unshift: function (value) {
+  unshift: function unshift(value) {
     var oldValue = this.__clone(this.__value),
         length = this.__value.unshift(value);
     this.set(this.__value, { oldValue: oldValue });
     return length;
   },
 
-  shift: function () {
+  shift: function shift() {
     var oldValue = this.__clone(this.__value),
         last = this.__value.shift();
     this.set(this.__value, { oldValue: oldValue });
     return last;
   },
 
-  insertAt: function (index, value) {
+  insertAt: function insertAt(index, value) {
     var oldValue = this.__clone(this.__value),
         args = [index, 0].concat(value);
 
@@ -1003,8 +1007,9 @@ var ArrayWrapper = {
     this.set(this.__value, { oldValue: oldValue });
   },
 
-  removeAt: function (index) {
+  removeAt: function removeAt(index) {
     var howMany = arguments[1] === undefined ? 1 : arguments[1];
+
     var oldValue = this.__clone(this.__value),
         removed = this.__value.splice(index, howMany);
 
@@ -1019,24 +1024,34 @@ module.exports = ArrayWrapper;
 "use strict";
 
 var HashWrapper = {
-  keys: function () {
+  keys: function keys() {
     return Object.keys(this.__value);
   },
 
-  values: function () {
+  values: (function (_values) {
+    var _valuesWrapper = function values() {
+      return _values.apply(this, arguments);
+    };
+
+    _valuesWrapper.toString = function () {
+      return _values.toString();
+    };
+
+    return _valuesWrapper;
+  })(function () {
     var key,
         values = [];
     for (key in this.__value) {
       values.push(this.__value[key]);
     }
     return values;
-  },
+  }),
 
-  hasKey: function (key) {
+  hasKey: function hasKey(key) {
     return this.__value[key] != null;
   },
 
-  destroy: function (key) {
+  destroy: function destroy(key) {
     var oldValue = this.__clone(this.__value),
         removed = this.__value[key];
     delete this.__value[key];
@@ -1044,7 +1059,7 @@ var HashWrapper = {
     return removed;
   },
 
-  add: function (key, value) {
+  add: function add(key, value) {
     var oldValue = this.__clone(this.__value);
     this.__value[key] = value;
     this.set(this.__value, { oldValue: oldValue });

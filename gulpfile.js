@@ -6,7 +6,7 @@ var gulp = require("gulp"),
     streamify = require("gulp-streamify"),
     rename = require("gulp-rename"),
     react = require("gulp-react"),
-    to5ify = require('6to5ify'),
+    to5ify = require('babelify'),
     jasmine = require("gulp-jasmine");
 
 gulp.task("scripts", function() {
