@@ -5,6 +5,7 @@ var Room = React.createClass({displayName: "Room",
     var current = this.props.room.light_on.getValue();
     this.props.room.light_on.set(!current);
     e.stopPropagation();
+    e.preventDefault();
   },
   render: function() {
     var windowClasses = "window " + (this.props.room.light_on.getValue() ? "light-on" : "light-off");
@@ -41,6 +42,7 @@ var Building = React.createClass({displayName: "Building",
         });
     this.props.building.floors.push({rooms: newFloor});
     e.stopPropagation();
+    e.preventDefault();
   },
   render: function() {
     var floors = this.props.building.floors.map(function(floor) {
@@ -62,9 +64,11 @@ var City = React.createClass({displayName: "City",
     var newBuilding = createBuilding(5 + Math.floor(Math.random() * 10), 3);
     this.props.city.push(newBuilding);
     e.preventDefault();
+    e.preventDefault();
   },
   removeBuilding: function(e) {
     this.props.city.pop();
+    e.preventDefault();
     e.preventDefault();
   },
   render: function() {
