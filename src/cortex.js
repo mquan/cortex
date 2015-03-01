@@ -119,6 +119,7 @@ module.exports = (function() {
       */
       if(path.length > 1) {
         var subValue = this.__subValue(path.slice(0, path.length - 1));
+
         subValue[path[path.length-1]] = newValue;
       } else if(path.length === 1) {
         this.__value[path[0]] = newValue;
@@ -168,7 +169,7 @@ module.exports = (function() {
         // Use the change type closest to the change.
         changeType = changeMappings[diff.item ? diff.item.kind : diff.kind];
 
-        diffPath = path;
+        diffPath = path.slice();
 
         if(diff.path) {
           diffPath = diffPath.concat(diff.path);

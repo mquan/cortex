@@ -1,3 +1,6 @@
+# 0.8.2
+- fix diffPath bug (should copy path to diffPath instead of simply setting it to path)
+
 # 0.8.1
 - revert back to regular for loop (instead of es6 for...of) to remove polyfill dependency
 
