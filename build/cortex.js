@@ -61,15 +61,20 @@ module.exports = (function () {
         writable: true,
         configurable: true
       },
+      commit: {
+        value: function commit() {
+          this.__batchAll();
+        },
+        writable: true,
+        configurable: true
+      },
       update: {
         value: function update(data) {
           if (this.__checkUpdate(data.oldValue, data.value, data.path)) {
             // Schedule value setting, rewrapping, and running callbacks in batch so that multiple updates
             // in the same event loop only result in a single rewrap and callbacks run.
             if (!this.__loopProcessing) {
-              this.__loopProcessing = true;
-
-              setTimeout(this.__batchAll.bind(this), 0);
+              this.__loopProcessing = setTimeout(this.__batchAll.bind(this), 0);
             }
 
             return true;
@@ -82,6 +87,8 @@ module.exports = (function () {
       },
       __batchAll: {
         value: function __batchAll() {
+          clearTimeout(this.__loopProcessing);
+
           this.__batchSetValue();
           this.__wrap();
 
