@@ -174,6 +174,10 @@ describe("ArrayWrapper", function() {
           expect(wrapperElement.getValue()).toBe(newArray[i]);
         });
       });
+
+      it("doesn't fail when value has not changed", function() {
+        expect(this.wrapper.insertAt.bind(this.wrapper, 0, [])).not.toThrow();
+      });
     });
   });
 
@@ -195,10 +199,14 @@ describe("ArrayWrapper", function() {
       });
     });
 
+    it("doesn't fail when value has not changed", function() {
+      expect(this.wrapper.removeAt.bind(this.wrapper, 0, 0)).not.toThrow();
+    });
+
     it("fails when called on a non array", function() {
       this.wrapper = new Cortex(1);
 
-      expect(this.wrapper.removeAt.bind(0)).toThrow();
+      expect(this.wrapper.removeAt.bind(this.wrapper, 0)).toThrow();
     });
   });
 });
