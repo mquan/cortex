@@ -131,25 +131,25 @@ module.exports = (function() {
     // Check whether newValue is different, if not then return false to bypass rewrap and running callbacks.
     // Note that we cannot compare stringified values of old and new data because order of keys cannot be guaranteed.
     __checkUpdate(oldValue, newValue, path) {
-      var diffs;
+      var diffs, batchUpdate = true;
 
       if(oldValue) {
-        diffs = this.__diff(oldValue, newValue);
+        batchUpdate = false;
+      }
+
+      oldValue || (oldValue = this.__subValue(path));
+      diffs = this.__diff(oldValue, newValue);
+
+      if(diffs) {
+        // Add to queue to update in batch later.
+        if (batchUpdate) {
+          this.__updates.push({newValue: newValue, path: path});
+        }
+
         this.__computeChanges(diffs, path);
         return true;
       } else {
-        var oldValue = this.__subValue(path);
-        diffs = this.__diff(oldValue, newValue);
-
-        if(diffs) {
-          // Add to queue to update in batch later.
-          this.__updates.push({newValue: newValue, path: path});
-
-          this.__computeChanges(diffs, path);
-          return true;
-        } else {
-          return false
-        }
+        return false;
       }
     }
 
