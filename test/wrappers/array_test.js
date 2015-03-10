@@ -144,32 +144,50 @@ describe("ArrayWrapper", function() {
   });
 
   describe("#insertAt", function() {
-    describe("when insert value is not an array", function() {
-      it("inserts a wrapper with value at specified index", function() {
-        var insertValue = 55,
-            currentLength = this.value.length,
-            index = Math.floor(currentLength / 2);
-        this.wrapper.insertAt(index, insertValue);
+    describe("when inserting a single element", function() {
+      describe("when not inserting a nested array", function() {
+        it("inserts a wrapper with value at specified index", function() {
+          var insertValue = 55,
+              currentLength = this.value.length,
+              index = Math.floor(currentLength / 2);
+          this.wrapper.insertAt(index, insertValue);
 
-        jasmine.clock().tick(1);
+          jasmine.clock().tick(1);
 
-        expect(this.wrapper.count()).toBe(currentLength + 1);
-        expect(this.wrapper[index].getValue()).toBe(insertValue);
+          expect(this.wrapper.count()).toBe(currentLength + 1);
+          expect(this.wrapper[index].getValue()).toBe(insertValue);
+        });
       });
+
+      describe("when inserting a nested array", function() {
+        it("inserts the nested array at index", function() {
+          var insertValue = [11],
+              currentLength = this.value.length,
+              index = Math.floor(currentLength / 2);
+
+          this.wrapper.insertAt(index, insertValue);
+
+          jasmine.clock().tick(1);
+
+          expect(this.wrapper.count()).toBe(currentLength + 1);
+          expect(this.wrapper[index].getValue()).toEqual(insertValue);
+        });
+      })
     });
 
-    describe("when insert value is an array", function() {
+    describe("when inserting multiple elements", function() {
       it("inserts nested wrappers with values starting at specified index", function() {
-        var insertArray = [0, 1],
-            currentLength = this.value.length,
+        var currentLength = this.value.length,
             index = Math.floor(currentLength / 2),
             newArray = this.value.slice(0);
-        Array.prototype.splice.apply(newArray, [index, 0].concat(insertArray));
-        this.wrapper.insertAt(index, insertArray);
+
+        newArray.splice(index, 0, 10, 20);
+
+        this.wrapper.insertAt(index, 10, 20);
 
         jasmine.clock().tick(1);
 
-        expect(this.wrapper.count()).toBe(currentLength + insertArray.length);
+        expect(this.wrapper.count()).toBe(currentLength + 2);
         this.wrapper.forEach(function(wrapperElement, i) {
           expect(wrapperElement.getValue()).toBe(newArray[i]);
         });

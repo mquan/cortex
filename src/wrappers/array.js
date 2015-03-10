@@ -57,11 +57,12 @@ var ArrayWrapper = {
     return last;
   },
 
-  insertAt: function(index, value) {
+  insertAt: function(index) {
     var oldValue = this.__clone(this.__value),
-        args = [index, 0].concat(value);
+        args = Array.prototype.slice.call(arguments, 1);
 
-    Array.prototype.splice.apply(this.__value, args);
+    Array.prototype.splice.apply(this.__value, [index, 0].concat(args));
+
     this.set(this.__value, {oldValue: oldValue});
   },
 

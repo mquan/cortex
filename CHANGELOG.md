@@ -1,3 +1,6 @@
+# 0.8.3
+- fix insertAt when inserting an array (previously the insert array gets flatten into the parent array)
+
 # 0.8.2
 - fix diffPath bug (should copy path to diffPath instead of simply setting it to path)
 

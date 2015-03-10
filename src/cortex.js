@@ -120,7 +120,7 @@ module.exports = (function() {
       if(path.length > 1) {
         var subValue = this.__subValue(path.slice(0, path.length - 1));
 
-        subValue[path[path.length-1]] = newValue;
+        subValue[path[path.length - 1]] = newValue;
       } else if(path.length === 1) {
         this.__value[path[0]] = newValue;
       } else {
