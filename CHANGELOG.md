@@ -1,3 +1,6 @@
+# 0.8.4
+- derequire build file
+
 # 0.8.3
 - fix insertAt when inserting an array (previously the insert array gets flatten into the parent array)
 

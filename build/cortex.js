@@ -1,7 +1,7 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.cortex = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 "use strict";
 
-var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
 
 var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
@@ -12,7 +12,7 @@ module.exports = (function () {
       DataWrapper = _dereq_("./data_wrapper")(cortexPubSub),
       changeMappings = { N: "new", E: "update", A: "update", D: "delete" };
 
-  var Cortex = (function (_DataWrapper) {
+  var Cortex = (function (DataWrapper) {
     function Cortex(value, callback) {
       _classCallCheck(this, Cortex);
 
@@ -31,15 +31,17 @@ module.exports = (function () {
       this.__wrap();
     }
 
-    _inherits(Cortex, _DataWrapper);
+    _inherits(Cortex, DataWrapper);
 
-    _createClass(Cortex, {
+    _prototypeProperties(Cortex, null, {
       on: {
         value: function on(eventName, callback) {
           if (eventName === "update") {
             this.__callbacks.push(callback);
           }
-        }
+        },
+        writable: true,
+        configurable: true
       },
       off: {
         value: function off(eventName, callback) {
@@ -55,7 +57,9 @@ module.exports = (function () {
               this.__callbacks = [];
             }
           }
-        }
+        },
+        writable: true,
+        configurable: true
       },
       update: {
         value: function update(data) {
@@ -72,7 +76,9 @@ module.exports = (function () {
           } else {
             return false;
           }
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __batchAll: {
         value: function __batchAll() {
@@ -83,7 +89,9 @@ module.exports = (function () {
           // takes place in the next event loop.
           this.__loopProcessing = false;
           this.__runCallbacks();
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __batchSetValue: {
         value: function __batchSetValue() {
@@ -92,14 +100,18 @@ module.exports = (function () {
           }
 
           this.__updates = [];
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __runCallbacks: {
         value: function __runCallbacks() {
           for (var i = 0, ii = this.__callbacks.length; i < ii; i++) {
             if (this.__callbacks[i]) this.__callbacks[i](this);
           }
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __subscribe: {
         value: function __subscribe() {
@@ -108,7 +120,9 @@ module.exports = (function () {
           }).bind(this), (function (topic, data) {
             this.__remove(data.path);
           }).bind(this));
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __remove: {
         value: function __remove(path) {
@@ -130,7 +144,9 @@ module.exports = (function () {
             delete this.__wrappers;
             delete this.__value;
           }
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __setValue: {
         value: function __setValue(newValue, path) {
@@ -148,7 +164,9 @@ module.exports = (function () {
           } else {
             this.__value = newValue;
           }
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __checkUpdate: {
 
@@ -176,7 +194,9 @@ module.exports = (function () {
               return false;
             }
           }
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __computeChanges: {
 
@@ -214,7 +234,9 @@ module.exports = (function () {
               newValue: diff.item ? diff.item.rhs : diff.rhs
             });
           }
-        }
+        },
+        writable: true,
+        configurable: true
       }
     });
 
@@ -562,7 +584,7 @@ module.exports = (function () {
 },{}],3:[function(_dereq_,module,exports){
 "use strict";
 
-var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
@@ -583,34 +605,44 @@ module.exports = function (cortexPubSub) {
       this.val = this.getValue;
     }
 
-    _createClass(DataWrapper, {
+    _prototypeProperties(DataWrapper, null, {
       set: {
         value: function set(value, data) {
           var payload = data || {};
           payload.value = value;
           payload.path = this.__path;
           cortexPubSub.publish("update" + this.__eventId, payload);
-        }
+        },
+        writable: true,
+        configurable: true
       },
       getValue: {
         value: function getValue() {
           return this.__value;
-        }
+        },
+        writable: true,
+        configurable: true
       },
       getPath: {
         value: function getPath() {
           return this.__path;
-        }
+        },
+        writable: true,
+        configurable: true
       },
       getKey: {
         value: function getKey() {
           return this.__path[this.__path.length - 1];
-        }
+        },
+        writable: true,
+        configurable: true
       },
       getChanges: {
         value: function getChanges() {
           return this.__changes;
-        }
+        },
+        writable: true,
+        configurable: true
       },
       didChange: {
         value: function didChange(key) {
@@ -625,7 +657,9 @@ module.exports = function (cortexPubSub) {
             }
           }
           return false;
-        }
+        },
+        writable: true,
+        configurable: true
       },
       forEach: {
         value: function forEach(callback) {
@@ -636,12 +670,16 @@ module.exports = function (cortexPubSub) {
           } else if (this.__isArray()) {
             this.__wrappers.forEach(callback);
           }
-        }
+        },
+        writable: true,
+        configurable: true
       },
       remove: {
         value: function remove() {
           cortexPubSub.publish("remove" + this.__eventId, { path: this.__path });
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __subValue: {
         value: function __subValue(path) {
@@ -650,7 +688,9 @@ module.exports = function (cortexPubSub) {
             subValue = subValue[path[i]];
           }
           return subValue;
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __wrap: {
 
@@ -671,7 +711,9 @@ module.exports = function (cortexPubSub) {
               this.__wrapChild(index);
             }
           }
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __wrapChild: {
         value: function __wrapChild(key) {
@@ -684,7 +726,9 @@ module.exports = function (cortexPubSub) {
             changes: this.__childChanges(key)
           });
           this[key] = this.__wrappers[key];
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __childChanges: {
         value: function __childChanges(key) {
@@ -712,12 +756,16 @@ module.exports = function (cortexPubSub) {
           }
 
           return childChanges;
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __hasChange: {
         value: function __hasChange(change, key) {
           return change.path.length === 0 && (change.oldValue && change.oldValue[key] || change.newValue && change.newValue[key]);
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __cleanup: {
         value: function __cleanup() {
@@ -733,22 +781,30 @@ module.exports = function (cortexPubSub) {
             }
             delete this.__wrappers;
           }
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __isObject: {
         value: function __isObject() {
           return this.__value && this.__value.constructor === Object;
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __isArray: {
         value: function __isArray() {
           return this.__value && this.__value.constructor === Array;
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __diff: {
         value: function __diff(oldValue, newValue) {
           return deepDiff(oldValue, newValue);
-        }
+        },
+        writable: true,
+        configurable: true
       },
       __clone: {
 
@@ -786,7 +842,9 @@ module.exports = function (cortexPubSub) {
           }
 
           throw new Error("Unable to copy obj! Its type isn't supported.");
-        }
+        },
+        writable: true,
+        configurable: true
       }
     });
 
@@ -813,7 +871,7 @@ module.exports = function (cortexPubSub) {
 },{"./wrappers/array":5,"./wrappers/hash":6,"deep-diff":2}],4:[function(_dereq_,module,exports){
 "use strict";
 
-var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
@@ -826,14 +884,16 @@ module.exports = (function () {
       this.topics = {};
     }
 
-    _createClass(PubSub, {
+    _prototypeProperties(PubSub, null, {
       subscribe: {
         value: function subscribe(topic, callback) {
           if (!this.topics.hasOwnProperty(topic)) {
             this.topics[topic] = [];
           }
           this.topics[topic].push({ callback: callback });
-        }
+        },
+        writable: true,
+        configurable: true
       },
       publish: {
         value: function publish(topic, data) {
@@ -848,7 +908,9 @@ module.exports = (function () {
           }
 
           return true;
-        }
+        },
+        writable: true,
+        configurable: true
       },
       subscribeToCortex: {
         value: function subscribeToCortex(updateCallback, removeCallback) {
@@ -856,13 +918,17 @@ module.exports = (function () {
           this.subscribe("update" + this.uid, updateCallback);
           this.subscribe("remove" + this.uid, removeCallback);
           return this.uid;
-        }
+        },
+        writable: true,
+        configurable: true
       },
       unsubscribeFromCortex: {
         value: function unsubscribeFromCortex(topicId) {
           delete this.topics["update" + topicId];
           delete this.topics["remove" + topicId];
-        }
+        },
+        writable: true,
+        configurable: true
       }
     });
 
