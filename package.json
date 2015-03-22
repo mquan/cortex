@@ -15,6 +15,7 @@
     "babelify": "^5.0.3",
     "browserify": "~9.0.3",
     "gulp": "~3.8.11",
+    "gulp-derequire": "^2.1.0",
     "gulp-jasmine": "~2.0.0",
     "gulp-react": "~2.0.0",
     "gulp-rename": "~1.2.0",
@@ -23,7 +24,7 @@
     "gulp-util": "~3.0.4",
     "vinyl-source-stream": "~1.0.0"
   },
-  "main": "./src/cortex",
+  "main": "./build/cortex",
   "engines": {
     "node": "*"
   }
