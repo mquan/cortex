@@ -18,7 +18,7 @@ module.exports = (function () {
     function Cortex(value, callback) {
       _classCallCheck(this, Cortex);
 
-      _get(Object.getPrototypeOf(Cortex.prototype), "constructor", this).call(this);
+      _get(Object.getPrototypeOf(Cortex.prototype), "constructor", this).call(this, value, callback);
       this.__value = value;
       this.__path = [];
       this.__updates = [];
