@@ -12,7 +12,7 @@
     "deep-diff": "~0.3.0"
   },
   "devDependencies": {
-    "babelify": "^5.0.3",
+    "babelify": "^6.0.2",
     "browserify": "~9.0.3",
     "gulp": "~3.8.11",
     "gulp-derequire": "^2.1.0",
