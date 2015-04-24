@@ -5,6 +5,7 @@ module.exports = (function() {
 
   class Cortex extends DataWrapper {
     constructor(value, callback) {
+      super()
       this.__value = value;
       this.__path = [];
       this.__updates = [];
