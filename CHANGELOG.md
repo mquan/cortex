@@ -1,3 +1,6 @@
+# 0.8.5
+- upgrade babelify
+
 # 0.8.4
 - derequire build file
 
