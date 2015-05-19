@@ -232,7 +232,7 @@ new Cortex(data, function() {
 
     Methods                                       | Description
     ----------------------------------------------|:------------------
-    `Cortex.deepDiff(oldValue, newValue)`         | performs deep diff on 2 given object
+    `Cortex.deepDiff(oldValue, newValue)`         | performs deep diff on 2 given objects
     `Cortex.deepClone(value)`                     | returns a deep copy of a given value
 
 
