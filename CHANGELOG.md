@@ -1,3 +1,6 @@
+# 0.8.6
+- provide `deepDiff` and `deepClone` class methods
+
 # 0.8.5
 - upgrade babelify
 

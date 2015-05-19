@@ -228,6 +228,14 @@ new Cortex(data, function() {
     `add(key, value)`              | Adds the specified key and value pair
 
 
+### Class methods
+
+    Methods                                       | Description
+    ----------------------------------------------|:------------------
+    `Cortex.deepDiff(oldValue, newValue)`         | performs deep diff on 2 given object
+    `Cortex.deepClone(value)`                     | returns a deep copy of a given value
+
+
 # CDN
 
 [cortex.0.6.2.js](https://cdn.rawgit.com/mquan/cortex/master/build/cortex.js)

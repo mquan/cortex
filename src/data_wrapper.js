@@ -155,12 +155,12 @@ module.exports = function(cortexPubSub) {
       return this.__value && this.__value.constructor === Array;
     }
 
-    __diff(oldValue, newValue) {
+    static deepDiff(oldValue, newValue) {
       return deepDiff(oldValue, newValue);
     }
 
     // source: http://stackoverflow.com/a/728694
-    __clone(obj) {
+    static deepClone(obj) {
       var copy;
 
       // Handle the 3 simple types, and null or undefined
@@ -177,7 +177,7 @@ module.exports = function(cortexPubSub) {
       if (obj instanceof Array) {
           copy = [];
           for (var i = 0, len = obj.length; i < len; i++) {
-              copy[i] = this.__clone(obj[i]);
+              copy[i] = DataWrapper.deepClone(obj[i]);
           }
           return copy;
       }
@@ -186,7 +186,7 @@ module.exports = function(cortexPubSub) {
       if (obj instanceof Object) {
           copy = {};
           for (var attr in obj) {
-              if (obj.hasOwnProperty(attr)) copy[attr] = this.__clone(obj[attr]);
+              if (obj.hasOwnProperty(attr)) copy[attr] = DataWrapper.deepClone(obj[attr]);
           }
           return copy;
       }

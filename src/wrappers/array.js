@@ -30,35 +30,35 @@ var ArrayWrapper = {
   },
 
   push: function(value) {
-    var oldValue = this.__clone(this.__value),
+    var oldValue = this.constructor.deepClone(this.__value),
         length = this.__value.push(value);
     this.set(this.__value, {oldValue: oldValue});
     return length;
   },
 
   pop: function() {
-    var oldValue = this.__clone(this.__value),
+    var oldValue = this.constructor.deepClone(this.__value),
         last = this.__value.pop();
     this.set(this.__value, {oldValue: oldValue});
     return last;
   },
 
   unshift: function(value) {
-    var oldValue = this.__clone(this.__value),
+    var oldValue = this.constructor.deepClone(this.__value),
         length = this.__value.unshift(value);
     this.set(this.__value, {oldValue: oldValue});
     return length;
   },
 
   shift: function() {
-    var oldValue = this.__clone(this.__value),
+    var oldValue = this.constructor.deepClone(this.__value),
         last = this.__value.shift();
     this.set(this.__value, {oldValue: oldValue});
     return last;
   },
 
   insertAt: function(index) {
-    var oldValue = this.__clone(this.__value),
+    var oldValue = this.constructor.deepClone(this.__value),
         args = Array.prototype.slice.call(arguments, 1);
 
     Array.prototype.splice.apply(this.__value, [index, 0].concat(args));
@@ -67,7 +67,7 @@ var ArrayWrapper = {
   },
 
   removeAt: function(index, howMany = 1) {
-    var oldValue = this.__clone(this.__value),
+    var oldValue = this.constructor.deepClone(this.__value),
         removed = this.__value.splice(index, howMany);
 
     this.set(this.__value, {oldValue: oldValue});

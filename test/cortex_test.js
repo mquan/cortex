@@ -543,7 +543,7 @@ describe("Cortex", function() {
 
       describe("when removing a key", function() {
         it("returns delete change", function() {
-          var oldValue = this.cortex.__clone(this.cortex.b.getValue());
+          var oldValue = Cortex.deepClone(this.cortex.b.getValue());
           this.cortex.destroy("b");
 
           expect(this.cortex.getChanges()).toEqual([{type: 'delete', path: ['b'], oldValue: oldValue, newValue: undefined}]);
@@ -552,7 +552,7 @@ describe("Cortex", function() {
 
       describe("when removing self", function() {
         it("returns delete change", function() {
-          var oldValue = this.cortex.__clone(this.cortex.a.getValue());
+          var oldValue = Cortex.deepClone(this.cortex.a.getValue());
           this.cortex.a.remove();
 
           expect(this.cortex.getChanges()).toEqual([{type: 'delete', path: ['a'], oldValue: oldValue, newValue: undefined}]);

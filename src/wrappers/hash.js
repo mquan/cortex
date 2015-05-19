@@ -17,7 +17,7 @@ var HashWrapper = {
   },
 
   destroy: function(key) {
-    var oldValue = this.__clone(this.__value),
+    var oldValue = this.constructor.deepClone(this.__value),
         removed = this.__value[key];
     delete this.__value[key];
     this.set(this.__value, {oldValue: oldValue});
@@ -25,7 +25,7 @@ var HashWrapper = {
   },
 
   add: function(key, value) {
-    var oldValue = this.__clone(this.__value);
+    var oldValue = this.constructor.deepClone(this.__value);
     this.__value[key] = value;
     this.set(this.__value, {oldValue: oldValue});
     return value;

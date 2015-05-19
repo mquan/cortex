@@ -98,7 +98,7 @@ module.exports = (function() {
             subValue = this.__subValue(subPath),
             key = path[path.length - 1],
             removed = subValue[key],
-            oldValue = this.__clone(subValue);
+            oldValue = this.constructor.deepClone(subValue);
 
         if(subValue.constructor === Object) {
           delete subValue[key];
@@ -136,12 +136,12 @@ module.exports = (function() {
       var diffs;
 
       if(oldValue) {
-        diffs = this.__diff(oldValue, newValue);
+        diffs = this.constructor.deepDiff(oldValue, newValue);
         this.__computeChanges(diffs, path);
         return true;
       } else {
         var oldValue = this.__subValue(path);
-        diffs = this.__diff(oldValue, newValue);
+        diffs = this.constructor.deepDiff(oldValue, newValue);
 
         if(diffs) {
           // Add to queue to update in batch later.
