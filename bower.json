@@ -1,6 +1,6 @@
 {
   "name": "cortexjs",
-  "version": "0.6.2",
+  "version": "0.8.6",
   "main": "build/cortex.js",
   "homepage": "https://github.com/mquan/cortex",
   "authors": ["Quan Nguyen"],
