@@ -113,7 +113,6 @@ module.exports = function(cortexPubSub) {
             oldValue: change.oldValue,
             newValue: change.newValue
           });
-          break;
         } else if(this.__hasChange(change, key)) {
           childChanges.push({
             type: change.type,
@@ -121,7 +120,6 @@ module.exports = function(cortexPubSub) {
             oldValue: change.oldValue ? change.oldValue[key] : undefined,
             newValue: change.newValue ? change.newValue[key] : undefined
           });
-          break;
         }
       }
 

@@ -234,13 +234,25 @@ module.exports = (function () {
 /*!
  * deep-diff.
  * Licensed under the MIT License.
- */ 
-/*jshint indent:2, laxcomma:true*/
-;(function (undefined) {
+ */
+;(function(root, factory) {
+  "use strict";
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module.
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like environments that support module.exports,
+    // like Node.
+    module.exports = factory();
+  } else {
+    // Browser globals (root is window)
+    root.DeepDiff = factory();
+  }
+}(this, function(undefined) {
   "use strict";
 
-  var $scope
-  , conflict, conflictResolution = [];
+  var $scope, conflict, conflictResolution = [];
   if (typeof global === 'object' && global) {
     $scope = global;
   } else if (typeof window !== 'undefined') {
@@ -251,7 +263,7 @@ module.exports = (function () {
   conflict = $scope.DeepDiff;
   if (conflict) {
     conflictResolution.push(
-      function () {
+      function() {
         if ('undefined' !== typeof conflict && $scope.DeepDiff === accumulateDiff) {
           $scope.DeepDiff = conflict;
           conflict = undefined;
@@ -273,35 +285,59 @@ module.exports = (function () {
   }
 
   function Diff(kind, path) {
-    Object.defineProperty(this, 'kind', { value: kind, enumerable: true });
+    Object.defineProperty(this, 'kind', {
+      value: kind,
+      enumerable: true
+    });
     if (path && path.length) {
-      Object.defineProperty(this, 'path', { value: path, enumerable: true });
+      Object.defineProperty(this, 'path', {
+        value: path,
+        enumerable: true
+      });
     }
   }
 
   function DiffEdit(path, origin, value) {
     DiffEdit.super_.call(this, 'E', path);
-    Object.defineProperty(this, 'lhs', { value: origin, enumerable: true });
-    Object.defineProperty(this, 'rhs', { value: value, enumerable: true });
+    Object.defineProperty(this, 'lhs', {
+      value: origin,
+      enumerable: true
+    });
+    Object.defineProperty(this, 'rhs', {
+      value: value,
+      enumerable: true
+    });
   }
   inherits(DiffEdit, Diff);
 
   function DiffNew(path, value) {
     DiffNew.super_.call(this, 'N', path);
-    Object.defineProperty(this, 'rhs', { value: value, enumerable: true });
+    Object.defineProperty(this, 'rhs', {
+      value: value,
+      enumerable: true
+    });
   }
   inherits(DiffNew, Diff);
 
   function DiffDeleted(path, value) {
     DiffDeleted.super_.call(this, 'D', path);
-    Object.defineProperty(this, 'lhs', { value: value, enumerable: true });
+    Object.defineProperty(this, 'lhs', {
+      value: value,
+      enumerable: true
+    });
   }
   inherits(DiffDeleted, Diff);
 
   function DiffArray(path, index, item) {
     DiffArray.super_.call(this, 'A', path);
-    Object.defineProperty(this, 'index', { value: index, enumerable: true });
-    Object.defineProperty(this, 'item', { value: item, enumerable: true });
+    Object.defineProperty(this, 'index', {
+      value: index,
+      enumerable: true
+    });
+    Object.defineProperty(this, 'item', {
+      value: item,
+      enumerable: true
+    });
   }
   inherits(DiffArray, Diff);
 
@@ -312,11 +348,33 @@ module.exports = (function () {
     return arr;
   }
 
+  function realTypeOf(subject) {
+    var type = typeof subject;
+    if (type !== 'object') {
+      return type;
+    }
+
+    if (subject === Math) {
+      return 'math';
+    } else if (subject === null) {
+      return 'null';
+    } else if (Array.isArray(subject)) {
+      return 'array';
+    } else if (subject instanceof Date) {
+      return 'date';
+    } else if (/^\/.*\//.test(subject.toString())) {
+      return 'regexp';
+    }
+    return 'object';
+  }
+
   function deepDiff(lhs, rhs, changes, prefilter, path, key, stack) {
     path = path || [];
     var currentPath = path.slice(0);
     if (typeof key !== 'undefined') {
-      if (prefilter && prefilter(currentPath, key)) { return; }
+      if (prefilter && prefilter(currentPath, key, { lhs: lhs, rhs: rhs })) {
+        return;
+      }
       currentPath.push(key);
     }
     var ltype = typeof lhs;
@@ -327,7 +385,7 @@ module.exports = (function () {
       }
     } else if (rtype === 'undefined') {
       changes(new DiffDeleted(currentPath, lhs));
-    } else if (ltype !== rtype) {
+    } else if (realTypeOf(lhs) !== realTypeOf(rhs)) {
       changes(new DiffEdit(currentPath, lhs, rhs));
     } else if (lhs instanceof Date && rhs instanceof Date && ((lhs - rhs) !== 0)) {
       changes(new DiffEdit(currentPath, lhs, rhs));
@@ -336,9 +394,7 @@ module.exports = (function () {
       if (stack.indexOf(lhs) < 0) {
         stack.push(lhs);
         if (Array.isArray(lhs)) {
-          var i
-          , len = lhs.length
-          ;
+          var i, len = lhs.length;
           for (i = 0; i < lhs.length; i++) {
             if (i >= rhs.length) {
               changes(new DiffArray(currentPath, i, new DiffDeleted(undefined, lhs[i])));
@@ -352,7 +408,7 @@ module.exports = (function () {
         } else {
           var akeys = Object.keys(lhs);
           var pkeys = Object.keys(rhs);
-          akeys.forEach(function (k, i) {
+          akeys.forEach(function(k, i) {
             var other = pkeys.indexOf(k);
             if (other >= 0) {
               deepDiff(lhs[k], rhs[k], changes, prefilter, currentPath, k, stack);
@@ -361,7 +417,7 @@ module.exports = (function () {
               deepDiff(lhs[k], undefined, changes, prefilter, currentPath, k, stack);
             }
           });
-          pkeys.forEach(function (k) {
+          pkeys.forEach(function(k) {
             deepDiff(undefined, rhs[k], changes, prefilter, currentPath, k, stack);
           });
         }
@@ -377,7 +433,7 @@ module.exports = (function () {
   function accumulateDiff(lhs, rhs, prefilter, accum) {
     accum = accum || [];
     deepDiff(lhs, rhs,
-      function (diff) {
+      function(diff) {
         if (diff) {
           accum.push(diff);
         }
@@ -388,34 +444,35 @@ module.exports = (function () {
 
   function applyArrayChange(arr, index, change) {
     if (change.path && change.path.length) {
-      var it = arr[index], i, u = change.path.length - 1;
+      var it = arr[index],
+        i, u = change.path.length - 1;
       for (i = 0; i < u; i++) {
         it = it[change.path[i]];
       }
       switch (change.kind) {
         case 'A':
-        applyArrayChange(it[change.path[i]], change.index, change.item);
-        break;
+          applyArrayChange(it[change.path[i]], change.index, change.item);
+          break;
         case 'D':
-        delete it[change.path[i]];
-        break;
+          delete it[change.path[i]];
+          break;
         case 'E':
         case 'N':
-        it[change.path[i]] = change.rhs;
-        break;
+          it[change.path[i]] = change.rhs;
+          break;
       }
     } else {
-      switch(change.kind) {
+      switch (change.kind) {
         case 'A':
-        applyArrayChange(arr[index], change.index, change.item);
-        break;
+          applyArrayChange(arr[index], change.index, change.item);
+          break;
         case 'D':
-        arr = arrayRemove(arr, index);
-        break;
+          arr = arrayRemove(arr, index);
+          break;
         case 'E':
         case 'N':
-        arr[index] = change.rhs;
-        break;
+          arr[index] = change.rhs;
+          break;
       }
     }
     return arr;
@@ -423,27 +480,26 @@ module.exports = (function () {
 
   function applyChange(target, source, change) {
     if (target && source && change && change.kind) {
-      var it = target
-      , i = -1
-      , last = change.path.length - 1
-      ;
+      var it = target,
+        i = -1,
+        last = change.path.length - 1;
       while (++i < last) {
         if (typeof it[change.path[i]] === 'undefined') {
-          it[change.path[i]] = (typeof change.path[i] === 'number') ? new Array() : {};
+          it[change.path[i]] = (typeof change.path[i] === 'number') ? [] : {};
         }
         it = it[change.path[i]];
       }
-      switch(change.kind) {
+      switch (change.kind) {
         case 'A':
-        applyArrayChange(it[change.path[i]], change.index, change.item);
-        break;
+          applyArrayChange(it[change.path[i]], change.index, change.item);
+          break;
         case 'D':
-        delete it[change.path[i]];
-        break;
+          delete it[change.path[i]];
+          break;
         case 'E':
         case 'N':
-        it[change.path[i]] = change.rhs;
-        break;
+          it[change.path[i]] = change.rhs;
+          break;
       }
     }
   }
@@ -451,39 +507,40 @@ module.exports = (function () {
   function revertArrayChange(arr, index, change) {
     if (change.path && change.path.length) {
       // the structure of the object at the index has changed...
-      var it = arr[index], i, u = change.path.length - 1;
+      var it = arr[index],
+        i, u = change.path.length - 1;
       for (i = 0; i < u; i++) {
         it = it[change.path[i]];
       }
-      switch(change.kind) {
+      switch (change.kind) {
         case 'A':
-        revertArrayChange(it[change.path[i]], change.index, change.item);
-        break;
+          revertArrayChange(it[change.path[i]], change.index, change.item);
+          break;
         case 'D':
-        it[change.path[i]] = change.lhs;
-        break;
+          it[change.path[i]] = change.lhs;
+          break;
         case 'E':
-        it[change.path[i]] = change.lhs;
-        break;
+          it[change.path[i]] = change.lhs;
+          break;
         case 'N':
-        delete it[change.path[i]];
-        break;
+          delete it[change.path[i]];
+          break;
       }
     } else {
       // the array item is different...
-      switch(change.kind) {
+      switch (change.kind) {
         case 'A':
-        revertArrayChange(arr[index], change.index, change.item);
-        break;
+          revertArrayChange(arr[index], change.index, change.item);
+          break;
         case 'D':
-        arr[index] = change.lhs;
-        break;
+          arr[index] = change.lhs;
+          break;
         case 'E':
-        arr[index] = change.lhs;
-        break;
+          arr[index] = change.lhs;
+          break;
         case 'N':
-        arr = arrayRemove(arr, index);
-        break;
+          arr = arrayRemove(arr, index);
+          break;
       }
     }
     return arr;
@@ -491,7 +548,8 @@ module.exports = (function () {
 
   function revertChange(target, source, change) {
     if (target && source && change && change.kind) {
-      var it = target, i, u;
+      var it = target,
+        i, u;
       u = change.path.length - 1;
       for (i = 0; i < u; i++) {
         if (typeof it[change.path[i]] === 'undefined') {
@@ -523,7 +581,7 @@ module.exports = (function () {
 
   function applyDiff(target, source, filter) {
     if (target && source) {
-      var onChange = function (change) {
+      var onChange = function(change) {
         if (!filter || filter(target, source, change)) {
           applyChange(target, source, change);
         }
@@ -534,16 +592,38 @@ module.exports = (function () {
 
   Object.defineProperties(accumulateDiff, {
 
-    diff: { value: accumulateDiff, enumerable: true },
-    observableDiff: { value: deepDiff, enumerable: true },
-    applyDiff: { value: applyDiff, enumerable: true },
-    applyChange: { value: applyChange, enumerable: true },
-    revertChange: { value: revertChange, enumerable: true },
-    isConflict: { value: function () { return 'undefined' !== typeof conflict; }, enumerable: true },
+    diff: {
+      value: accumulateDiff,
+      enumerable: true
+    },
+    observableDiff: {
+      value: deepDiff,
+      enumerable: true
+    },
+    applyDiff: {
+      value: applyDiff,
+      enumerable: true
+    },
+    applyChange: {
+      value: applyChange,
+      enumerable: true
+    },
+    revertChange: {
+      value: revertChange,
+      enumerable: true
+    },
+    isConflict: {
+      value: function() {
+        return 'undefined' !== typeof conflict;
+      },
+      enumerable: true
+    },
     noConflict: {
-      value: function () {
+      value: function() {
         if (conflictResolution) {
-          conflictResolution.forEach(function (it) { it(); });
+          conflictResolution.forEach(function(it) {
+            it();
+          });
           conflictResolution = null;
         }
         return accumulateDiff;
@@ -552,12 +632,8 @@ module.exports = (function () {
     }
   });
 
-  if (typeof module !== 'undefined' && module && typeof exports === 'object' && exports && module.exports === exports) {
-    module.exports = accumulateDiff; // nodejs
-  } else {
-    $scope.DeepDiff = accumulateDiff; // other... browser?
-  }
-}());
+  return accumulateDiff;
+}));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],3:[function(_dereq_,module,exports){
@@ -699,7 +775,6 @@ module.exports = function (cortexPubSub) {
               oldValue: change.oldValue,
               newValue: change.newValue
             });
-            break;
           } else if (this.__hasChange(change, key)) {
             childChanges.push({
               type: change.type,
@@ -707,7 +782,6 @@ module.exports = function (cortexPubSub) {
               oldValue: change.oldValue ? change.oldValue[key] : undefined,
               newValue: change.newValue ? change.newValue[key] : undefined
             });
-            break;
           }
         }
 
