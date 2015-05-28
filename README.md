@@ -100,14 +100,14 @@ cortex.off("update");
 
 In React's world data flows in one direction from the top down. That means if you want to make a change, change it at the source and let it propagate down the chain. But what happens when a child component needs to update the data? React's official guideline is to use callback for communication between parent and child components.
 
-However, this simply isn't sustainable even for trivially nested data. Imagine a Restaurant app in which the Restaurant has many Orders, each has many Items, each of which has many Modifiers. If you want to update a Modifier from 'medium rare' to 'well-done' you'd have to pass the data changes several levels up. This is not only awkward but also creates unnecessary extra code in each component in the chain only for the purpose of passing data upstream.
+However, this simply isn't sustainable even for trivially nested data. Imagine a Restaurant app in which the Restaurant has many Orders, each has many Items, each of which has many Modifiers. If you want to update a spiciness Modifier from 'hot' to 'mild' you'd have to pass the data changes several levels up. This is not only awkward but also creates unnecessary extra code in each component in the chain only for the purpose of passing data upstream.
 
 Cortex's goal is to support arbitrarily deep data structures without requiring you to pass callbacks down the chain. Cortex achieves this by thinly wrapping your data in an object that contains the key for locating each nested piece of data as accessed from the top level. When you change the data, internally Cortex passes the new value along with its location key to update the data at the source.
 
 
 # Basic example
 
-The following example has two components Order and Item components. An Order contains an array of Items, and each Item can increase its own quantity attribute.
+The following example has two components, Order and Item. An Order contains an array of Items, and each Item can increase its own quantity attribute.
 
 ```javascript
 var Item = React.createClass({
