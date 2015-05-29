@@ -151,6 +151,20 @@ describe("DataWrapper", function() {
       });
     });
 
+    describe("when nested values change", function() {
+      it("returns changes for each nested element", function() {
+        var oldValue = {root: {a: 1, b: 2}},
+            newValue = {root: {a: 10, b: 20}},
+            changes = [{type: "update", path: ['root', 'a'], oldValue: oldValue['root']['a'], newValue: newValue['root']['a']}, {type: "update", path: ['root', 'b'], oldValue: oldValue['root']['b'], newValue: newValue['root']['b']}],
+            wrapper = new DataWrapper({value: newValue, changes: changes});
+
+        expect(wrapper.getChanges()).toBe(changes);
+        expect(wrapper['root'].getChanges()).toEqual([{type: "update", path: ['a'], oldValue: oldValue['root']['a'], newValue: newValue['root']['a']}, {type: "update", path: ['b'], oldValue: oldValue['root']['b'], newValue: newValue['root']['b']}]);
+        expect(wrapper['root']['a'].getChanges()).toEqual([{type: "update", path: [], oldValue: oldValue['root']['a'], newValue: newValue['root']['a']}]);
+        expect(wrapper['root']['b'].getChanges()).toEqual([{type: "update", path: [], oldValue: oldValue['root']['b'], newValue: newValue['root']['b']}]);
+      });
+    });
+
     describe("when array value changes", function() {
       describe("when changing element value", function() {
         it("returns changes for the updated element", function() {
@@ -302,6 +316,19 @@ describe("DataWrapper", function() {
               wrapper = new DataWrapper({value: value, changes: changes});
 
           expect(wrapper.didChange()).toBe(true);
+        });
+      });
+
+      describe("when there are multiple changes in the same root", function() {
+        it("returns true for each changed branch", function() {
+          var value = {root: {a: 1, b: 2, c: 3}},
+              changes = [{type: "update", path: ['root', 'a'], oldValue: 10, newValue: 1}, {type: "update", path: ['root', 'b'], oldValue: 20, newValue: 2}],
+              wrapper = new DataWrapper({value: value, changes: changes});
+
+          expect(wrapper['root'].didChange()).toBe(true);
+          expect(wrapper['root']['a'].didChange()).toBe(true);
+          expect(wrapper['root']['b'].didChange()).toBe(true);
+          expect(wrapper['root']['c'].didChange()).toBe(false);
         });
       });
     });
