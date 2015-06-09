@@ -1,3 +1,6 @@
+# 0.8.7
+- fix multiple changes bug
+
 # 0.8.6
 - provide `deepDiff` and `deepClone` class methods
 
