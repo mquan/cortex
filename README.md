@@ -96,6 +96,28 @@ Remove all callbacks
 cortex.off("update");
 ```
 
+### ES6 Guide
+Since React 0.13.0 removed `setProps` for ES6 React.Component class you have to define your cortex data as state instead
+
+```javascript
+class MyComponent extends React.Component {
+  constructor(props) {
+    super(props);
+
+    // Assume you pass your data into props as myData
+    var myCortex = new Cortex(props.myData, (updatedCortex) => {
+      this.setState({myCortex: updatedCortex});
+    });
+
+    this.state = {myCortex: myCortex};
+  }
+
+  render() {
+    // access cortex data from this.state.myCortex
+  }
+}
+```
+
 # Overview
 
 In React's world data flows in one direction from the top down. That means if you want to make a change, change it at the source and let it propagate down the chain. But what happens when a child component needs to update the data? React's official guideline is to use callback for communication between parent and child components.
