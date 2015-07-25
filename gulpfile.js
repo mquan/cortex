@@ -12,7 +12,7 @@ var gulp = require("gulp"),
 
 gulp.task("scripts", function() {
   browserify({entries: "./src/cortex.js", standalone: 'cortex'})
-    .transform(to5ify)
+    .transform(to5ify, { optional: ["spec.protoToAssign"] })
     .bundle()
     .on("error", gutil.log.bind(gutil, 'Browserify Error'))
     .pipe(source("cortex.js"))
