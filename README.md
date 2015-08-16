@@ -57,6 +57,8 @@ cortex.getValue()
 ```
 
 Get the changes
+** Deprecated method. `getChanges` and `didChange` will be removed in cortex 2.0
+
 ```javascript
 cortex.getChanges(); // => [{type: "update", path: ['a'], oldValue: 200, newValue: 300}]
 

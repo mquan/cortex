@@ -33,10 +33,13 @@ module.exports = function(cortexPubSub) {
     }
 
     getChanges() {
+      console.warn("Method deprecated! getChanges will be removed in cortex 2.0 in favor of immutable data");
       return this.__changes;
     }
 
     didChange(key) {
+      console.warn("Method deprecated! didChange will be removed in cortex 2.0 in favor of immutable data")
+
       if(!key) {
         return this.__changes.length > 0;
       }

@@ -688,11 +688,14 @@ module.exports = function (cortexPubSub) {
     }, {
       key: "getChanges",
       value: function getChanges() {
+        console.warn("Method deprecated! getChanges will be removed in cortex 2.0 in favor of immutable data");
         return this.__changes;
       }
     }, {
       key: "didChange",
       value: function didChange(key) {
+        console.warn("Method deprecated! didChange will be removed in cortex 2.0 in favor of immutable data");
+
         if (!key) {
           return this.__changes.length > 0;
         }
