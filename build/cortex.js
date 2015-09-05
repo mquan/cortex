@@ -1,237 +1,4 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.cortex = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-"use strict";
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-function _defaults(obj, defaults) { var keys = Object.getOwnPropertyNames(defaults); for (var i = 0; i < keys.length; i++) { var key = keys[i]; var value = Object.getOwnPropertyDescriptor(defaults, key); if (value && value.configurable && obj[key] === undefined) { Object.defineProperty(obj, key, value); } } return obj; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : _defaults(subClass, superClass); }
-
-module.exports = (function () {
-  var cortexPubSub = _dereq_("./pubsub"),
-      DataWrapper = _dereq_("./data_wrapper")(cortexPubSub),
-      changeMappings = { "N": "new", "E": "update", "A": "update", "D": "delete" };
-
-  var Cortex = (function (_DataWrapper) {
-    _inherits(Cortex, _DataWrapper);
-
-    function Cortex(value, callback) {
-      _classCallCheck(this, Cortex);
-
-      _get(Object.getPrototypeOf(Cortex.prototype), "constructor", this).call(this, value);
-
-      this.__value = value;
-      this.__path = [];
-      this.__updates = [];
-      this.__callbacks = callback ? [callback] : [];
-      this.__loopProcessing = false;
-      this.__subscribe();
-
-      // Set initial changes to empty because we don't want any component rerendering to misinterpret available changes.
-      // For instance, if a new cortex initialization is considered a change from undefined to its current value then a setState call
-      // would trigger shouldComponentUpdate, which would return the changes even though no cortex update actually happens.
-      // The changes would incorrectly persist until an actual cortex rewrap occurs.
-      this.__changes = [];
-      this.__wrap();
-    }
-
-    _createClass(Cortex, [{
-      key: "on",
-      value: function on(eventName, callback) {
-        if (eventName === "update") {
-          this.__callbacks.push(callback);
-        }
-      }
-    }, {
-      key: "off",
-      value: function off(eventName, callback) {
-        if (eventName === "update") {
-          if (callback) {
-            for (var i = 0, ii = this.__callbacks.length; i < ii; i++) {
-              if (callback === this.__callbacks[i]) {
-                this.__callbacks.splice(i, 1);
-                break;
-              }
-            }
-          } else {
-            this.__callbacks = [];
-          }
-        }
-      }
-    }, {
-      key: "update",
-      value: function update(data) {
-        if (this.__checkUpdate(data.oldValue, data.value, data.path)) {
-          // Schedule value setting, rewrapping, and running callbacks in batch so that multiple updates
-          // in the same event loop only result in a single rewrap and callbacks run.
-          if (!this.__loopProcessing) {
-            this.__loopProcessing = true;
-
-            setTimeout(this.__batchAll.bind(this), 0);
-          }
-
-          return true;
-        } else {
-          return false;
-        }
-      }
-    }, {
-      key: "__batchAll",
-      value: function __batchAll() {
-        this.__batchSetValue();
-        this.__wrap();
-
-        // Set processing to false so that update from inside a cortex callback
-        // takes place in the next event loop.
-        this.__loopProcessing = false;
-        this.__runCallbacks();
-      }
-    }, {
-      key: "__batchSetValue",
-      value: function __batchSetValue() {
-        for (var i = 0, ii = this.__updates.length; i < ii; i++) {
-          this.__setValue(this.__updates[i].newValue, this.__updates[i].path);
-        }
-
-        this.__updates = [];
-      }
-    }, {
-      key: "__runCallbacks",
-      value: function __runCallbacks() {
-        for (var i = 0, ii = this.__callbacks.length; i < ii; i++) {
-          if (this.__callbacks[i]) this.__callbacks[i](this);
-        }
-      }
-    }, {
-      key: "__subscribe",
-      value: function __subscribe() {
-        this.__eventId = cortexPubSub.subscribeToCortex((function (topic, data) {
-          this.update(data);
-        }).bind(this), (function (topic, data) {
-          this.__remove(data.path);
-        }).bind(this));
-      }
-    }, {
-      key: "__remove",
-      value: function __remove(path) {
-        if (path.length) {
-          var subPath = path.slice(0, path.length - 1),
-              subValue = this.__subValue(subPath),
-              key = path[path.length - 1],
-              removed = subValue[key],
-              oldValue = this.constructor.deepClone(subValue);
-
-          if (subValue.constructor === Object) {
-            delete subValue[key];
-          } else if (subValue.constructor === Array) {
-            subValue.splice(key, 1);
-          }
-          this.update({ value: subValue, path: subPath, oldValue: oldValue });
-          return removed;
-        } else {
-          delete this.__wrappers;
-          delete this.__value;
-        }
-      }
-    }, {
-      key: "__setValue",
-      value: function __setValue(newValue, path) {
-        /*
-          When saving an object to a variable it's pass by reference, but when doing so for a primitive value
-          it's pass by value. We avoid this pass by value problem by only setting subValue when path length is greater
-          than 2 (meaning it can't never be a primitive). When path length is 0 or 1 we set the value directly.
-        */
-        if (path.length > 1) {
-          var subValue = this.__subValue(path.slice(0, path.length - 1));
-
-          subValue[path[path.length - 1]] = newValue;
-        } else if (path.length === 1) {
-          this.__value[path[0]] = newValue;
-        } else {
-          this.__value = newValue;
-        }
-      }
-
-      // Check whether newValue is different, if not then return false to bypass rewrap and running callbacks.
-      // Note that we cannot compare stringified values of old and new data because order of keys cannot be guaranteed.
-    }, {
-      key: "__checkUpdate",
-      value: function __checkUpdate(oldValue, newValue, path) {
-        var diffs;
-
-        if (oldValue) {
-          diffs = this.constructor.deepDiff(oldValue, newValue);
-          this.__computeChanges(diffs, path);
-          return true;
-        } else {
-          var oldValue = this.__subValue(path);
-          diffs = this.constructor.deepDiff(oldValue, newValue);
-
-          if (diffs) {
-            // Add to queue to update in batch later.
-            this.__updates.push({ newValue: newValue, path: path });
-
-            this.__computeChanges(diffs, path);
-            return true;
-          } else {
-            return false;
-          }
-        }
-      }
-
-      // changes = [{kind: ('new' || 'update' || 'delete'), path: [...], oldValue: ..., newValue: ...}]
-    }, {
-      key: "__computeChanges",
-      value: function __computeChanges(diffs, path) {
-        var changeType, diffPath, diff;
-
-        // Reset changes at beginning of event loop. This has to be done after new changes are detected because
-        // we don't want to override previous changes if current update does not result in any new change.
-        if (!this.__loopProcessing) {
-          this.__changes = [];
-        }
-
-        for (var i = 0, ii = diffs.length; i < ii; i++) {
-          diff = diffs[i];
-          // Raw deep diff sample: {"kind":"A","path":[1,"b"],"index":1,"item":{"kind":"N","rhs":1}}
-          // Use the change type closest to the change.
-          changeType = changeMappings[diff.item ? diff.item.kind : diff.kind];
-
-          diffPath = path.slice();
-
-          if (diff.path) {
-            diffPath = diffPath.concat(diff.path);
-          }
-
-          if (diff.index) {
-            diffPath.push(diff.index);
-          }
-
-          this.__changes.push({
-            type: changeType,
-            path: diffPath,
-            oldValue: diff.item ? diff.item.lhs : diff.lhs,
-            newValue: diff.item ? diff.item.rhs : diff.rhs
-          });
-        }
-      }
-    }]);
-
-    return Cortex;
-  })(DataWrapper);
-
-  if (typeof window !== "undefined" && window !== null) {
-    window.Cortex = Cortex;
-  }
-
-  return Cortex;
-})();
-
-},{"./data_wrapper":3,"./pubsub":4}],2:[function(_dereq_,module,exports){
 (function (global){
 /*!
  * deep-diff.
@@ -638,7 +405,330 @@ module.exports = (function () {
 }));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],2:[function(_dereq_,module,exports){
+'use strict';
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+module.exports = function (ImmutableWrapper) {
+  var ChangeHandler = (function () {
+    function ChangeHandler() {
+      _classCallCheck(this, ChangeHandler);
+    }
+
+    _createClass(ChangeHandler, null, [{
+      key: 'updateNode',
+      value: function updateNode(params) {
+        var newWrapper = this._initNode(params);
+        params.newWrapper = newWrapper;
+        params.childrenDiffs = this._applyChanges(params);
+        this._updateChildNodes(params);
+
+        return newWrapper;
+      }
+
+      // Create empty node and fill in with link to existing nodes and value.
+    }, {
+      key: '_initNode',
+      value: function _initNode(params) {
+        var oldWrapper = params.oldWrapper;
+        var root = params.root;
+        var eventId = params.eventId;
+
+        var newWrapper;
+
+        if (root) {
+          newWrapper = root;
+        } else {
+          newWrapper = new ImmutableWrapper({
+            path: oldWrapper.getPath().slice(),
+            eventId: eventId
+          });
+        }
+
+        // copy old wrapper references into new node
+        newWrapper.__wrappers = this._shallowCopy(oldWrapper.__wrappers);
+        for (var key in newWrapper.__wrappers) {
+          newWrapper.__wrappers[key].__eventId = eventId;
+          newWrapper[key] = newWrapper.__wrappers[key];
+        }
+        newWrapper.__value = this._shallowCopy(oldWrapper.__value);
+
+        return newWrapper;
+      }
+    }, {
+      key: '_shallowCopy',
+      value: function _shallowCopy(obj) {
+        var newObj;
+
+        if (ImmutableWrapper.__isObject(obj)) {
+          newObj = {};
+
+          for (var key in obj) {
+            newObj[key] = obj[key];
+          }
+        } else if (ImmutableWrapper.__isArray(obj)) {
+          newObj = [];
+
+          for (var i = 0, ii = obj.length; i < ii; i++) {
+            newObj[i] = obj[i];
+          }
+        }
+
+        return newObj;
+      }
+
+      // Apply diffs for the current level and pass back childrenDiffs to be processed in the nested update call.
+    }, {
+      key: '_applyChanges',
+      value: function _applyChanges(params) {
+        var oldWrapper = params.oldWrapper;
+        var newWrapper = params.newWrapper;
+        var diffs = params.diffs;
+        var eventId = params.eventId;
+
+        var childrenDiffs = {};
+
+        for (var i = 0, ii = diffs.length; i < ii; i++) {
+          var path = diffs[i].path.slice();
+
+          if (path.length > 1) {
+            // Diff is not applicable at this level, we simply pass the diffs onto the next level
+            // bucketted by the keys of the nested children so that all diffs of a common node are applied once.
+            var childKey = path.shift();
+            diffs[i].path = path;
+            if (childrenDiffs[childKey]) {
+              childrenDiffs[childKey].push(diffs[i]);
+            } else {
+              childrenDiffs[childKey] = [diffs[i]];
+            }
+          } else if (path.length === 1) {
+            var _diffs$i = diffs[i];
+            var action = _diffs$i.action;
+            var value = _diffs$i.value;
+
+            var key = diffs[i].path[0];
+
+            if (action === 'add' && ImmutableWrapper.__isArray(newWrapper.__value)) {
+              // -1 means end of array, whatever the index is right now
+              if (key === -1) {
+                key = newWrapper.__value.length;
+              }
+
+              newWrapper.__value.splice(key, 0, value);
+              newWrapper.__wrappers.splice(key, 0, new ImmutableWrapper({
+                value: value,
+                path: oldWrapper.__path.concat(key),
+                eventId: eventId
+              }));
+            } else if (action === 'delete') {
+              if (ImmutableWrapper.__isObject(newWrapper.__value)) {
+                delete newWrapper.__value[key];
+                delete newWrapper.__wrappers[key];
+                delete newWrapper[key];
+              } else if (ImmutableWrapper.__isArray(newWrapper.__value)) {
+                var index = 0;
+                if (key === -1) {
+                  index = newWrapper.__value.length - 1;
+                } else if (diffs[i].force) {
+                  index = key;
+                } else {
+                  // Since the it's possible element already got rearrange.
+                  // The only signature that's not changed is the __path, so we
+                  // go by the index of the element that match the path specified in diff.
+
+                  index = newWrapper.findIndex(function (wrapper) {
+                    return wrapper.__path[wrapper.__path.length - 1] === key;
+                  });
+                }
+
+                newWrapper.__value.splice(index, 1);
+                newWrapper.__wrappers.splice(index, 1);
+              }
+            } else {
+              // Update action
+              newWrapper.__value[key] = value;
+              newWrapper.__wrappers[key] = new ImmutableWrapper({
+                value: value,
+                path: oldWrapper.__path.concat(key),
+                eventId: eventId
+              });
+              newWrapper[key] = newWrapper.__wrappers[key];
+            }
+          } else {
+            // This only occurs when setting primitive value or destroy() at the root level
+            if (diffs[i].action == 'delete') {
+              return newWrapper = undefined;
+            } else {
+              newWrapper.__value = diffs[i].value;
+            }
+          }
+        }
+
+        // only run this if current array changes length
+        if (ImmutableWrapper.__isArray(newWrapper.__value)) {
+          // reorder indices and set path to new value
+          for (var j = 0, jj = newWrapper.__wrappers.length; j < jj; j++) {
+            // Set last element in path since index may already changed.
+            var newPath = newWrapper.__wrappers[j].__path;
+            newPath[newPath.length - 1] = j;
+
+            newWrapper[j] = newWrapper.__wrappers[j];
+          }
+
+          // Remove extranous elements since we may already remove from array
+          while (newWrapper[j]) {
+            delete newWrapper[j];
+            j += 1;
+          }
+        }
+
+        return childrenDiffs;
+      }
+    }, {
+      key: '_updateChildNodes',
+      value: function _updateChildNodes(params) {
+        var oldWrapper = params.oldWrapper;
+        var newWrapper = params.newWrapper;
+        var childrenDiffs = params.childrenDiffs;
+        var eventId = params.eventId;
+
+        // iterate over set of unapplied diffs and let child nodes handle the changes.
+        for (var key in childrenDiffs) {
+          newWrapper[key] = newWrapper.__wrappers[key] = this.updateNode({
+            oldWrapper: oldWrapper.__wrappers[key],
+            diffs: childrenDiffs[key],
+            eventId: eventId
+          });
+
+          // The current value does not have the value changes from children diffs applied.
+          // So we set the affected nested value to that of children.
+          newWrapper.__value[key] = newWrapper.__wrappers[key].__value;
+        }
+      }
+    }]);
+
+    return ChangeHandler;
+  })();
+
+  return ChangeHandler;
+};
+
 },{}],3:[function(_dereq_,module,exports){
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _defaults(obj, defaults) { var keys = Object.getOwnPropertyNames(defaults); for (var i = 0; i < keys.length; i++) { var key = keys[i]; var value = Object.getOwnPropertyDescriptor(defaults, key); if (value && value.configurable && obj[key] === undefined) { Object.defineProperty(obj, key, value); } } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : _defaults(subClass, superClass); }
+
+module.exports = (function () {
+  var cortexPubSub = _dereq_("./pubsub"),
+      ImmutableWrapper = _dereq_("./immutable_wrapper")(cortexPubSub),
+      ChangeHandler = _dereq_("./change_handler")(ImmutableWrapper);
+
+  var Cortex = (function (_ImmutableWrapper) {
+    _inherits(Cortex, _ImmutableWrapper);
+
+    function Cortex(value, callback) {
+      _classCallCheck(this, Cortex);
+
+      _get(Object.getPrototypeOf(Cortex.prototype), "constructor", this).call(this);
+
+      this.__value = value;
+      this.__path = [];
+      this.__callbacks = callback ? [callback] : [];
+      this.__updating = false;
+      this.__subscribe();
+
+      this.__wrap();
+    }
+
+    _createClass(Cortex, [{
+      key: "update",
+      value: function update(diffs) {
+        if (diffs.length) {
+          if (!this.__updating) {
+            this.__diffs = [];
+            this.__diffSignature = {};
+            this.__updating = true;
+            setTimeout(this.__updateAll.bind(this), 0);
+          }
+
+          var sig = JSON.stringify(diffs[i]);
+
+          for (var i = 0, ii = diffs.length; i < ii; i++) {
+            if (diffs[i].force) {
+              this.__diffs.push(diffs[i]);
+            } else if (!this.__diffSignature[sig]) {
+              // Stringify to get diff signature as unique key to
+              // prevent adding duplicate diffs.
+              this.__diffSignature[sig] = true;
+              this.__diffs.push(diffs[i]);
+            }
+          }
+        }
+      }
+    }, {
+      key: "onChange",
+      value: function onChange(callback) {
+        this.__callbacks.push(callback);
+      }
+    }, {
+      key: "__subscribe",
+      value: function __subscribe() {
+        var self = this;
+        this.__eventId = cortexPubSub.subscribeToCortex((function (topic, data) {
+          this.update(data);
+        }).bind(this));
+      }
+    }, {
+      key: "__updateAll",
+      value: function __updateAll() {
+        if (this.__diffs.length) {
+          var updatedCortex = new Cortex();
+          updatedCortex = ChangeHandler.updateNode({
+            oldWrapper: this,
+            root: updatedCortex,
+            diffs: this.__diffs,
+            eventId: updatedCortex.eventId
+          });
+
+          this.__runCallbacks(updatedCortex);
+
+          updatedCortex.__callbacks = this.__callbacks.slice();
+          // this.__callbacks = [];
+          this.__updating = false;
+          delete this.__diffs;
+        }
+      }
+    }, {
+      key: "__runCallbacks",
+      value: function __runCallbacks(updatedCortex) {
+        for (var i = 0, ii = this.__callbacks.length; i < ii; i++) {
+          if (this.__callbacks[i]) this.__callbacks[i](updatedCortex);
+        }
+      }
+    }]);
+
+    return Cortex;
+  })(ImmutableWrapper);
+
+  if (typeof window !== "undefined" && window !== null) {
+    window.Cortex = Cortex;
+  }
+
+  return Cortex;
+})();
+
+},{"./change_handler":2,"./immutable_wrapper":4,"./pubsub":5}],4:[function(_dereq_,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -647,30 +737,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 module.exports = function (cortexPubSub) {
   var _deepDiff = _dereq_("deep-diff").diff;
+  var changeMappings = { "N": 'add', "E": 'update', "A": 'add', "D": 'delete' };
 
-  var DataWrapper = (function () {
-    function DataWrapper(data) {
-      _classCallCheck(this, DataWrapper);
+  var ImmutableWrapper = (function () {
+    function ImmutableWrapper(data) {
+      _classCallCheck(this, ImmutableWrapper);
 
-      this.__eventId = data.eventId;
-      this.__value = data.value;
-      this.__path = data.path || [];
-      this.__changes = data.changes || [];
+      if (data) {
+        this.__eventId = data.eventId;
+        this.__value = data.value;
+        this.__path = data.path || [];
+      }
 
       this.__wrap();
-
-      this.val = this.getValue;
     }
 
-    _createClass(DataWrapper, [{
-      key: "set",
-      value: function set(value, data) {
-        var payload = data || {};
-        payload["value"] = value;
-        payload["path"] = this.__path;
-        cortexPubSub.publish("update" + this.__eventId, payload);
-      }
-    }, {
+    _createClass(ImmutableWrapper, [{
       key: "getValue",
       value: function getValue() {
         return this.__value;
@@ -686,67 +768,83 @@ module.exports = function (cortexPubSub) {
         return this.__path[this.__path.length - 1];
       }
     }, {
-      key: "getChanges",
-      value: function getChanges() {
-        console.warn("Method deprecated! getChanges will be removed in cortex 2.0 in favor of immutable data");
-        return this.__changes;
-      }
-    }, {
-      key: "didChange",
-      value: function didChange(key) {
-        console.warn("Method deprecated! didChange will be removed in cortex 2.0 in favor of immutable data");
+      key: "set",
+      value: function set(value) {
+        var rawDiffs = this.constructor.deepDiff(this.__value, value);
+        if (rawDiffs) {
+          var diffs = [],
+              diff,
+              path;
 
-        if (!key) {
-          return this.__changes.length > 0;
-        }
+          for (var i = 0, ii = rawDiffs.length; i < ii; i++) {
+            path = this.__path.slice();
+            diff = rawDiffs[i];
 
-        for (var i = 0, ii = this.__changes.length; i < ii; i++) {
-          var change = this.__changes[i];
-          if (change.path[0] === key || this.__hasChange(change, key)) {
-            return true;
+            // Diff path may not be present if value is shallow
+            if (diff.path) path = path.concat(diff.path);
+
+            // Both index and path may be available
+            if (diff.index) path.push(diff.index);
+
+            diffs.push({
+              action: changeMappings[diff.item ? diff.item.kind : diff.kind],
+              path: path,
+              value: diff.item ? diff.item.rhs : diff.rhs
+            });
           }
+
+          this.__notifyUpdate(diffs);
         }
-        return false;
       }
     }, {
       key: "forEach",
       value: function forEach(callback) {
-        if (this.__isObject()) {
+        if (this.constructor.__isObject(this.__wrappers)) {
           for (var key in this.__wrappers) {
             callback(key, this.__wrappers[key], this.__wrappers);
           }
-        } else if (this.__isArray()) {
+        } else if (this.constructor.__isArray(this.__wrappers)) {
           this.__wrappers.forEach(callback);
         }
       }
     }, {
-      key: "remove",
-      value: function remove() {
-        cortexPubSub.publish("remove" + this.__eventId, { path: this.__path });
+      key: "destroy",
+      value: function destroy() {
+        var diffs = [{
+          action: 'delete',
+          path: this.__path.slice()
+        }];
+
+        this.__notifyUpdate(diffs);
       }
     }, {
-      key: "__subValue",
-      value: function __subValue(path) {
-        var subValue = this.__value;
-        for (var i = 0, ii = path.length; i < ii; i++) {
-          subValue = subValue[path[i]];
-        }
-        return subValue;
-      }
+      key: "__forceUpdate",
+      value: function __forceUpdate(action, key, value) {
+        var diffs = [{
+          action: action,
+          path: this.__path.concat(key),
+          value: value,
+          force: true
+        }];
 
-      // Recursively wrap data if @value is a hash or an array.
-      // Otherwise there's no need to further wrap primitive or other class instances
+        this.__notifyUpdate(diffs);
+      }
+    }, {
+      key: "__notifyUpdate",
+      value: function __notifyUpdate(diffs) {
+        if (diffs && diffs.length) {
+          cortexPubSub.publish("update" + this.__eventId, diffs);
+        }
+      }
     }, {
       key: "__wrap",
       value: function __wrap() {
-        this.__cleanup();
-
-        if (this.__isObject()) {
+        if (this.constructor.__isObject(this.__value)) {
           this.__wrappers = {};
           for (var key in this.__value) {
             this.__wrapChild(key);
           }
-        } else if (this.__isArray()) {
+        } else if (this.constructor.__isArray(this.__value)) {
           this.__wrappers = [];
           for (var index = 0, length = this.__value.length; index < length; index++) {
             this.__wrapChild(index);
@@ -758,123 +856,35 @@ module.exports = function (cortexPubSub) {
       value: function __wrapChild(key) {
         var path = this.__path.slice();
         path.push(key);
-        this.__wrappers[key] = new DataWrapper({
+        this.__wrappers[key] = new ImmutableWrapper({
           value: this.__value[key],
           path: path,
-          eventId: this.__eventId,
-          changes: this.__childChanges(key)
+          eventId: this.__eventId
         });
         this[key] = this.__wrappers[key];
-      }
-    }, {
-      key: "__childChanges",
-      value: function __childChanges(key) {
-        var childChanges = [],
-            change;
-        for (var i = 0, ii = this.__changes.length; i < ii; i++) {
-          change = this.__changes[i];
-          if (change.path[0] === key) {
-            childChanges.push({
-              type: change.type,
-              path: change.path.slice(1, change.path.length),
-              oldValue: change.oldValue,
-              newValue: change.newValue
-            });
-          } else if (this.__hasChange(change, key)) {
-            childChanges.push({
-              type: change.type,
-              path: [],
-              oldValue: change.oldValue ? change.oldValue[key] : undefined,
-              newValue: change.newValue ? change.newValue[key] : undefined
-            });
-          }
-        }
-
-        return childChanges;
-      }
-    }, {
-      key: "__hasChange",
-      value: function __hasChange(change, key) {
-        return change.path.length === 0 && (change.oldValue && change.oldValue[key] || change.newValue && change.newValue[key]);
-      }
-    }, {
-      key: "__cleanup",
-      value: function __cleanup() {
-        if (this.__wrappers) {
-          if (this.__isObject()) {
-            for (var key in this.__wrappers) {
-              delete this[key];
-            }
-          } else if (this.__isArray()) {
-            for (var i = 0, ii = this.__wrappers.length; i < ii; i++) {
-              delete this[i];
-            }
-          }
-          delete this.__wrappers;
-        }
-      }
-    }, {
-      key: "__isObject",
-      value: function __isObject() {
-        return this.__value && this.__value.constructor === Object;
-      }
-    }, {
-      key: "__isArray",
-      value: function __isArray() {
-        return this.__value && this.__value.constructor === Array;
       }
     }], [{
       key: "deepDiff",
       value: function deepDiff(oldValue, newValue) {
         return _deepDiff(oldValue, newValue);
       }
-
-      // source: http://stackoverflow.com/a/728694
     }, {
-      key: "deepClone",
-      value: function deepClone(obj) {
-        var copy;
-
-        // Handle the 3 simple types, and null or undefined
-        if (null == obj || "object" != typeof obj) return obj;
-
-        // Handle Date
-        if (obj instanceof Date) {
-          copy = new Date();
-          copy.setTime(obj.getTime());
-          return copy;
-        }
-
-        // Handle Array
-        if (obj instanceof Array) {
-          copy = [];
-          for (var i = 0, len = obj.length; i < len; i++) {
-            copy[i] = DataWrapper.deepClone(obj[i]);
-          }
-          return copy;
-        }
-
-        // Handle Object
-        if (obj instanceof Object) {
-          copy = {};
-          for (var attr in obj) {
-            if (obj.hasOwnProperty(attr)) copy[attr] = DataWrapper.deepClone(obj[attr]);
-          }
-          return copy;
-        }
-
-        throw new Error("Unable to copy obj! Its type isn't supported.");
+      key: "__isObject",
+      value: function __isObject(obj) {
+        return obj && obj.constructor === Object;
+      }
+    }, {
+      key: "__isArray",
+      value: function __isArray(arr) {
+        return arr && arr.constructor === Array;
       }
     }]);
 
-    return DataWrapper;
-  })()
+    return ImmutableWrapper;
+  })();
 
-  // Mixin Array and Hash behaviors
-  ;
-
-  var ArrayWrapper = _dereq_("./wrappers/array"),
-      HashWrapper = _dereq_("./wrappers/hash");
+  var ArrayWrapper = _dereq_("./wrappers/array_wrapper");
+  var ObjectWrapper = _dereq_("./wrappers/object_wrapper");
 
   var __include = function __include(klass, mixins) {
     for (var i = 0, ii = mixins.length; i < ii; i++) {
@@ -884,12 +894,12 @@ module.exports = function (cortexPubSub) {
     }
   };
 
-  __include(DataWrapper, [ArrayWrapper, HashWrapper]);
+  __include(ImmutableWrapper, [ArrayWrapper, ObjectWrapper]);
 
-  return DataWrapper;
+  return ImmutableWrapper;
 };
 
-},{"./wrappers/array":5,"./wrappers/hash":6,"deep-diff":2}],4:[function(_dereq_,module,exports){
+},{"./wrappers/array_wrapper":6,"./wrappers/object_wrapper":7,"deep-diff":1}],5:[function(_dereq_,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -950,8 +960,8 @@ module.exports = (function () {
   return new PubSub();
 })();
 
-},{}],5:[function(_dereq_,module,exports){
-"use strict";
+},{}],6:[function(_dereq_,module,exports){
+'use strict';
 
 var ArrayWrapper = {
   count: function count() {
@@ -972,7 +982,7 @@ var ArrayWrapper = {
         return this.__wrappers[index];
       }
     }
-    return null;
+    return undefined;
   },
 
   findIndex: function findIndex(callback) {
@@ -984,94 +994,133 @@ var ArrayWrapper = {
     return -1;
   },
 
-  push: function push(value) {
-    var oldValue = this.constructor.deepClone(this.__value),
-        length = this.__value.push(value);
-    this.set(this.__value, { oldValue: oldValue });
-    return length;
+  // A limitation of these 'add' methods is it can only generate
+  // one value change per diff
+  // one way to improve is to create a new action 'concat'
+  // that insert the array as multiple elements instead of treating
+  // the array as a single element. This unwraps value as array and then add
+
+  // add spec that push/unshift empty input
+  // should not error
+  // should not change anything
+  push: function push() {
+    var values = Array.prototype.slice.call(arguments);
+    var diffs = [];
+
+    // Use -1 to indicate end of array because we don't mutate in-place
+    // so there's no way to tell the current values in array.
+    for (var i = 0, ii = values.length; i < ii; i++) {
+      diffs.push({
+        action: 'add',
+        path: this.__path.concat(-1),
+        value: values[i],
+        force: true
+      });
+    }
+
+    this.__notifyUpdate(diffs);
   },
 
   pop: function pop() {
-    var oldValue = this.constructor.deepClone(this.__value),
-        last = this.__value.pop();
-    this.set(this.__value, { oldValue: oldValue });
-    return last;
+    this.__forceUpdate('delete', -1);
   },
 
-  unshift: function unshift(value) {
-    var oldValue = this.constructor.deepClone(this.__value),
-        length = this.__value.unshift(value);
-    this.set(this.__value, { oldValue: oldValue });
-    return length;
+  unshift: function unshift() {
+    var values = Array.prototype.slice.call(arguments);
+    var diffs = [];
+
+    for (var i = 0, ii = values.length; i < ii; i++) {
+      // Unshift so that the diffs come out in reverse order
+      // making the last diffs showing up first in the array.
+      diffs.unshift({
+        action: 'add',
+        path: this.__path.concat(0),
+        value: values[i],
+        force: true
+      });
+    }
+
+    this.__notifyUpdate(diffs);
   },
 
   shift: function shift() {
-    var oldValue = this.constructor.deepClone(this.__value),
-        last = this.__value.shift();
-    this.set(this.__value, { oldValue: oldValue });
-    return last;
+    this.__forceUpdate('delete', 0);
   },
 
-  insertAt: function insertAt(index) {
-    var oldValue = this.constructor.deepClone(this.__value),
-        args = Array.prototype.slice.call(arguments, 1);
-
-    Array.prototype.splice.apply(this.__value, [index, 0].concat(args));
-
-    this.set(this.__value, { oldValue: oldValue });
-  },
-
-  removeAt: function removeAt(index) {
+  splice: function splice(index) {
     var howMany = arguments.length <= 1 || arguments[1] === undefined ? 1 : arguments[1];
 
-    var oldValue = this.constructor.deepClone(this.__value),
-        removed = this.__value.splice(index, howMany);
+    var values = Array.prototype.slice.call(arguments, 2);
+    var diffs = [];
 
-    this.set(this.__value, { oldValue: oldValue });
-    return removed;
+    // create delete diffs first.
+    // Notice we don't specify index as index + i because
+    // elements are deleted one at the time so it would always be
+    // at the same index.
+    for (var i = 0; i < howMany; i++) {
+      diffs.push({
+        action: 'delete',
+        path: this.__path.concat(index),
+        force: true
+      });
+    }
+
+    // insert diffs
+    for (var i = 0, ii = values.length; i < ii; i++) {
+      diffs.push({
+        action: 'add',
+        path: this.__path.concat(index + i),
+        value: values[i],
+        force: true
+      });
+    }
+
+    this.__notifyUpdate(diffs);
   }
 };
 
 module.exports = ArrayWrapper;
 
-},{}],6:[function(_dereq_,module,exports){
-"use strict";
+},{}],7:[function(_dereq_,module,exports){
+'use strict';
 
-var HashWrapper = {
+var ObjectWrapper = {
   keys: function keys() {
     return Object.keys(this.__value);
   },
 
   values: function values() {
-    var key,
-        values = [];
-    for (key in this.__value) {
+    var values = [];
+    for (var key in this.__value) {
       values.push(this.__value[key]);
     }
+
     return values;
   },
 
   hasKey: function hasKey(key) {
-    return this.__value[key] != null;
+    return this.__value[key] !== undefined;
   },
 
-  destroy: function destroy(key) {
-    var oldValue = this.constructor.deepClone(this.__value),
-        removed = this.__value[key];
-    delete this.__value[key];
-    this.set(this.__value, { oldValue: oldValue });
-    return removed;
+  remove: function remove(key) {
+    if (key && this.hasKey(key)) this.__wrappers[key].destroy();
   },
 
-  add: function add(key, value) {
-    var oldValue = this.constructor.deepClone(this.__value);
-    this.__value[key] = value;
-    this.set(this.__value, { oldValue: oldValue });
-    return value;
+  merge: function merge(obj) {
+    var diffs = [];
+    for (var key in obj) {
+      diffs.push({
+        action: 'update',
+        path: this.__path.concat(key),
+        value: obj[key]
+      });
+    }
+
+    this.__notifyUpdate(diffs);
   }
 };
 
-module.exports = HashWrapper;
+module.exports = ObjectWrapper;
 
-},{}]},{},[1])(1)
+},{}]},{},[3])(3)
 });

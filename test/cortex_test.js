@@ -14,7 +14,8 @@ describe("Cortex", function() {
           }
         }
       },
-      c: [0, 1, 2]
+      c: [0, 1, 2],
+      d: { foo: 1, bar: { a: 1, b: 2} }
     };
   });
 
@@ -22,598 +23,316 @@ describe("Cortex", function() {
     jasmine.clock().uninstall();
   });
 
-  describe("#on", function() {
-    describe("when update event", function() {
-      it("sets new callback", function() {
-        var called1 = null,
-            called2 = null,
+  describe("updating data", function() {
+    describe("running callback", function() {
+      it("runs callback", function() {
+        var called = false;
+        var cortex = new Cortex(this.value, function() {
+          called = true;
+        });
+
+        cortex.set({});
+
+        jasmine.clock().tick();
+
+        expect(called).toBe(true);
+      });
+
+      it("runs callback once for multiple updates", function() {
+        var called = 0,
+            cortex = new Cortex(this.value, function() {
+              called += 1;
+            });
+
+        cortex.a.set(2);
+        cortex.c[0].set(10);
+
+        jasmine.clock().tick();
+
+        expect(called).toBe(1);
+      });
+
+      it("queues update inside a callback", function() {
+        var called = 0,
+            updated,
             cortex = new Cortex(this.value, function(updatedCortex) {
-              called1 = updatedCortex.updatedValue.getValue();
+              updated = updatedCortex;
+              updated.set({calledFrom: "callback"});
+              called += 1;
             });
 
-        cortex.on("update", function(updatedCortex) {
-          called2 = updatedCortex.updatedValue.getValue();
-        });
+        cortex.set({calledFrom: "outside"});
 
-        cortex.update({value: {updatedValue: 123}, path: []});
+        jasmine.clock().tick();
 
-        jasmine.clock().tick(1);
-
-        expect(called1).toBe(cortex.updatedValue.getValue());
-        expect(called2).toBe(cortex.updatedValue.getValue());
+        expect(called).toBe(1);
+        expect(updated.getValue()).toEqual({calledFrom: "outside"});
       });
     });
 
-    describe("when not update event", function() {
-      it("does not change callback", function() {
-        var called1 = null,
-            called2 = null,
-            cortex = new Cortex(this.value, function(updatedCortex) {
-              called1 = updatedCortex.updatedValue.getValue();
-            });
+    describe("setting value", function() {
+      describe("when there is no change", function() {
+        it("does not create new cortex object", function() {
+          var updated;
+          var cortex = new Cortex(this.value, function(updatedCortex) {
+            updated = updatedCortex;
+          });
+          cortex.set(this.value);
 
-        cortex.on("notupdate", function(updatedCortex) {
-          called2 = updatedCortex.updatedValue.getValue();
-        });
-
-        cortex.update({value: {updatedValue: 123}, path: []});
-
-        jasmine.clock().tick(1);
-
-        expect(called1).toBe(cortex.updatedValue.getValue());
-        expect(called2).toBe(null);
-      });
-    });
-  });
-
-  describe("#off", function() {
-    describe("when update event", function() {
-      describe("when no callback specified", function() {
-        it("removes all callbacks", function() {
-          var called1 = null,
-            called2 = null,
-            callback1 = function(updatedCortex) {
-              called1 = updatedCortex.updatedValue.getValue();
-            },
-            callback2 = function(updatedCortex) {
-              called2 = updatedCortex.updatedValue.getValue();
-            },
-            cortex = new Cortex(this.value, callback1);
-
-          cortex.on("update", callback2);
-          cortex.off("update");
-
-          cortex.update({value: {updatedValue: 123}, path: []});
-
-          jasmine.clock().tick(1);
-
-          expect(called1).toBe(null);
-          expect(called2).toBe(null);
+          jasmine.clock().tick();
+          expect(updated).toBe(undefined);
         });
       });
 
-      describe("when callback is specified", function() {
-        it("removes specified callback", function() {
-          var called1 = null,
-            called2 = null,
-            callback1 = function(updatedCortex) {
-              called1 = updatedCortex.updatedValue.getValue();
-            },
-            callback2 = function(updatedCortex) {
-              called2 = updatedCortex.updatedValue.getValue();
-            },
-            cortex = new Cortex(this.value, callback1);
-
-          cortex.on("update", callback2);
-          cortex.off("update", callback1);
-
-          cortex.update({value: {updatedValue: 123}, path: []});
-
-          jasmine.clock().tick(1);
-
-          expect(called1).toBe(null);
-          expect(called2).toBe(cortex.updatedValue.getValue());
-        });
-      });
-    });
-
-    describe("when not update event", function() {
-      it("does not remove any callback", function() {
-        var called1 = null,
-            called2 = null,
-            callback1 = function(updatedCortex) {
-              called1 = updatedCortex.updatedValue.getValue();
-            },
-            callback2 = function(updatedCortex) {
-              called2 = updatedCortex.updatedValue.getValue();
-            },
-            cortex = new Cortex(this.value, callback1);
-
-        cortex.on("update", callback2);
-        cortex.off("notupdate");
-
-        cortex.update({value: {updatedValue: 123}, path: []});
-
-        jasmine.clock().tick(1);
-
-        expect(called1).toBe(cortex.updatedValue.getValue());
-        expect(called2).toBe(cortex.updatedValue.getValue());
-      });
-    });
-  });
-
-  describe("#update", function() {
-    it("runs callback", function() {
-      var called = false,
-          data = { value: {}, path: []},
-          cortex = new Cortex(this.value, function() {
-            called = true;
+      describe("when setting value of root node to primitive", function() {
+        it("updates value and returns a new cortex object", function() {
+          var updated;
+          var cortex = new Cortex(this.value, function(updatedCortex) {
+            updated = updatedCortex;
           });
+          cortex.set(1);
 
-      cortex.update({value: {}, path: []});
+          jasmine.clock().tick();
 
-      jasmine.clock().tick(1);
-
-      expect(called).toBe(true);
-    });
-
-    it("runs callbacks once for multiple updates", function() {
-      var called = 0,
-          cortex = new Cortex([1, 2, 3, 4, 5], function() {
-            called += 1;
-          });
-
-      cortex.forEach(function(wrapper) {
-        wrapper.set(wrapper.getValue()*10);
-      });
-
-      jasmine.clock().tick(1);
-
-      expect(called).toBe(1);
-      expect(cortex.getValue()).toEqual([10, 20, 30, 40, 50]);
-    });
-
-    it("update inside a callback call should be queued", function() {
-      var called = 0,
-          cortex = new Cortex(this.value, function(updatedCortex) {
-            updatedCortex.set({calledFrom: "callback"});
-            called += 1;
-          });
-
-      cortex.set({calledFrom: "outside"});
-
-      jasmine.clock().tick(1);
-
-      expect(called).toBe(2);
-      expect(cortex.getValue()).toEqual({calledFrom: "callback"});
-    });
-
-    it("sets value to new data", function() {
-      var cortex = new Cortex(this.value),
-          newValue = { foo: "bar" };
-      cortex.update({ value: newValue, path: []});
-
-      jasmine.clock().tick(1);
-
-      expect(cortex.getValue()).toEqual(newValue);
-    });
-
-    it("sets value of a key", function() {
-      var cortex = new Cortex(this.value),
-          newValue = 100;
-      cortex.update({value: newValue, path: [cortex.a.getPath()]});
-
-      jasmine.clock().tick(1);
-
-      expect(cortex.getValue()["a"]).toEqual(newValue);
-    });
-
-    it("sets value of a nested object", function() {
-      var cortex = new Cortex(this.value),
-          newValue = { nested: [100, 200, 300]},
-          path = cortex.b.key2.key3.getPath();
-      cortex.update({value: newValue, path: path});
-
-      jasmine.clock().tick(1);
-
-      expect(cortex.getValue()["b"]["key2"]["key3"]).toEqual(newValue);
-    });
-
-    it("sets value of an array element", function() {
-      var cortex = new Cortex(this.value),
-          newValue = [0, 11, 22],
-          path = cortex.c.getPath();
-      cortex.update({value: newValue, path: path});
-
-      jasmine.clock().tick(1);
-
-      expect(cortex.getValue()["c"]).toEqual(newValue);
-    });
-
-    it("sets a primitive value in an array", function() {
-      var cortex = new Cortex(this.value),
-          newValue = -1,
-          path = cortex.c[0].getPath();
-      cortex.update({value: newValue, path: path});
-      jasmine.clock().tick(1);
-
-      expect(cortex.getValue()["c"][0]).toEqual(newValue);
-    });
-
-    describe("when new value change is nested", function() {
-      describe("when data is an array", function() {
-        describe("when elements are primitive", function() {
-          it("runs callback and rewraps new value", function() {
-            var called = false,
-                value = [1, 2, 3],
-                newValue = [1, 2, 4],
-                cortex = new Cortex(value, (function() {
-                  called = true;
-                }));
-            cortex.update({value: newValue, path: []});
-
-            jasmine.clock().tick(1);
-
-            expect(called).toBe(true);
-
-            for (var i = 0, ii = newValue.length;i < ii;i++) {
-              expect(cortex[i].getValue()).toBe(newValue[i]);
-            }
-          });
-        });
-
-        describe("when elements are object", function() {
-          it("runs callback and rewraps new value", function() {
-            var called = false,
-              value = [{a: 1}, {b: 2}],
-              newValue = [{a: 1}, {c: 3}],
-              cortex = new Cortex(value, (function() {
-                called = true;
-              }));
-            cortex.update({value: newValue, path: []});
-
-            jasmine.clock().tick(1);
-
-            expect(called).toBe(true);
-            expect(cortex[1].b).toBe(undefined);
-            expect(cortex[1].c.getValue()).toBe(3);
-            expect(cortex.getValue()).toBe(newValue);
-          });
+          expect(updated).not.toBe(cortex);
+          expect(updated.getValue()).toEqual(1);
         });
       });
 
-      describe("when data is a hash", function() {
-        describe("when hash values are primitive", function() {
-          it("runs callback and rewraps new value", function() {
-            var called = false,
-            value = {a: 1, b: 2},
-            newValue = {a: 1, b: 3},
-            cortex = new Cortex(value, (function() {
-              called = true;
-            }));
-
-            cortex.update({value: newValue, path: []});
-
-            jasmine.clock().tick(1);
-
-            expect(called).toBe(true);
-            expect(cortex.b.getValue()).toBe(3);
+      describe("when setting value of a nested object", function() {
+        it("updates value and returns a new wrapper for every affected node", function() {
+          var updated;
+          var cortex = new Cortex(this.value, function(updatedCortex) {
+            updated = updatedCortex;
           });
-        });
+          cortex.a.set(100);
 
-        describe("when hash values are array", function() {
-          it("runs callback and rewraps new value", function() {
-            var called = false,
-                value = { a: [1, 2], b: [3, 4] },
-                newValue = { a: [1, 2], b: [3, 5] },
-                cortex = new Cortex(value, (function() {
-                  called = true;
-                }));
+          jasmine.clock().tick();
 
-            cortex.update({value: newValue, path: []});
+          expect(updated).not.toBe(cortex);
+          expect(updated.a).not.toBe(cortex.a);
+          expect(updated.b).toBe(cortex.b);
+          expect(updated.c).toBe(cortex.c);
+          expect(updated.d).toBe(cortex.d);
 
-            jasmine.clock().tick(1);
-
-            expect(called).toBe(true);
-            expect(cortex.b.getValue()).toEqual([3, 5]);
-          });
-        });
-      });
-    });
-
-    describe("when new value is the same as old value", function() {
-      describe("when primitive value", function() {
-        describe("when data is at root level", function() {
-          it("does not run callback", function() {
-            var called = false,
-                value = 1,
-                cortex = new Cortex(value, (function() {
-                  called = true;
-                }));
-            cortex.update({value: value, path: []});
-
-            jasmine.clock().tick(1);
-
-            expect(called).toBe(false);
-          });
-        });
-
-        describe("when data is 1 level deep", function() {
-          it("does not run callback", function() {
-            var called = false,
-                value = { a: 1 },
-                cortex = new Cortex(value, (function() {
-                  called = true;
-                }));
-            cortex.update({value: 1, path: ["a"]});
-
-            jasmine.clock().tick(1);
-
-            expect(called).toBe(false);
-          });
-        });
-
-        describe("when data is 2 levels deep", function() {
-          it("does not run callback", function() {
-            var called = false,
-                value = { a: { b: 1 } },
-                cortex = new Cortex(value, (function() {
-                  called = true;
-                }));
-            cortex.update({value: 1, path: ["a", "b"]});
-
-            jasmine.clock().tick(1);
-
-            expect(called).toBe(false);
-          });
+          this.value.a = 100;
+          expect(updated.getValue()).toEqual(this.value);
+          expect(updated.a.getValue()).toEqual(this.value.a);
         });
       });
 
-      describe("when array", function() {
-        describe("when data is at root", function() {
-          describe("when array elements are primitive type", function() {
-            it("does not run callback", function() {
-              var called = false,
-                  value = [1, 2, 3],
-                  cortex = new Cortex(value, (function() {
-                    called = true;
-                  }));
-              cortex.update({value: value.slice(), path: []});
-
-              jasmine.clock().tick(1);
-
-              expect(called).toBe(false);
-            });
+      describe("when setting value of an element in array", function() {
+        it("updates value and returns a new wrapper for every affected node", function() {
+          var updated;
+          var cortex = new Cortex(this.value, function(updatedCortex) {
+            updated = updatedCortex;
           });
+          cortex.c[1].set(100);
 
-          describe("when array elements are object", function() {
-            it("does not run callback", function() {
-              var called = false,
-                  value = [{a: 1}, {b: 2}],
-                  cortex = new Cortex(value, (function() {
-                    called = true;
-                  }));
-              cortex.update({value: [{a: 1}, {b: 2}], path: []});
+          jasmine.clock().tick();
 
-              jasmine.clock().tick(1);
+          expect(updated).not.toBe(cortex);
+          expect(updated.c).not.toBe(cortex.c);
+          expect(updated.c[1]).not.toBe(cortex.c[1]);
+          expect(updated.c[0]).toBe(cortex.c[0]);
+          expect(updated.c[2]).toBe(cortex.c[2]);
+          expect(updated.a).toBe(cortex.a);
+          expect(updated.b).toBe(cortex.b);
+          expect(updated.d).toBe(cortex.d);
 
-              expect(called).toBe(false);
-            });
-          });
-        });
-
-        describe("when data is nested 1 level deep", function() {
-          it("does not run callback", function() {
-            var called = false,
-                value = {arr: [1, 2, 3]},
-                cortex = new Cortex(value, (function() {
-                  called = true;
-                }));
-            cortex.update({value: [1, 2, 3], path: ["arr"]});
-
-            jasmine.clock().tick(1);
-
-            expect(called).toBe(false);
-          });
-        });
-
-        describe("when data is nested 2 levels deep", function() {
-          it("does not run callback", function() {
-            var called = false,
-                value = {a: { b: [1, 2, 3] } },
-                cortex = new Cortex(value, (function() {
-                  called = true;
-                }));
-            cortex.update({value: [1, 2, 3], path: ["a", "b"]});
-
-            jasmine.clock().tick(1);
-
-            expect(called).toBe(false);
-          });
+          this.value.c[1] = 100;
+          expect(updated.getValue()).toEqual(this.value);
+          expect(updated.c.getValue()).toEqual(this.value.c);
+          expect(updated.c[1].getValue()).toEqual(this.value.c[1]);
         });
       });
 
-      describe("when a hash", function() {
-        describe("when data is at root", function() {
-          describe("when hash values are primitive types", function() {
-            it("does not run callback", function() {
-              var called = false,
-                  value = {a: 1, b: 2, c: 3},
-                  cortex = new Cortex(value, (function() {
-                    called = true;
-                  }));
-              cortex.update({value: {c: 3, b: 2, a: 1}, path: []});
-
-              jasmine.clock().tick(1);
-
-              expect(called).toBe(false);
-            });
+      describe("when setting value of object", function() {
+        it("updates value and returns a new wrapper for every affected node", function() {
+          var updated;
+          var cortex = new Cortex(this.value, function(updatedCortex) {
+            updated = updatedCortex;
           });
+          cortex.d.bar.set({b: 2, c: 3});
 
-          describe("when hash values are objects", function() {
-            it("does not run callback", function() {
-              var called = false,
-                  value = { a: { aa: 1}, b: { bb: 2 } },
-                  cortex = new Cortex(value, (function() {
-                    called = true;
-                  }));
+          jasmine.clock().tick();
 
-              cortex.update({value: {a: {aa: 1}, b: { bb: 2 } }, path: []});
+          expect(updated).not.toBe(cortex);
+          expect(updated.d).not.toBe(cortex.d);
+          expect(updated.d.bar).not.toBe(cortex.d.bar);
+          expect(updated.d.bar.a).toBe(undefined);
+          expect(updated.d.bar.b).toBe(cortex.d.bar.b);
+          expect(updated.d.bar.c).not.toBe(undefined);
+          expect(updated.a).toBe(cortex.a);
+          expect(updated.b).toBe(cortex.b);
+          expect(updated.c).toBe(cortex.c);
 
-              jasmine.clock().tick(1);
-
-              expect(called).toBe(false);
-            });
-          });
-
-          describe("when hash values are arrays", function() {
-            it("does not run callback", function() {
-              var called = false,
-                  value = { a: [1, 2], b: [1, 2]},
-                  cortex = new Cortex(value, (function() {
-                    called = true;
-                  }));
-              cortex.update({value: { a: [1, 2], b: [1, 2] }, path: []});
-
-              jasmine.clock().tick(1);
-
-              expect(called).toBe(false);
-            });
-          });
-        });
-      });
-    });
-  });
-
-  describe("#getChanges", function() {
-    beforeEach(function() {
-      this.cortex = new Cortex(this.value);
-    });
-
-    describe("on initialization", function() {
-      it("returns no changes", function() {
-         expect(this.cortex.getChanges()).toEqual([]);
-      });
-    });
-
-    describe("on update", function() {
-      describe("when no change was made", function() {
-        it("retains the same changes", function() {
-          var changes = this.cortex.getChanges();
-          this.cortex.set(this.cortex.getValue());
-
-          expect(this.cortex.getChanges()).toBe(changes);
-        });
-      });
-
-      describe("when updating a value", function() {
-        it("returns update changes", function() {
-          var oldValue = this.value['a'],
-              newValue = oldValue + 1;
-          this.cortex.a.set(newValue);
-
-          expect(this.cortex.getChanges()).toEqual([{type: 'update', path: ['a'], oldValue: oldValue, newValue: newValue}]);
-        });
-      });
-
-      describe("when adding an element to array", function() {
-        it("returns new change", function() {
-          var newValue = 4;
-          this.cortex.b.key2.key3.nested.push(newValue);
-
-          expect(this.cortex.getChanges()).toEqual([{type: 'new', path: ['b', 'key2', 'key3', 'nested', 3], oldValue: undefined, newValue: newValue}])
-        });
-      });
-
-      describe("when removing an element from array", function() {
-        it("returns delete change", function() {
-          this.cortex.c.pop();
-
-          expect(this.cortex.getChanges()).toEqual([{type: 'delete', path: ['c', 2], oldValue: 2, newValue: undefined}]);
+          this.value.d.bar = {b: 2, c: 3};
+          expect(updated.getValue()).toEqual(this.value);
+          expect(updated.d.getValue()).toEqual(this.value.d);
+          expect(updated.d.bar.getValue()).toEqual(this.value.d.bar);
+          expect(updated.d.foo.getValue()).toEqual(this.value.d.foo);
         })
       });
 
-      describe("when adding a new key", function() {
-        it("returns new change", function() {
-          this.cortex.b.key2.add("d", "val");
+      describe("when setting value of very deeply nested object", function() {
+        it("updates value and returns a new wrapper for every affected node", function() {
+          var updated;
+          var cortex = new Cortex(this.value, function(updatedCortex) {
+            updated = updatedCortex;
+          });
+          var value = [10, 20, 30];
+          cortex.b.key2.key3.nested.set(value);
 
-          expect(this.cortex.getChanges()).toEqual([{type: 'new', path: ["b", "key2", "d"], oldValue: undefined, newValue: "val"}]);
+          jasmine.clock().tick();
+
+          expect(updated).not.toBe(cortex);
+          expect(updated.b).not.toBe(cortex.b);
+          expect(updated.b.key2).not.toBe(cortex.b.key2);
+          expect(updated.b.key2.key3).not.toBe(cortex.b.key2.key3);
+          expect(updated.b.key2.key3.nested).not.toBe(cortex.b.key2.key3.nested);
+          expect(updated.a).toBe(cortex.a);
+          expect(updated.c).toBe(cortex.c);
+          expect(updated.d).toBe(cortex.d);
+
+          this.value.b.key2.key3.nested = value;
+          expect(updated.getValue()).toEqual(this.value);
+          expect(updated.b.getValue()).toEqual(this.value.b);
+          expect(updated.b.key2.getValue()).toEqual(this.value.b.key2);
+          expect(updated.b.key2.key3.getValue()).toEqual(this.value.b.key2.key3);
+          expect(updated.b.key2.key3.nested.getValue()).toEqual([10, 20, 30]);
         });
       });
 
-      describe("when removing a key", function() {
-        it("returns delete change", function() {
-          var oldValue = Cortex.deepClone(this.cortex.b.getValue());
-          this.cortex.destroy("b");
+      describe("when changing an array to object", function() {
+        it("updates value and returns new wrapper for every affected node", function() {
+          var updated;
+          var cortex = new Cortex(this.value, function(updatedCortex) {
+            updated = updatedCortex;
+          });
+          var value = {a: 1};
+          cortex.c.set(value);
 
-          expect(this.cortex.getChanges()).toEqual([{type: 'delete', path: ['b'], oldValue: oldValue, newValue: undefined}]);
+          jasmine.clock().tick();
+
+          expect(updated).not.toBe(cortex);
+          expect(updated.c).not.toBe(cortex.c);
+          expect(updated.a).toBe(cortex.a);
+          expect(updated.b).toBe(cortex.b);
+          expect(updated.d).toBe(cortex.d);
+
+          this.value.c = value;
+          expect(updated.getValue()).toEqual(this.value);
+          expect(updated.c.getValue()).toEqual(this.value.c);
         });
       });
 
-      describe("when removing self", function() {
-        it("returns delete change", function() {
-          var oldValue = Cortex.deepClone(this.cortex.a.getValue());
-          this.cortex.a.remove();
+      describe("when changing an object to an array", function() {
+        it("updates value and returns new wrapper for every affected node", function() {
+          var updated;
+          var cortex = new Cortex(this.value, function(updatedCortex) {
+            updated = updatedCortex;
+          });
+          var value = [0, 1, 2];
+          cortex.d.set(value);
+          jasmine.clock().tick();
 
-          expect(this.cortex.getChanges()).toEqual([{type: 'delete', path: ['a'], oldValue: oldValue, newValue: undefined}]);
+          expect(updated).not.toBe(cortex);
+          expect(updated.d).not.toBe(cortex.d);
+          expect(updated.a).toBe(cortex.a);
+          expect(updated.b).toBe(cortex.b);
+          expect(updated.c).toBe(cortex.c);
+          this.value.d = value;
+
+          expect(updated.getValue()).toEqual(this.value);
+          expect(updated.d.getValue()).toEqual(this.value.d);
+        });
+      });
+
+      describe("deleting an element in object", function() {
+        it("updates value and creates new wrapper for every affected node", function() {
+          var updated;
+          var cortex = new Cortex(this.value, function(updatedCortex) {
+            updated = updatedCortex;
+          });
+          var value = {foo: 1};
+          cortex.d.set(value);
+          jasmine.clock().tick();
+
+          expect(updated).not.toBe(cortex);
+          expect(updated.d).not.toBe(cortex.d);
+          expect(updated.d.foo).toBe(cortex.d.foo);
+          expect(updated.d.bar).toBe(undefined);
+          expect(cortex.d.bar).not.toBe(undefined); // show that this is not touched
+
+          this.value.d = value;
+
+          expect(updated.getValue()).toEqual(this.value);
+          expect(updated.d.getValue()).toEqual(this.value.d);
+        });
+      });
+
+      describe("deleting elements in array", function() {
+        it("updates value and creates new wrapper for every affected node", function() {
+          var updated;
+          var cortex = new Cortex(this.value, function(updatedCortex) {
+            updated = updatedCortex;
+          });
+          var value = [0];
+          cortex.c.set(value);
+          jasmine.clock().tick();
+
+          expect(updated).not.toBe(cortex);
+          expect(updated.c).not.toBe(cortex.c);
+          expect(updated.c[0]).toBe(cortex.c[0]);
+          expect(updated.c[1]).toBe(undefined);
+          expect(updated.c[2]).toBe(undefined);
+          expect(cortex.c[1]).not.toBe(undefined);
+          expect(cortex.c[2]).not.toBe(undefined);
+
+          this.value.c = value;
+
+          expect(updated.getValue()).toEqual(this.value);
+          expect(updated.c.getValue()).toEqual(this.value.c);
+        });
+      });
+
+      describe("deleting elements in array in 2 steps", function() {
+        it("updates value and creates new wrapper for every affected node", function() {
+          var updated;
+          var cortex = new Cortex(this.value, function(updatedCortex) {
+            updated = updatedCortex;
+          });
+          var value1 = [0, 1],
+              value2 = [0];
+          cortex.c.set(value1);
+          cortex.c.set(value2);
+          jasmine.clock().tick();
+
+          expect(updated).not.toBe(cortex);
+          expect(updated.c).not.toBe(cortex.c);
+          expect(updated.c[0]).toBe(cortex.c[0]);
+          expect(updated.c[1]).toBe(undefined);
+          expect(updated.c[2]).toBe(undefined);
+          expect(cortex.c[1]).not.toBe(undefined);
+          expect(cortex.c[2]).not.toBe(undefined);
+
+          this.value.c = value2;
+
+          expect(updated.getValue()).toEqual(this.value);
+          expect(updated.c.getValue()).toEqual(this.value.c);
         })
-      })
+      });
     });
   });
 
-  describe("Update notification", function() {
-    it("calls update method", function() {
-      var cortex = new Cortex(1),
-          update = spyOn(cortex, "update"),
-          newValue = 100;
-      //Call set to trigger update event
-      cortex.set(newValue);
-      jasmine.clock().tick(1);
+  describe("deleting data", function() {
 
-      expect(update).toHaveBeenCalledWith({value: newValue, path: cortex.getPath()});
-    });
   });
 
-  describe("Remove notification", function() {
-    describe("when not a root", function() {
-      describe("when parent is an array", function() {
-        it("removes the specified element in parent array", function() {
-          var value = [1, 2, 3, 4, 5],
-              length = value.length,
-              cortex = new Cortex(value);
+  describe("adding data", function() {
+    describe("when an object", function() {
 
-          cortex[0].remove();
-
-          jasmine.clock().tick(1);
-
-          expect(cortex.count()).toBe(length - 1);
-          expect(cortex[0].getValue()).toBe(2);
-        });
-      });
-
-      describe("when parent is a hash", function() {
-        it("removes the specified key and value pair", function() {
-          var value = { a: 1, b: 2, c: 3 },
-              cortex = new Cortex(value);
-
-          cortex.a.remove();
-
-          jasmine.clock().tick(1);
-
-          expect(cortex.a).toBe(undefined);
-          expect(cortex.hasKey("a")).toBe(false);
-        });
-      });
-    });
-
-    describe("when a root", function() {
-      it("removes itself", function() {
-        var cortex = new Cortex(1);
-        cortex.remove();
-        jasmine.clock().tick(1);
-
-        expect(cortex.getValue()).toBe(undefined);
-      });
     });
   });
 });

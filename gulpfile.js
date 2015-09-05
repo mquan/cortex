@@ -26,10 +26,10 @@ gulp.task("scripts", function() {
 gulp.task("test", function() {
   var tests = [
     "test/cortex_test.js",
-    "test/data_wrapper_test.js",
+    "test/immutable_wrapper_test.js",
     "test/pubsub_test.js",
-    "test/wrappers/array_test.js",
-    "test/wrappers/hash_test.js"
+    "test/wrappers/array_wrapper_test.js",
+    "test/wrappers/object_wrapper_test.js"
   ];
 
   for(var i=0,ii=tests.length;i<ii;i++) {
