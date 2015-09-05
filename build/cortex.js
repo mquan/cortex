@@ -711,10 +711,11 @@ module.exports = (function () {
           this.__runCallbacks(updatedCortex);
 
           updatedCortex.__callbacks = this.__callbacks.slice();
-          // this.__callbacks = [];
+
+          // Reset everything on the old cortex including unsubscribe from pubsub.
+          this.__callbacks = [];
           this.__updating = false;
           delete this.__diffs;
-
           cortexPubSub.unsubscribeFromCortex(this.__eventId);
         }
       }
