@@ -26,7 +26,7 @@ module.exports = function(ImmutableWrapper) {
       // copy old wrapper references into new node
       newWrapper.__wrappers = this._shallowCopy(oldWrapper.__wrappers);
       for(var key in newWrapper.__wrappers) {
-        newWrapper.__wrappers[key].__eventId = eventId;
+        newWrapper.__wrappers[key].__setEventId(eventId);
         newWrapper[key] = newWrapper.__wrappers[key];
       }
       newWrapper.__value = this._shallowCopy(oldWrapper.__value);

@@ -451,7 +451,7 @@ module.exports = function (ImmutableWrapper) {
         // copy old wrapper references into new node
         newWrapper.__wrappers = this._shallowCopy(oldWrapper.__wrappers);
         for (var key in newWrapper.__wrappers) {
-          newWrapper.__wrappers[key].__eventId = eventId;
+          newWrapper.__wrappers[key].__setEventId(eventId);
           newWrapper[key] = newWrapper.__wrappers[key];
         }
         newWrapper.__value = this._shallowCopy(oldWrapper.__value);
@@ -700,11 +700,12 @@ module.exports = (function () {
       value: function __updateAll() {
         if (this.__diffs.length) {
           var updatedCortex = new Cortex();
+
           updatedCortex = ChangeHandler.updateNode({
             oldWrapper: this,
             root: updatedCortex,
             diffs: this.__diffs,
-            eventId: updatedCortex.eventId
+            eventId: updatedCortex.__eventId
           });
 
           this.__runCallbacks(updatedCortex);
@@ -713,6 +714,8 @@ module.exports = (function () {
           // this.__callbacks = [];
           this.__updating = false;
           delete this.__diffs;
+
+          cortexPubSub.unsubscribeFromCortex(this.__eventId);
         }
       }
     }, {
@@ -840,6 +843,14 @@ module.exports = function (cortexPubSub) {
       value: function __notifyUpdate(diffs) {
         if (diffs && diffs.length) {
           cortexPubSub.publish("update" + this.__eventId, diffs);
+        }
+      }
+    }, {
+      key: "__setEventId",
+      value: function __setEventId(eventId) {
+        this.__eventId = eventId;
+        for (var key in this.__wrappers) {
+          this.__wrappers[key].__setEventId(eventId);
         }
       }
     }, {

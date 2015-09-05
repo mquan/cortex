@@ -1,6 +1,9 @@
 /** @jsx React.DOM */
 
 var Room = React.createClass({
+  shouldComponentUpdate: function(nextProps, nextState) {
+    return nextProps.room !== this.props.room;
+  },
   toggleLight: function(e) {
     var current = this.props.room.light_on.getValue();
     this.props.room.light_on.set(!current);
@@ -18,6 +21,9 @@ var Room = React.createClass({
 });
 
 var Floor = React.createClass({
+  shouldComponentUpdate: function(nextProps, nextState) {
+    return nextProps.floor !== this.props.floor;
+  },
   addRoom: function(e) {
     this.props.floor.rooms.push({light_on: true});
     e.stopPropagation();
@@ -35,6 +41,9 @@ var Floor = React.createClass({
 });
 
 var Building = React.createClass({
+  shouldComponentUpdate: function(nextProps, nextState) {
+    return nextProps.building !== this.props.building;
+  },
   addFloor: function(e) {
     var floors = this.props.building.floors.getValue(),
         newFloor = floors[0].rooms.map(function() {
@@ -60,6 +69,9 @@ var Building = React.createClass({
 });
 
 var City = React.createClass({
+  shouldComponentUpdate: function(nextProps, nextState) {
+    return nextProps.city !== this.props.city;
+  },
   addBuilding: function(e) {
     var newBuilding = createBuilding(5 + Math.floor(Math.random() * 10), 3);
     this.props.city.push(newBuilding);
@@ -108,6 +120,7 @@ var cityComponent = React.render(
   <City city={cortexData} />, document.getElementById("city")
 );
 
-cortexData.on("update", function(updatedCortex) {
+cortexData.onChange(function(updatedCortex) {
+  cortexData = updatedCortex;
   cityComponent.setProps({city: updatedCortex});
 });

@@ -101,6 +101,13 @@ module.exports = function(cortexPubSub) {
       }
     }
 
+    __setEventId(eventId) {
+      this.__eventId = eventId;
+      for (var key in this.__wrappers) {
+        this.__wrappers[key].__setEventId(eventId);
+      }
+    }
+
     __wrap() {
       if(this.constructor.__isObject(this.__value)) {
         this.__wrappers = {};

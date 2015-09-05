@@ -54,11 +54,12 @@ module.exports = (function() {
     __updateAll() {
       if(this.__diffs.length) {
         var updatedCortex = new Cortex();
+
         updatedCortex = ChangeHandler.updateNode({
           oldWrapper: this,
           root: updatedCortex,
           diffs: this.__diffs,
-          eventId: updatedCortex.eventId
+          eventId: updatedCortex.__eventId
         });
 
         this.__runCallbacks(updatedCortex);
@@ -67,6 +68,8 @@ module.exports = (function() {
         // this.__callbacks = [];
         this.__updating = false;
         delete this.__diffs;
+
+        cortexPubSub.unsubscribeFromCortex(this.__eventId);
       }
     }
 
