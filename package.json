@@ -1,7 +1,7 @@
 {
   "name": "cortexjs",
-  "version": "0.8.7",
-  "description": "A data managment solution for React",
+  "version": "2.0.0.rc1",
+  "description": "An immutable store for React that supports deeply nested structure",
   "author": "Quan Nguyen",
   "license": "MIT",
   "repository": {

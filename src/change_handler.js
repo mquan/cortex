@@ -126,7 +126,13 @@ module.exports = function(ImmutableWrapper) {
         } else {
           // This only occurs when setting primitive value or destroy() at the root level
           if (diffs[i].action == 'delete') {
-            return newWrapper = undefined;
+            // remove all nested wrapper references
+            for(var key in newWrapper.__wrappers) {
+              delete newWrapper[key];
+            }
+            delete newWrapper.__value;
+            delete newWrapper.__wrappers;
+            return [];
           } else {
             newWrapper.__value = diffs[i].value;
           }

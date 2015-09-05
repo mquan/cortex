@@ -25,9 +25,9 @@ module.exports = (function() {
           setTimeout((this.__updateAll).bind(this), 0);
         }
 
-        let sig = JSON.stringify(diffs[i]);
-
         for(var i = 0, ii = diffs.length; i < ii; i++) {
+          var sig = JSON.stringify(diffs[i]);
+
           if (diffs[i].force){
             this.__diffs.push(diffs[i]);
           } else if (!this.__diffSignature[sig]) {

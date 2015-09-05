@@ -560,7 +560,13 @@ module.exports = function (ImmutableWrapper) {
           } else {
             // This only occurs when setting primitive value or destroy() at the root level
             if (diffs[i].action == 'delete') {
-              return newWrapper = undefined;
+              // remove all nested wrapper references
+              for (var key in newWrapper.__wrappers) {
+                delete newWrapper[key];
+              }
+              delete newWrapper.__value;
+              delete newWrapper.__wrappers;
+              return [];
             } else {
               newWrapper.__value = diffs[i].value;
             }
@@ -662,9 +668,9 @@ module.exports = (function () {
             setTimeout(this.__updateAll.bind(this), 0);
           }
 
-          var sig = JSON.stringify(diffs[i]);
-
           for (var i = 0, ii = diffs.length; i < ii; i++) {
+            var sig = JSON.stringify(diffs[i]);
+
             if (diffs[i].force) {
               this.__diffs.push(diffs[i]);
             } else if (!this.__diffSignature[sig]) {

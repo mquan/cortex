@@ -23,8 +23,12 @@ describe("Cortex", function() {
     jasmine.clock().uninstall();
   });
 
+  describe("#forEach", function() {
+
+  });
+
   describe("updating data", function() {
-    describe("running callback", function() {
+    fdescribe("running callback", function() {
       it("runs callback", function() {
         var called = false;
         var cortex = new Cortex(this.value, function() {
@@ -326,13 +330,102 @@ describe("Cortex", function() {
     });
   });
 
-  describe("deleting data", function() {
+  describe("#destroy", function() {
+    fdescribe("when deleting root node", function() {
+      it("returns for wrapper for undefined", function() {
+        var updated;
+        var cortex = new Cortex(this.value, function(updatedCortex) {
+          updated = updatedCortex;
+        });
+        cortex.destroy();
 
-  });
+        jasmine.clock().tick();
 
-  describe("adding data", function() {
-    describe("when an object", function() {
+        expect(updated).not.toBe(cortex);
+        expect(updated.getValue()).toBe(undefined);
+        expect(updated.a).toBe(undefined);
+        expect(updated.b).toBe(undefined);
+        expect(updated.c).toBe(undefined);
+        expect(updated.d).toBe(undefined);
+      });
+    });
 
+    describe("when deleting an object", function() {
+      it("deletes and updates wrapper", function() {
+        var updated;
+        var cortex = new Cortex(this.value, function(updatedCortex) {
+          updated = updatedCortex;
+        });
+        cortex.d.destroy();
+
+        jasmine.clock().tick();
+
+        expect(updated).not.toBe(cortex);
+        expect(updated.d).toBe(undefined);
+        expect(updated.a).toBe(cortex.a);
+        expect(updated.b).toBe(cortex.b);
+        expect(updated.c).toBe(cortex.c);
+      });
+    });
+
+    describe("when deleting a key in object", function() {
+      it("deletes and updates wrapper", function() {
+        var updated;
+        var cortex = new Cortex(this.value, function(updatedCortex) {
+          updated = updatedCortex;
+        });
+        cortex.a.destroy();
+
+        jasmine.clock().tick();
+
+        expect(updated).not.toBe(cortex);
+        expect(updated.a).toBe(undefined);
+        expect(updated.b).toBe(cortex.b);
+        expect(updated.c).toBe(cortex.c);
+        expect(updated.d).toBe(cortex.d);
+      });
+    });
+
+    describe("when deleting an array", function() {
+      it("deletes and updates wrapper", function() {
+        var updated;
+        var cortex = new Cortex(this.value, function(updatedCortex) {
+          updated = updatedCortex;
+        });
+        cortex.c.destroy();
+
+        jasmine.clock().tick();
+
+        expect(updated).not.toBe(cortex);
+        expect(updated.getValue().c).toBe(undefined);
+        expect(updated.c).toBe(undefined);
+        expect(updated.a).toBe(cortex.a);
+        expect(updated.b).toBe(cortex.b);
+        expect(updated.d).toBe(cortex.d);
+      });
+    });
+
+    describe("when deleting an element in array", function() {
+      it("deletes and updates wrapper", function() {
+        var updated;
+        var cortex = new Cortex(this.value, function(updatedCortex) {
+          updated = updatedCortex;
+        });
+        cortex.c[2].destroy();
+
+        jasmine.clock().tick();
+
+        expect(updated).not.toBe(cortex);
+        expect(updated.c).not.toBe(cortex.c);
+        expect(updated.c[0]).toBe(cortex.c[0]);
+        expect(updated.c[1]).toBe(cortex.c[1]);
+
+        expect(updated.getValue().c).toBe([0, 1]);
+        expect(updated.getValue()).toBe([0, 1]);
+        expect(updated.a).toBe(cortex.a);
+        expect(updated.b).toBe(cortex.b);
+        expect(updated.d).toBe(cortex.d);
+      });
     });
   });
 });
