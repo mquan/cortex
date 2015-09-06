@@ -2,7 +2,7 @@ Cortex is an immutable data store for managing deeply nested structure with Reac
 
 **Key features:**
 - supports deeply nested data
-- uses immutable data structure for `shouldComponentUpdate` comparison
+- uses immutable data, which allows fast comparison in `shouldComponentUpdate`
 - very efficient batch updates
 - simple APIs with built-in methods for working with arrays and hashes
 - very lightweight (4.5kB minified and gzip)
