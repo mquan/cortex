@@ -1,10 +1,10 @@
 {
   "name": "cortexjs",
-  "version": "0.8.7",
+  "version": "2.0.0",
   "main": "build/cortex.js",
   "homepage": "https://github.com/mquan/cortex",
   "authors": ["Quan Nguyen"],
-  "description": "A data management solution for React",
+  "description": "An immutable data store for managing deeply nested structure with React",
   "keywords": [
     "React",
     "nested data",
