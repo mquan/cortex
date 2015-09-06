@@ -1,10 +1,11 @@
-Cortex is a Javascript library for centrally managing data with React.
+Cortex is an immutable data store for managing deeply nested structure with React
 
 **Key features:**
 - supports deeply nested data
-- exposes changes for every data node
-- performs efficient batch updates and rewrapping
-- has built-in methods for working with arrays and hashes
+- uses immutable data structure for `shouldComponentUpdate` comparison
+- very efficient batch updates
+- simple APIs with built-in methods for working with arrays and hashes
+- very lightweight (4.5kB minified and gzip)
 - written in ES6
 
 **Demos**
@@ -19,7 +20,8 @@ Initialize a cortex object
 var data = {a: 100, b: [1, 2, 3]};
 
 var cortex = new Cortex(data, function(updatedCortex) {
-  //trigger your React component to update props
+  //trigger React component to update props
+  myComponent.setProps({cortex: updatedCortex});
 });
 ```
 
@@ -56,46 +58,9 @@ cortex.getValue()
 // ==> {a: 300}
 ```
 
-Get the changes
-** Deprecated method. `getChanges` and `didChange` will be removed in cortex 2.0
-
-```javascript
-cortex.getChanges(); // => [{type: "update", path: ['a'], oldValue: 200, newValue: 300}]
-
-// changes are available at every node at any level. Note the difference in path
-cortex.a.getChanges(); // => [{type: "update", path: [], oldValue: 200, newValue: 300}]
-
-// subtree without changes returns empty array
-cortex.b.getChanges(); // => []
-```
-
-Alternatively you can also check whether a node changes
-```javascript
-cortex.didChange() // => true
-
-cortex.didChange('a') // => true
-cortex.didChange('b') // => false
-
-//same as above
-cortex.a.didChange()  // => true
-cortex.b.didChange()  // => false
-```
-
-** You SHOULD NOT use `getChanges` and `didChange` to implement `shouldComponentUpdate` unless your components ONLY rely on cortex object to rerender. The reason is these changes are computed on cortex update and retained until the next update, so if your non-cortex props or state change then your nextProps, nextState would still contain the cortex changes of the previous cycle. This may incorrectly return true and results in your components updating more frequent than they should be.
-
 Add callbacks
 ```javascript
-cortex.on("update", myCallback);
-```
-
-Remove callback
-```javascript
-cortex.off("update", myCallback);
-```
-
-Remove all callbacks
-```javascript
-cortex.off("update");
+cortex.onUpdate(myCallback);
 ```
 
 ### ES6 Guide
@@ -120,6 +85,25 @@ class MyComponent extends React.Component {
 }
 ```
 
+# Cortex 2.0 migration guide
+
+The biggest change in v2 is immutable data. This allows us to implement `shouldComponentUpdate` as easy as
+
+```javascript
+shouldComponentUpdate: function(nextProps, nextState) {
+  return nextProps.myCortex !== this.props.myCortex;
+}
+```
+
+Immutability also allows us to remove `getChanges` and `didChange` methods.
+
+BREAKING CHANGES
+- `on('update', callback) is now simply onUpdate(callback)
+- `off('update', callback) is removed
+- `insertAt` and `removeAt` are replaced by `splice`, which behaves the same way as `Array.prototype.splice`
+- `add` is replaced by `merge`
+- for aesthetic reason, `remove` and `destroy` are swapped. So you would call `remove(key)` to remove a nested child and call `destroy` to remove self.
+
 # Overview
 
 In React's world data flows in one direction from the top down. That means if you want to make a change, change it at the source and let it propagate down the chain. But what happens when a child component needs to update the data? React's official guideline is to use callback for communication between parent and child components.
@@ -135,6 +119,9 @@ The following example has two components, Order and Item. An Order contains an a
 
 ```javascript
 var Item = React.createClass({
+  shouldComponentUpdate: function(nextProps, nextState) {
+    nextProps.item !== this.props.item;
+  },
   increase: function() {
     var quantity = this.props.item.quantity.getValue();
     this.props.item.quantity.set(quantity + 1);
@@ -155,6 +142,9 @@ var Item = React.createClass({
 });
 
 var Order = React.createClass({
+  shouldComponentUpdate: function(nextProps, nextState) {
+    return nextProps.order !== this.props.order;
+  },
   render: function() {
     var items = this.props.order.map(function(item){
       return <Item item={item} />;
@@ -201,6 +191,8 @@ In Item component, note that we display the quantity value with ``this.props.ite
 
 In `increase` method, we use ``this.props.item.quantity.set(quantity + 1)`` to add 1 to the current quantity value.
 
+Note that we implement `shouldComponentUpdate` by simply comparing the current and next props. This comparison is extremely fast since cortex returns a brand new immutable wrapper when data change.
+
 # Cortex API
 
 ### Initialize:
@@ -218,11 +210,8 @@ new Cortex(data, function() {
     `getValue()`              | Returns the actual value
     `val()`                   | Alias for `getValue`
     `set(value)`              | Changes the value and rewrap the subtree.
-    `remove()`                | Self destruct method: remove self from parent if nested, set value to undefined if root level.
-    `on("update", callback)` | Add a callback to run on update event (only available on root object)
-    `off("update", callback)`| Remove a callback. If no callback is specified, all existing callbacks will be removed (only available on root object)
-    `getChanges()`            | Returns array of changes. Each change include the change type (either 'new', 'update', or 'delete'), the path (array of keys to the changed subtree), oldValue, and newValue
-    `didChange(key)`          | Returns boolean value whether a change was made. key is an optional argument. When key provided, it checks whether changes occur in the key subtree. When not provided, it checks whether any change was made on the current node.
+    `destroy()`               | Self destruct method: remove self from parent if nested, set value to undefined if root level.
+    `onUpdate(callback)`      | Add a callback to run on update event (only available on root object)
 
 ### Cortex wrapper of array data has the following methods:
 
@@ -238,8 +227,7 @@ new Cortex(data, function() {
     `pop()`                        | Removes the last element in the array
     `unshift(value)`               | Inserts and rewrap the value at the front of the array.
     `shift()`                      | Removes the first element in the array
-    `insertAt(index, [value])`     | Inserts a value or an array of values starting at specified index.
-    `removeAt(index, howMany = 1)` | Removes specified number of elements starting at index location. By default it removes 1 element if number of elements to be removed isn't specified.
+    `splice(index, removeCount, element1 [, element2, ...])`     | Remove `removeCount` from the array and insert elements into the array. This is similar to the native `Array.prototype.splice` method
 
 ### Cortex wrapper of hash data has the following methods:
     Methods                        | Description
@@ -248,17 +236,8 @@ new Cortex(data, function() {
     `values()`                     | Returns the array of values
     `hasKey(key)`                  | Returns boolean value whether the key exists
     `forEach(callback)`            | Iterates over every key and value pair. The callback accepts the following inputs `(key, wrapperElement)`
-    `destroy(key)`                 | Removes the specified key and value pair
-    `add(key, value)`              | Adds the specified key and value pair
-
-
-### Class methods
-
-    Methods                                       | Description
-    ----------------------------------------------|:------------------
-    `Cortex.deepDiff(oldValue, newValue)`         | performs deep diff on 2 given objects
-    `Cortex.deepClone(value)`                     | returns a deep copy of a given value
-
+    `remove(key)`                 | Removes the specified key and value pair
+    `merge({key1: value1[, key2: value2, ...]})`              | Adds/modifies the specified key and value pairs
 
 # CDN
 
@@ -315,7 +294,7 @@ Besides providing the convenience of allowing you to update data from any level,
 
 ### 1. Deep comparison between old and new values
 
-When you issue a `set(newValue)` call, no data actually changes at that point. What happens internally is the wrapper being called publishes a notification to the master cortex wrapper passing along a payload consisting of the path for locating the data and the new value (Yes, there is a pub/sub system within Cortex.) The master wrapper then performs a deep comparison between the old and new data to determine whether it should trigger the update action. If no change was made, the process just exits without touching the data nor invoking the callbacks.
+When you issue a `set(newValue)` call, no data actually changes at that point. What happens internally is the wrapper being called publishes a notification to the master cortex wrapper passing along a payload consisting of the path for locating the data and the new value (Yes, there is a pub/sub system within Cortex.) The root wrapper then performs a deep comparison between the old and new data to determine whether it should trigger the update action. If no change was made, the process just terminates without touching the data nor invoking the callbacks.
 
 Deep comparison may sound costly but in practice when you call `set(newValue)` the newValue usually isn't deeply nested (if it is and the actual change is many layers deep then you should consider calling `set(newValue)` on the wrapper at the level that the change actually occurs.) In some situations where you have to pass in arbirarily deeply nested value the comparison work is still worth it because it can potentially save you from unnecessarily rewrapping and triggering React to update.
 

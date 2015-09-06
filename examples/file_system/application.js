@@ -1,6 +1,11 @@
 /** @jsx React.DOM */
 
 var Node = React.createClass({displayName: "Node",
+  shouldComponentUpdate: function(nextProps, nextState) {
+    return nextProps.node !== this.props.node ||
+           nextState.editing !== this.state.editing ||
+           nextState.editText !== this.state.editText;
+  },
   getInitialState: function() {
     return {editing: false, editText: ""};
   },
@@ -83,6 +88,6 @@ var fileSystemComponent = React.render(
   React.createElement(Node, {node: cortexData}), document.getElementById("filesystem")
 );
 
-cortexData.on("update", function(updatedCortex) {
-  fileSystemComponent.setProps({children: updatedCortex});
+cortexData.onUpdate(function(updatedCortex) {
+  fileSystemComponent.setProps({node: updatedCortex});
 });

@@ -1,7 +1,7 @@
 {
   "name": "cortexjs",
-  "version": "0.8.7",
-  "description": "A data managment solution for React",
+  "version": "2.0.0",
+  "description": "An immutable data store for managing deeply nested structure with React",
   "author": "Quan Nguyen",
   "license": "MIT",
   "repository": {
@@ -9,20 +9,20 @@
     "url": "http://github.com/mquan/cortex.git"
   },
   "dependencies": {
-    "deep-diff": "~0.3.0"
+    "deep-diff": "~0.3.2"
   },
   "devDependencies": {
-    "babelify": "^6.1.2",
-    "browserify": "~9.0.3",
+    "babelify": "^6.3.0",
+    "browserify": "~11.0.1",
     "gulp": "~3.9.0",
     "gulp-derequire": "^2.1.0",
     "gulp-jasmine": "~2.0.1",
-    "gulp-react": "~2.0.0",
+    "gulp-react": "~3.0.1",
     "gulp-rename": "~1.2.2",
     "gulp-streamify": "~0.0.5",
-    "gulp-uglify": "~1.2.0",
-    "gulp-util": "~3.0.5",
-    "vinyl-source-stream": "~1.0.0"
+    "gulp-uglify": "~1.4.0",
+    "gulp-util": "~3.0.6",
+    "vinyl-source-stream": "~1.1.0"
   },
   "main": "./build/cortex",
   "engines": {
