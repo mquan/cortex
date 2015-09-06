@@ -658,8 +658,13 @@ module.exports = (function () {
     }
 
     _createClass(Cortex, [{
-      key: "update",
-      value: function update(diffs) {
+      key: "onUpdate",
+      value: function onUpdate(callback) {
+        this.__callbacks.push(callback);
+      }
+    }, {
+      key: "__update",
+      value: function __update(diffs) {
         if (diffs.length) {
           if (!this.__updating) {
             this.__diffs = [];
@@ -683,16 +688,10 @@ module.exports = (function () {
         }
       }
     }, {
-      key: "onChange",
-      value: function onChange(callback) {
-        this.__callbacks.push(callback);
-      }
-    }, {
       key: "__subscribe",
       value: function __subscribe() {
-        var self = this;
         this.__eventId = cortexPubSub.subscribeToCortex((function (topic, data) {
-          this.update(data);
+          this.__update(data);
         }).bind(this));
       }
     }, {

@@ -1,7 +1,7 @@
 {
   "name": "cortexjs",
-  "version": "2.0.0.rc1",
-  "description": "An immutable store for React that supports deeply nested structure",
+  "version": "2.0.0",
+  "description": "An immutable data store for managing deeply nested structure with React",
   "author": "Quan Nguyen",
   "license": "MIT",
   "repository": {
@@ -9,7 +9,7 @@
     "url": "http://github.com/mquan/cortex.git"
   },
   "dependencies": {
-    "deep-diff": "~0.3.0"
+    "deep-diff": "~0.3.2"
   },
   "devDependencies": {
     "babelify": "^6.3.0",

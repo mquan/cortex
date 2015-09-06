@@ -1,3 +1,12 @@
+# 2.0.0
+- support immutable data structure
+- remove `didChange` and `getChanges`
+- remove `off('update')`
+- replace `on('update')` with `onUpdate`
+- replace `insertAt` and `removeAt` with `splice`
+- replace `add` with `merge`
+- swap `remove` and `destroy` method
+
 # 0.8.7
 - fix multiple changes bug
 

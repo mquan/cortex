@@ -120,7 +120,7 @@ var cityComponent = React.render(
   React.createElement(City, {city: cortexData}), document.getElementById("city")
 );
 
-cortexData.onChange(function(updatedCortex) {
+cortexData.onUpdate(function(updatedCortex) {
   cortexData = updatedCortex;
   cityComponent.setProps({city: updatedCortex});
 });

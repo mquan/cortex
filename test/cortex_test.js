@@ -23,10 +23,6 @@ describe("Cortex", function() {
     jasmine.clock().uninstall();
   });
 
-  describe("#forEach", function() {
-
-  });
-
   describe("updating data", function() {
     fdescribe("running callback", function() {
       it("runs callback", function() {

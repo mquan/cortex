@@ -88,6 +88,6 @@ var fileSystemComponent = React.render(
   <Node node={cortexData} />, document.getElementById("filesystem")
 );
 
-cortexData.onChange(function(updatedCortex) {
+cortexData.onUpdate(function(updatedCortex) {
   fileSystemComponent.setProps({node: updatedCortex});
 });

@@ -16,7 +16,11 @@ module.exports = (function() {
       this.__wrap();
     }
 
-    update(diffs) {
+    onUpdate(callback) {
+      this.__callbacks.push(callback);
+    }
+
+    __update(diffs) {
       if(diffs.length) {
         if(!this.__updating) {
           this.__diffs = [];
@@ -40,14 +44,9 @@ module.exports = (function() {
       }
     }
 
-    onChange(callback) {
-      this.__callbacks.push(callback);
-    }
-
     __subscribe() {
-      var self = this;
       this.__eventId = cortexPubSub.subscribeToCortex((function(topic, data) {
-        this.update(data);
+        this.__update(data);
       }).bind(this));
     }
 

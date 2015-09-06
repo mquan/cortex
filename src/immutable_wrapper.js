@@ -11,6 +11,8 @@ module.exports = function(cortexPubSub) {
       }
 
       this.__wrap();
+
+      this.val = this.getValue;
     }
 
     static deepDiff(oldValue, newValue) {
