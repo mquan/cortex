@@ -1,6 +1,11 @@
 /** @jsx React.DOM */
 
 var Node = React.createClass({displayName: "Node",
+  shouldComponentUpdate: function(nextProps, nextState) {
+    return nextProps.node !== this.props.node ||
+           nextState.editing !== this.state.editing ||
+           nextState.editText !== this.state.editText;
+  },
   getInitialState: function() {
     return {editing: false, editText: ""};
   },
@@ -38,15 +43,15 @@ var Node = React.createClass({displayName: "Node",
     }
 
     return(
-      React.createElement("div", {className: nodeType},
-        React.createElement("span", {className: "icon"}),
-        React.createElement("span", {className: nameClass, onDoubleClick: this.edit},
+      React.createElement("div", {className: nodeType}, 
+        React.createElement("span", {className: "icon"}), 
+        React.createElement("span", {className: nameClass, onDoubleClick: this.edit}, 
           this.props.node.name.getValue()
-        ),
-        React.createElement("input", {className: editClass,
-               value: this.state.editText,
-               onChange: this.handleChange,
-               onKeyUp: this.update}),
+        ), 
+        React.createElement("input", {className: editClass, 
+               value: this.state.editText, 
+               onChange: this.handleChange, 
+               onKeyUp: this.update}), 
         nodes
       )
     );
@@ -79,10 +84,10 @@ var data = {name: "Desktop", children: [
 ]};
 
 var cortexData = new Cortex(data);
-var fileSystemComponent = React.renderComponent(
+var fileSystemComponent = React.render(
   React.createElement(Node, {node: cortexData}), document.getElementById("filesystem")
 );
 
-cortexData.on("update", function(updatedCortex) {
-  fileSystemComponent.setProps({children: updatedCortex});
+cortexData.onUpdate(function(updatedCortex) {
+  fileSystemComponent.setProps({node: updatedCortex});
 });

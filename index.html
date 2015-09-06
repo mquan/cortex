@@ -36,295 +36,377 @@
     </div>
 
     <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-<h3>Key features:</h3>
-<ul>
-<li>supports deeply nested data with a simple API</li>
-<li>performs old and new data comparison out of the box so you don't have to implement shouldComponentUpdate</li>
-<li>has built-in methods for working with arrays and hashes data</li>
-</ul>
-<p>
-  <strong>Basic demos</strong>
-  <ul>
-    <li>
-      <a href="http://mquan.github.io/cortex/examples/skyline/">Skyline (4-level components)</a>
-    </li>
-    <li>
-      <a href="http://mquan.github.io/cortex/examples/file_system/">File system (arbitrarily deep tree structure of 1 component type)</a>
-    </li>
-  </ul>
-</p>
+    <article class="markdown-body entry-content" itemprop="mainContentOfPage"><p>Cortex is an immutable data store for managing deeply nested structure with React</p>
 
-<h1>
-<a name="quickstart" class="anchor" href="#quickstart"><span class="octicon octicon-link"></span></a>Quickstart</h1>
+    <p><strong>Key features:</strong></p>
 
-<p>Initialize a cortex object</p>
+    <ul>
+    <li>supports deeply nested data</li>
+    <li>uses immutable data, which allows fast comparison in <code>shouldComponentUpdate</code></li>
+    <li>very efficient batch updates</li>
+    <li>simple APIs with built-in methods for working with arrays and hashes</li>
+    <li>very lightweight (4.5kB minified and gzip)</li>
+    <li>written in ES6</li>
+    </ul>
 
-<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">100</span><span class="p">,</span> <span class="nx">b</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]};</span>
+    <p><strong>Demos</strong></p>
 
-<span class="kd">var</span> <span class="nx">cortex</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Cortex</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="c1">//trigger your React component to update props</span>
-<span class="p">});</span>
-</pre></div>
+    <p><a href="https://mquan.github.io/cortex/examples/skyline/">skyline (4-level nested components)</a></p>
 
-<p>Get a nested cortex object</p>
+    <p><a href="https://mquan.github.io/cortex/examples/file_system/">file system (arbitrarily deep structure of a single component type)</a></p>
 
-<div class="highlight highlight-javascript"><pre><span class="nx">cortex</span><span class="p">.</span><span class="nx">a</span>
+    <h1><a id="user-content-quickstart" class="anchor" href="#quickstart" aria-hidden="true"><span class="octicon octicon-link"></span></a>Quickstart</h1>
 
-<span class="c1">//Also works</span>
-<span class="nx">cortex</span><span class="p">[</span><span class="s1">'a'</span><span class="p">]</span>
-</pre></div>
+    <p>Initialize a cortex object</p>
 
-<p>Get a nested cortex element in an array</p>
+    <div class="highlight highlight-javascript"><pre><span class="pl-k">var</span> data <span class="pl-k">=</span> {a<span class="pl-k">:</span> <span class="pl-c1">100</span>, b<span class="pl-k">:</span> [<span class="pl-c1">1</span>, <span class="pl-c1">2</span>, <span class="pl-c1">3</span>]};
 
-<div class="highlight highlight-javascript"><pre><span class="nx">cortex</span><span class="p">.</span><span class="nx">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</pre></div>
+    <span class="pl-k">var</span> cortex <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Cortex</span>(data, <span class="pl-k">function</span>(<span class="pl-smi">updatedCortex</span>) {
+      <span class="pl-c">//trigger React component to update props</span>
+      myComponent.setProps({cortex<span class="pl-k">:</span> updatedCortex});
+    });</pre></div>
 
-<p>Get the actual value</p>
+    <p>Get a nested cortex object</p>
 
-<div class="highlight highlight-javascript"><pre><span class="nx">cortex</span><span class="p">.</span><span class="nx">a</span><span class="p">.</span><span class="nx">getValue</span><span class="p">()</span>
-<span class="c1">// ==&gt; 100</span>
-</pre></div>
+    <div class="highlight highlight-javascript"><pre>cortex.a
 
-<p>Change data</p>
+    <span class="pl-c">//Also works</span>
+    cortex[<span class="pl-s"><span class="pl-pds">'</span>a<span class="pl-pds">'</span></span>]</pre></div>
 
-<div class="highlight highlight-javascript"><pre><span class="nx">cortex</span><span class="p">.</span><span class="nx">a</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
-<span class="nx">cortex</span><span class="p">.</span><span class="nx">a</span><span class="p">.</span><span class="nx">getValue</span><span class="p">();</span>
-<span class="c1">// ==&gt; 200</span>
-</pre></div>
+    <p>Get a nested cortex element in an array</p>
 
-<h1>
-<a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h1>
+    <div class="highlight highlight-javascript"><pre>cortex.b[<span class="pl-c1">0</span>]</pre></div>
 
-<p>In React's world data flows in one direction from the top down. That means if you want to make a change, change it at the source and let it propagate down the chain. But what happen when a child component needs to update the data? React's official guideline is to use callback for communication between parent and child components.</p>
+    <p>Get the actual value</p>
 
-<p>However, this simply isn't sustainable even for trivially nested data. Imagine a Restaurant app in which the Restaurant has many Orders, each has many Items, each of which has many Modifiers. If you want to update a Modifier from 'medium rare' to 'well-done' you'd have to pass the data changes several levels up. This is not only awkward but also creates unnecessary extra code in each component in the chain only for the purpose of passing data upstream.</p>
+    <div class="highlight highlight-javascript"><pre>cortex.a.getValue()
+    <span class="pl-c">// ==&gt; 100</span></pre></div>
 
-<p>Cortex's goal is to support arbitrarily deep data structure without requiring you to pass callbacks down the chain. Cortex achieves this by thinly wrap your data in an object that contains the key for locating each nested piece of data as accessed from the top level. When you change the data, internally Cortex passes the new value along with its location key to update the data at the source.</p>
+    <p>Change data</p>
 
-<h1>
-<a name="basic-example" class="anchor" href="#basic-example"><span class="octicon octicon-link"></span></a>Basic example</h1>
+    <div class="highlight highlight-javascript"><pre>cortex.a.set(<span class="pl-c1">200</span>);
+    cortex.a.getValue();
+    <span class="pl-c">// ==&gt; 200</span></pre></div>
 
-<p>The following example has two components Order and Item components. An Order contains an array of Items, and each Item can increase its own quantity attribute.</p>
+    <p>Change data from root object</p>
 
-<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">Item</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
-  <span class="nx">increase</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">quantity</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">item</span><span class="p">.</span><span class="nx">quantity</span><span class="p">.</span><span class="nx">getValue</span><span class="p">();</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">item</span><span class="p">.</span><span class="nx">quantity</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">quantity</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-  <span class="p">},</span>
-  <span class="nx">subTotal</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">item</span><span class="p">.</span><span class="nx">quantity</span><span class="p">.</span><span class="nx">getValue</span><span class="p">()</span> <span class="o">*</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">item</span><span class="p">.</span><span class="nx">price</span><span class="p">.</span><span class="nx">getValue</span><span class="p">();</span>
-  <span class="p">},</span>
-  <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">return</span><span class="p">(</span>
-      <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="s2">"item"</span><span class="o">&gt;</span>
-        <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">"#"</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">increase</span><span class="p">}</span><span class="o">&gt;+&lt;</span><span class="err">/a&gt;</span>
-        <span class="o">&lt;</span><span class="nx">span</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">item</span><span class="p">.</span><span class="nx">quantity</span><span class="p">.</span><span class="nx">getValue</span><span class="p">()}</span><span class="o">&lt;</span><span class="err">/span&gt;</span>
-        <span class="o">&lt;</span><span class="nx">span</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">item</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">getValue</span><span class="p">()}</span><span class="o">&lt;</span><span class="err">/span&gt;</span>
-        <span class="o">&lt;</span><span class="nx">span</span><span class="o">&gt;</span><span class="nx">$</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">subTotal</span><span class="p">()}</span><span class="o">&lt;</span><span class="err">/span&gt;</span>
-      <span class="o">&lt;</span><span class="err">/div&gt;</span>
-    <span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">});</span>
+    <div class="highlight highlight-javascript"><pre>cortex.set({a<span class="pl-k">:</span> <span class="pl-c1">300</span>})
+    cortex.getValue()
+    <span class="pl-c">// ==&gt; {a: 300}</span></pre></div>
 
-<span class="kd">var</span> <span class="nx">Order</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
-  <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">items</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">order</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">item</span><span class="p">){</span>
-      <span class="k">return</span> <span class="o">&lt;</span><span class="nx">Item</span> <span class="nx">item</span><span class="o">=</span><span class="p">{</span><span class="nx">item</span><span class="p">}</span> <span class="o">/&gt;</span><span class="p">;</span>
-    <span class="p">});</span>
-    <span class="k">return</span><span class="p">(</span>
-      <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span><span class="p">{</span><span class="nx">items</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/div&gt;</span>
-    <span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">});</span>
+    <p>Add callbacks</p>
 
-<span class="kd">var</span> <span class="nx">orderComponent</span><span class="p">,</span>
-    <span class="nx">orderData</span> <span class="o">=</span> <span class="p">[</span>
-      <span class="p">{</span><span class="nx">name</span><span class="o">:</span> <span class="s2">"Burger"</span><span class="p">,</span> <span class="nx">quantity</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span> <span class="nx">price</span><span class="o">:</span> <span class="mf">5.0</span><span class="p">},</span>
-      <span class="p">{</span><span class="nx">name</span><span class="o">:</span> <span class="s2">"Salad"</span><span class="p">,</span> <span class="nx">quantity</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">price</span><span class="o">:</span> <span class="mf">4.50</span><span class="p">},</span>
-      <span class="p">{</span><span class="nx">name</span><span class="o">:</span> <span class="s2">"Coke"</span><span class="p">,</span> <span class="nx">quantity</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span> <span class="nx">price</span><span class="o">:</span> <span class="mf">1.50</span><span class="p">}</span>
-    <span class="p">];</span>
+    <div class="highlight highlight-javascript"><pre>cortex.onUpdate(myCallback);</pre></div>
 
-<span class="c1">//Initialize cortex with data and pass in a callback to run when data is updated.</span>
-<span class="kd">var</span> <span class="nx">orderCortex</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Cortex</span><span class="p">(</span><span class="nx">orderData</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">updatedOrder</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nx">orderComponent</span><span class="p">.</span><span class="nx">setProps</span><span class="p">({</span><span class="nx">order</span><span class="o">:</span> <span class="nx">orderCortex</span><span class="p">});</span>
-<span class="p">});</span>
+    <h3><a id="user-content-es6-guide" class="anchor" href="#es6-guide" aria-hidden="true"><span class="octicon octicon-link"></span></a>ES6 Guide</h3>
 
-<span class="nx">orderComponent</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">renderComponent</span><span class="p">(</span>
-  <span class="o">&lt;</span><span class="nx">Order</span> <span class="nx">order</span><span class="o">=</span><span class="p">{</span><span class="nx">orderCortex</span><span class="p">}</span> <span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">"order"</span><span class="p">)</span>
-<span class="p">);</span>
-</pre></div>
+    <p>Since React 0.13.0 removed <code>setProps</code> for ES6 React.Component class you have to define your cortex data as state instead</p>
 
-<p>First we initialize cortex with:</p>
+    <div class="highlight highlight-javascript"><pre><span class="pl-k">class</span> <span class="pl-en">MyComponent</span> <span class="pl-k">extends</span> <span class="pl-en">React.Component</span> {
+      <span class="pl-en">constructor</span>(<span class="pl-smi">props</span>) {
+        <span class="pl-v">super</span>(props);
 
-<div class="highlight highlight-javascript"><pre><span class="kd">var</span> <span class="nx">orderCortex</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Cortex</span><span class="p">(</span><span class="nx">orderData</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">updatedOrder</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nx">orderComponent</span><span class="p">.</span><span class="nx">setProps</span><span class="p">({</span><span class="nx">order</span><span class="o">:</span> <span class="nx">orderCortex</span><span class="p">});</span>
-<span class="p">});</span>
-</pre></div>
+        <span class="pl-c">// Assume you pass your data into props as myData</span>
+        <span class="pl-k">var</span> myCortex <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Cortex</span>(props.myData, (<span class="pl-smi">updatedCortex</span>)<span class="pl-k"> =&gt;</span> {
+          <span class="pl-v">this</span>.setState({myCortex<span class="pl-k">:</span> updatedCortex});
+        });
 
-<p>Then it's passed into the Order component to render the Item components.</p>
+        <span class="pl-v">this</span>.state <span class="pl-k">=</span> {myCortex<span class="pl-k">:</span> myCortex};
+      }
 
-<p>In Item component, note that we display the quantity value with <code>this.props.item.quantity.getValue()</code>. This is because <code>this.props.item.quantity</code> only gives us the wrapper of the <code>quantity</code> attribute, we need to call <code>getValue()</code> to get the actual value.</p>
+      <span class="pl-en">render</span>() {
+        <span class="pl-c">// access cortex data from this.state.myCortex</span>
+      }
+    }</pre></div>
 
-<p>In <code>increase</code> method, we use <code>this.props.item.quantity.set(quantity + 1)</code> to add 1 to the current quantity value.</p>
+    <h1><a id="user-content-cortex-20-migration-guide" class="anchor" href="#cortex-20-migration-guide" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cortex 2.0 migration guide</h1>
 
-<h1>
-<a name="cortex-api" class="anchor" href="#cortex-api"><span class="octicon octicon-link"></span></a>Cortex API</h1>
+    <p>The biggest change in v2 is immutable data. This allows us to implement <code>shouldComponentUpdate</code> as easy as</p>
 
-<h3>
-<a name="initialize" class="anchor" href="#initialize"><span class="octicon octicon-link"></span></a>Initialize:</h3>
+    <div class="highlight highlight-javascript"><pre><span class="pl-en">shouldComponentUpdate</span><span class="pl-k">:</span> <span class="pl-k">function</span>(<span class="pl-smi">nextProps</span>, <span class="pl-smi">nextState</span>) {
+      <span class="pl-k">return</span> nextProps.myCortex <span class="pl-k">!==</span> <span class="pl-v">this</span>.props.myCortex;
+    }</pre></div>
 
-<div class="highlight highlight-javascript"><pre><span class="k">new</span> <span class="nx">Cortex</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="c1">//trigger your React component to update</span>
-<span class="p">});</span>
-</pre></div>
+    <p>Immutability also allows us to remove <code>getChanges</code> and <code>didChange</code> methods.</p>
 
-<h3>
-<a name="instance-methods" class="anchor" href="#instance-methods"><span class="octicon octicon-link"></span></a>Instance methods:</h3>
+    <p>BREAKING CHANGES</p>
 
-<table>
-<thead><tr>
-<th>Method</th>
-<th align="left">Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>getValue()</code></td>
-<td align="left">Returns the actual value</td>
-</tr>
-<tr>
-<td><code>set(value)</code></td>
-<td align="left">Changes the value and rewrap the entire data tree</td>
-</tr>
-</tbody>
-</table><h3>
-<a name="cortex-wrapper-of-array-data-has-the-following-methods" class="anchor" href="#cortex-wrapper-of-array-data-has-the-following-methods"><span class="octicon octicon-link"></span></a>Cortex wrapper of array data has the following methods:</h3>
+    <ul>
+    <li>`on('update', callback) is now simply onUpdate(callback)</li>
+    <li>`off('update', callback) is removed</li>
+    <li><code>insertAt</code> and <code>removeAt</code> are replaced by <code>splice</code>, which behaves the same way as <code>Array.prototype.splice</code></li>
+    <li><code>add</code> is replaced by <code>merge</code></li>
+    <li>for aesthetic reason, <code>remove</code> and <code>destroy</code> are swapped. So you would call <code>remove(key)</code> to remove a nested child and call <code>destroy</code> to remove self.</li>
+    </ul>
 
-<table>
-<thead><tr>
-<th>Method</th>
-<th align="left">Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>count()</code></td>
-<td align="left">Returns length of nested wrappers</td>
-</tr>
-<tr>
-<td><code>forEach(callback)</code></td>
-<td align="left">Iterates over all elements. The callback accepts the following input <code>(wrapperElement, index, wrapperArray)</code>
-</td>
-</tr>
-<tr>
-<td><code>map(callback)</code></td>
-<td align="left">Returns a new array as returned by the callback. Callback accepts same input as forEach callback</td>
-</tr>
-<tr>
-<td><code>find(callback)</code></td>
-<td align="left">Returns the first wrapper element that meets the condition returned by callback. Callback accepts same input as forEach callback.</td>
-</tr>
-<tr>
-<td><code>findIndex(callback)</code></td>
-<td align="left">Returns index of first wrapper element that meets condition returned callback. Callback accepts same input as forEach callback.</td>
-</tr>
-<tr>
-<td><code>push(value)</code></td>
-<td align="left">Inserts and rewrap the value at the end of the array.</td>
-</tr>
-<tr>
-<td><code>pop()</code></td>
-<td align="left">Removes the last element in the array</td>
-</tr>
-<tr>
-<td><code>insertAt(index, [value])</code></td>
-<td align="left">Inserts a value or an array of values starting at specified index.</td>
-</tr>
-<tr>
-<td><code>removeAt(index, howMany = 1)</code></td>
-<td align="left">Removes specified number of elements starting at index location. By default it removes 1 element if number of elements to be removed isn't specified.</td>
-</tr>
-</tbody>
-</table><h3>
-<a name="cortex-wrapper-of-hash-data-has-the-following-methods" class="anchor" href="#cortex-wrapper-of-hash-data-has-the-following-methods"><span class="octicon octicon-link"></span></a>Cortex wrapper of hash data has the following methods:</h3>
+    <h1><a id="user-content-overview" class="anchor" href="#overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview</h1>
 
-<table>
-<thead><tr>
-<th>Methods</th>
-<th align="left">Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>keys()</code></td>
-<td align="left">Returns the array of keys</td>
-</tr>
-<tr>
-<td><code>values()</code></td>
-<td align="left">Returns the array of values</td>
-</tr>
-<tr>
-<td><code>hasKey(key)</code></td>
-<td align="left">Returns boolean value whether the key exists</td>
-</tr>
-<tr>
-<td><code>forEach(callback)</code></td>
-<td align="left">Iterates over every key and value pair. The callback accepts the following inputs <code>(key, wrapperElement)</code>
-</td>
-</tr>
-<tr>
-<td><code>delete(key)</code></td>
-<td align="left">Deletes the specified key and value pair</td>
-</tr>
-<tr>
-<td><code>add(key, value)</code></td>
-<td align="left">Adds the specified key and value pair</td>
-</tr>
-</tbody>
-</table><h1>
-<a name="install-via-bower" class="anchor" href="#install-via-bower"><span class="octicon octicon-link"></span></a>Install via Bower</h1>
+    <p>In React's world data flows in one direction from the top down. That means if you want to make a change, change it at the source and let it propagate down the chain. But what happens when a child component needs to update the data? React's official guideline is to use callback for communication between parent and child components.</p>
 
-<div class="highlight highlight-console"><pre><span class="go">bower install cortexjs</span>
-</pre></div>
+    <p>However, this simply isn't sustainable even for trivially nested data. Imagine a Restaurant app in which the Restaurant has many Orders, each has many Items, each of which has many Modifiers. If you want to update a spiciness Modifier from 'hot' to 'mild' you'd have to pass the data changes several levels up. This is not only awkward but also creates unnecessary extra code in each component in the chain only for the purpose of passing data upstream.</p>
 
-<p>Reference the js file</p>
+    <p>Cortex's goal is to support arbitrarily deep data structures without requiring you to pass callbacks down the chain. Cortex achieves this by thinly wrapping your data in an object that contains the key for locating each nested piece of data as accessed from the top level. When you change the data, internally Cortex passes the new value along with its location key to update the data at the source.</p>
 
-<div class="highlight highlight-html"><pre><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"/bower_components/cortexjs/build/cortex.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-</pre></div>
+    <h1><a id="user-content-basic-example" class="anchor" href="#basic-example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Basic example</h1>
 
-<h1>
-<a name="using-cortex-with-node" class="anchor" href="#using-cortex-with-node"><span class="octicon octicon-link"></span></a>Using cortex with node</h1>
+    <p>The following example has two components, Order and Item. An Order contains an array of Items, and each Item can increase its own quantity attribute.</p>
 
-<div class="highlight highlight-console"><pre><span class="go">npm install cortexjs</span>
-</pre></div>
+    <div class="highlight highlight-javascript"><pre><span class="pl-k">var</span> Item <span class="pl-k">=</span> React.createClass({
+      <span class="pl-en">shouldComponentUpdate</span><span class="pl-k">:</span> <span class="pl-k">function</span>(<span class="pl-smi">nextProps</span>, <span class="pl-smi">nextState</span>) {
+        nextProps.item <span class="pl-k">!==</span> <span class="pl-v">this</span>.props.item;
+      },
+      <span class="pl-en">increase</span><span class="pl-k">:</span> <span class="pl-k">function</span>() {
+        <span class="pl-k">var</span> quantity <span class="pl-k">=</span> <span class="pl-v">this</span>.props.item.quantity.getValue();
+        <span class="pl-v">this</span>.props.item.quantity.set(quantity <span class="pl-k">+</span> <span class="pl-c1">1</span>);
+      },
+      <span class="pl-en">subTotal</span><span class="pl-k">:</span> <span class="pl-k">function</span>() {
+        <span class="pl-k">return</span> <span class="pl-v">this</span>.props.item.quantity.getValue() <span class="pl-k">*</span> <span class="pl-v">this</span>.props.item.price.getValue();
+      },
+      <span class="pl-en">render</span><span class="pl-k">:</span> <span class="pl-k">function</span>() {
+        <span class="pl-k">return</span>(
+          <span class="pl-k">&lt;</span>div className<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>item<span class="pl-pds">"</span></span><span class="pl-k">&gt;</span>
+            <span class="pl-k">&lt;</span>a href<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>#<span class="pl-pds">"</span></span> onClick<span class="pl-k">=</span>{<span class="pl-v">this</span>.increase}<span class="pl-k">&gt;+&lt;/</span>a<span class="pl-k">&gt;</span>
+            <span class="pl-k">&lt;</span>span<span class="pl-k">&gt;</span>{<span class="pl-v">this</span>.props.item.quantity.getValue()}<span class="pl-k">&lt;/</span>span<span class="pl-k">&gt;</span>
+            <span class="pl-k">&lt;</span>span<span class="pl-k">&gt;</span>{<span class="pl-v">this</span>.props.item.<span class="pl-c1">name</span>.getValue()}<span class="pl-k">&lt;/</span>span<span class="pl-k">&gt;</span>
+            <span class="pl-k">&lt;</span>span<span class="pl-k">&gt;</span>${<span class="pl-v">this</span>.subTotal()}<span class="pl-k">&lt;/</span>span<span class="pl-k">&gt;</span>
+          <span class="pl-k">&lt;/</span>div<span class="pl-k">&gt;</span>
+        );
+      }
+    });
 
-<div class="highlight highlight-javascript"><pre><span class="nx">Cortex</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"cortexjs"</span><span class="p">);</span>
+    <span class="pl-k">var</span> Order <span class="pl-k">=</span> React.createClass({
+      <span class="pl-en">shouldComponentUpdate</span><span class="pl-k">:</span> <span class="pl-k">function</span>(<span class="pl-smi">nextProps</span>, <span class="pl-smi">nextState</span>) {
+        <span class="pl-k">return</span> nextProps.order <span class="pl-k">!==</span> <span class="pl-v">this</span>.props.order;
+      },
+      <span class="pl-en">render</span><span class="pl-k">:</span> <span class="pl-k">function</span>() {
+        <span class="pl-k">var</span> items <span class="pl-k">=</span> <span class="pl-v">this</span>.props.order.map(<span class="pl-k">function</span>(<span class="pl-smi">item</span>){
+          <span class="pl-k">return</span> <span class="pl-k">&lt;</span>Item item<span class="pl-k">=</span>{item} <span class="pl-k">/&gt;</span>;
+        });
+        <span class="pl-k">return</span>(
+          <span class="pl-k">&lt;</span>div<span class="pl-k">&gt;</span>{items}<span class="pl-k">&lt;/</span>div<span class="pl-k">&gt;</span>
+        );
+      }
+    });
 
-<span class="nx">wrappedData</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Cortex</span><span class="p">({</span><span class="nx">mydata</span><span class="o">:</span> <span class="mi">1</span><span class="p">});</span>
-<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">wrappedData</span><span class="p">.</span><span class="nx">mydata</span><span class="p">.</span><span class="nx">getValue</span><span class="p">());</span> <span class="c1">//1</span>
+    <span class="pl-k">var</span> orderData <span class="pl-k">=</span> [
+          {name<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>Burger<span class="pl-pds">"</span></span>, quantity<span class="pl-k">:</span> <span class="pl-c1">2</span>, price<span class="pl-k">:</span> <span class="pl-c1">5.0</span>},
+          {name<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>Salad<span class="pl-pds">"</span></span>, quantity<span class="pl-k">:</span> <span class="pl-c1">1</span>, price<span class="pl-k">:</span> <span class="pl-c1">4.50</span>},
+          {name<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>Coke<span class="pl-pds">"</span></span>, quantity<span class="pl-k">:</span> <span class="pl-c1">3</span>, price<span class="pl-k">:</span> <span class="pl-c1">1.50</span>}
+        ];
 
-<span class="nx">wrappedData</span><span class="p">.</span><span class="nx">mydata</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
-<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">wrappedData</span><span class="p">.</span><span class="nx">mydata</span><span class="p">.</span><span class="nx">getValue</span><span class="p">());</span> <span class="c1">//100</span>
-</pre></div>
+    <span class="pl-c">//Initialize cortex with data and pass in a callback to run when data is updated.</span>
+    <span class="pl-k">var</span> orderCortex <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Cortex</span>(orderData);
 
-<h1>
-<a name="buidling-cortex" class="anchor" href="#buidling-cortex"><span class="octicon octicon-link"></span></a>Buidling Cortex</h1>
+    <span class="pl-k">var</span> orderComponent <span class="pl-k">=</span> React.renderComponent(
+      <span class="pl-k">&lt;</span>Order order<span class="pl-k">=</span>{orderCortex} <span class="pl-k">/&gt;</span>, <span class="pl-c1">document</span>.<span class="pl-c1">getElementById</span>(<span class="pl-s"><span class="pl-pds">"</span>order<span class="pl-pds">"</span></span>)
+    );
 
-<p>To build Cortex:</p>
+    orderCortex.on(<span class="pl-s"><span class="pl-pds">"</span>update<span class="pl-pds">"</span></span>, <span class="pl-k">function</span>(<span class="pl-smi">updatedOrder</span>) {
+      orderComponent.setProps({order<span class="pl-k">:</span> updatedOrder});
+    });</pre></div>
 
-<div class="highlight highlight-console"><pre><span class="go">gulp</span>
-</pre></div>
+    <p>First we initialize cortex with:</p>
 
-<p>To run test:</p>
+    <div class="highlight highlight-javascript"><pre><span class="pl-k">var</span> orderCortex <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Cortex</span>(orderData);</pre></div>
 
-<div class="highlight highlight-console"><pre><span class="go">gulp test</span>
-</pre></div>
+    <p>Then it's passed into the Order component to render the Item components.</p>
 
-<p>To compile jsx files in examples into js files:</p>
+    <p>We set a callback to run on update event using</p>
 
-<div class="highlight highlight-console"><pre><span class="go">gulp react</span>
-</pre></div>
-      </section>
-    </div>
+    <pre><code>orderCortex.on("update", function(updatedOrder) {
+      orderComponent.setProps({order: updatedOrder});
+    });
+    </code></pre>
+
+    <p>In Item component, note that we display the quantity value with <code>this.props.item.quantity.getValue()</code>. This is because <code>this.props.item.quantity</code> only gives us the wrapper of the <code>quantity</code> attribute, we need to call <code>getValue()</code> to get the actual value.</p>
+
+    <p>In <code>increase</code> method, we use <code>this.props.item.quantity.set(quantity + 1)</code> to add 1 to the current quantity value.</p>
+
+    <p>Note that we implement <code>shouldComponentUpdate</code> by simply comparing the current and next props. This comparison is extremely fast since cortex returns a brand new immutable wrapper when data change.</p>
+
+    <h1><a id="user-content-cortex-api" class="anchor" href="#cortex-api" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cortex API</h1>
+
+    <h3><a id="user-content-initialize" class="anchor" href="#initialize" aria-hidden="true"><span class="octicon octicon-link"></span></a>Initialize:</h3>
+
+    <div class="highlight highlight-javascript"><pre><span class="pl-k">new</span> <span class="pl-en">Cortex</span>(data, <span class="pl-k">function</span>() {
+      <span class="pl-c">//trigger your React component to update</span>
+    });</pre></div>
+
+    <h3><a id="user-content-instance-methods" class="anchor" href="#instance-methods" aria-hidden="true"><span class="octicon octicon-link"></span></a>Instance methods:</h3>
+
+    <table><thead>
+    <tr>
+    <th>Method</th>
+    <th align="left">Description</th>
+    </tr>
+    </thead><tbody>
+    <tr>
+    <td><code>getValue()</code></td>
+    <td align="left">Returns the actual value</td>
+    </tr>
+    <tr>
+    <td><code>val()</code></td>
+    <td align="left">Alias for <code>getValue</code></td>
+    </tr>
+    <tr>
+    <td><code>set(value)</code></td>
+    <td align="left">Changes the value and rewrap the subtree.</td>
+    </tr>
+    <tr>
+    <td><code>destroy()</code></td>
+    <td align="left">Self destruct method: remove self from parent if nested, set value to undefined if root level.</td>
+    </tr>
+    <tr>
+    <td><code>onUpdate(callback)</code></td>
+    <td align="left">Add a callback to run on update event (only available on root object)</td>
+    </tr>
+    </tbody></table>
+
+    <h3><a id="user-content-cortex-wrapper-of-array-data-has-the-following-methods" class="anchor" href="#cortex-wrapper-of-array-data-has-the-following-methods" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cortex wrapper of array data has the following methods:</h3>
+
+    <table><thead>
+    <tr>
+    <th>Method</th>
+    <th align="left">Description</th>
+    </tr>
+    </thead><tbody>
+    <tr>
+    <td><code>count()</code></td>
+    <td align="left">Returns length of nested wrappers</td>
+    </tr>
+    <tr>
+    <td><code>forEach(callback)</code></td>
+    <td align="left">Iterates over all elements. The callback accepts the following input <code>(wrapperElement, index, wrapperArray)</code></td>
+    </tr>
+    <tr>
+    <td><code>map(callback)</code></td>
+    <td align="left">Returns a new array as returned by the callback. Callback accepts same input as forEach callback</td>
+    </tr>
+    <tr>
+    <td><code>filter(callback, thisArg)</code></td>
+    <td align="left">Returns a new array of wrappers whose elements satisfy condition return by callback.</td>
+    </tr>
+    <tr>
+    <td><code>find(callback)</code></td>
+    <td align="left">Returns the first wrapper element that meets the condition returned by callback. Callback accepts same input as forEach callback.</td>
+    </tr>
+    <tr>
+    <td><code>findIndex(callback)</code></td>
+    <td align="left">Returns index of first wrapper element that meets condition returned callback. Callback accepts same input as forEach callback.</td>
+    </tr>
+    <tr>
+    <td><code>push(value)</code></td>
+    <td align="left">Inserts and rewrap the value at the end of the array.</td>
+    </tr>
+    <tr>
+    <td><code>pop()</code></td>
+    <td align="left">Removes the last element in the array</td>
+    </tr>
+    <tr>
+    <td><code>unshift(value)</code></td>
+    <td align="left">Inserts and rewrap the value at the front of the array.</td>
+    </tr>
+    <tr>
+    <td><code>shift()</code></td>
+    <td align="left">Removes the first element in the array</td>
+    </tr>
+    <tr>
+    <td><code>splice(index, removeCount, element1 [, element2, ...])</code></td>
+    <td align="left">Remove <code>removeCount</code> from the array and insert elements into the array. This is similar to the native <code>Array.prototype.splice</code> method</td>
+    </tr>
+    </tbody></table>
+
+    <h3><a id="user-content-cortex-wrapper-of-hash-data-has-the-following-methods" class="anchor" href="#cortex-wrapper-of-hash-data-has-the-following-methods" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cortex wrapper of hash data has the following methods:</h3>
+
+    <table><thead>
+    <tr>
+    <th>Methods</th>
+    <th align="left">Description</th>
+    </tr>
+    </thead><tbody>
+    <tr>
+    <td><code>keys()</code></td>
+    <td align="left">Returns the array of keys</td>
+    </tr>
+    <tr>
+    <td><code>values()</code></td>
+    <td align="left">Returns the array of values</td>
+    </tr>
+    <tr>
+    <td><code>hasKey(key)</code></td>
+    <td align="left">Returns boolean value whether the key exists</td>
+    </tr>
+    <tr>
+    <td><code>forEach(callback)</code></td>
+    <td align="left">Iterates over every key and value pair. The callback accepts the following inputs <code>(key, wrapperElement)</code></td>
+    </tr>
+    <tr>
+    <td><code>remove(key)</code></td>
+    <td align="left">Removes the specified key and value pair</td>
+    </tr>
+    <tr>
+    <td><code>merge({key1: value1[, key2: value2, ...]})</code></td>
+    <td align="left">Adds/modifies the specified key and value pairs</td>
+    </tr>
+    </tbody></table>
+
+    <h1><a id="user-content-cdn" class="anchor" href="#cdn" aria-hidden="true"><span class="octicon octicon-link"></span></a>CDN</h1>
+
+    <p><a href="https://cdn.rawgit.com/mquan/cortex/master/build/cortex.js">cortex.2.0.0.js</a>
+    <a href="https://cdn.rawgit.com/mquan/cortex/master/build/cortex.min.js">cortex.2.0.0.min.js</a></p>
+
+    <h1><a id="user-content-install-via-bower" class="anchor" href="#install-via-bower" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install via Bower</h1>
+
+    <div class="highlight highlight-console"><pre><span class="pl-mo">bower install cortexjs</span></pre></div>
+
+    <p>Reference the js file</p>
+
+    <div class="highlight highlight-html"><pre>&lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>/bower_components/cortexjs/build/cortex.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;</pre></div>
+
+    <h1><a id="user-content-using-cortex-with-nodejs" class="anchor" href="#using-cortex-with-nodejs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using cortex with node.js</h1>
+
+    <p>Install via npm</p>
+
+    <div class="highlight highlight-console"><pre><span class="pl-mo">npm install cortexjs</span></pre></div>
+
+    <p>Use it:</p>
+
+    <div class="highlight highlight-javascript"><pre>Cortex <span class="pl-k">=</span> <span class="pl-c1">require</span>(<span class="pl-s"><span class="pl-pds">"</span>cortexjs<span class="pl-pds">"</span></span>);
+
+    wrappedData <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Cortex</span>({mydata<span class="pl-k">:</span> <span class="pl-c1">1</span>});
+    <span class="pl-en">console</span><span class="pl-c1">.log</span>(wrappedData.mydata.getValue()); <span class="pl-c">//1</span>
+
+    wrappedData.mydata.set(<span class="pl-c1">100</span>);
+    <span class="pl-en">console</span><span class="pl-c1">.log</span>(wrappedData.mydata.getValue()); <span class="pl-c">//100</span></pre></div>
+
+    <h1><a id="user-content-building-cortex" class="anchor" href="#building-cortex" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building Cortex</h1>
+
+    <p>To build Cortex:</p>
+
+    <div class="highlight highlight-console"><pre><span class="pl-mo">gulp</span></pre></div>
+
+    <p>To run test:</p>
+
+    <div class="highlight highlight-console"><pre><span class="pl-mo">gulp test</span></pre></div>
+
+    <p>To compile jsx files in examples into js files:</p>
+
+    <div class="highlight highlight-console"><pre><span class="pl-mo">gulp react</span></pre></div>
+
+    <h1><a id="user-content-design--optimizations" class="anchor" href="#design--optimizations" aria-hidden="true"><span class="octicon octicon-link"></span></a>Design &amp; Optimizations</h1>
+
+    <p>Besides providing the convenience of allowing you to update data from any level, Cortex also has several optimizations that help boost performance.</p>
+
+    <h3><a id="user-content-1-deep-comparison-between-old-and-new-values" class="anchor" href="#1-deep-comparison-between-old-and-new-values" aria-hidden="true"><span class="octicon octicon-link"></span></a>1. Deep comparison between old and new values</h3>
+
+    <p>When you issue a <code>set(newValue)</code> call, no data actually changes at that point. What happens internally is the wrapper being called publishes a notification to the master cortex wrapper passing along a payload consisting of the path for locating the data and the new value (Yes, there is a pub/sub system within Cortex.) The root wrapper then performs a deep comparison between the old and new data to determine whether it should trigger the update action. If no change was made, the process just terminates without touching the data nor invoking the callbacks.</p>
+
+    <p>Deep comparison may sound costly but in practice when you call <code>set(newValue)</code> the newValue usually isn't deeply nested (if it is and the actual change is many layers deep then you should consider calling <code>set(newValue)</code> on the wrapper at the level that the change actually occurs.) In some situations where you have to pass in arbirarily deeply nested value the comparison work is still worth it because it can potentially save you from unnecessarily rewrapping and triggering React to update.</p>
+
+    <h3><a id="user-content-2-batch-rewrap-and-invoke-callbacks-once-for-multiple-updates" class="anchor" href="#2-batch-rewrap-and-invoke-callbacks-once-for-multiple-updates" aria-hidden="true"><span class="octicon octicon-link"></span></a>2. Batch rewrap and invoke callbacks once for multiple updates</h3>
+
+    <p>When multiple updates occur at the same time, it will result in the same number of data rewrapping and callback invocations, which usually involve triggering React to update that same number of times. While React has good diffing algorithm for efficiently redrawing the DOM it would be even more efficient if React doesn't have to perform DOM comparison mutliple times. Cortex avoids triggering React by running callback only once for updates happening at the same time. This is especially useful when an array is being updated one element at a time or a deeply nested piece of data change at multiple levels.</p>
+    </article>
 
     <!-- FOOTER  -->
     <div id="footer_wrap" class="outer">
