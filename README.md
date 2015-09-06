@@ -143,7 +143,7 @@ var Item = React.createClass({
 
 var Order = React.createClass({
   shouldComponentUpdate: function(nextProps, nextState) {
-
+    return nextProps.order !== this.props.order;
   },
   render: function() {
     var items = this.props.order.map(function(item){
