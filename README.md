@@ -241,8 +241,8 @@ new Cortex(data, function() {
 
 # CDN
 
-[cortex.0.6.2.js](https://cdn.rawgit.com/mquan/cortex/master/build/cortex.js)
-[cortex.0.6.2.min.js](https://cdn.rawgit.com/mquan/cortex/master/build/cortex.min.js)
+[cortex.2.0.0.js](https://cdn.rawgit.com/mquan/cortex/master/build/cortex.js)
+[cortex.2.0.0.min.js](https://cdn.rawgit.com/mquan/cortex/master/build/cortex.min.js)
 
 
 # Install via Bower
