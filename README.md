@@ -98,8 +98,8 @@ shouldComponentUpdate: function(nextProps, nextState) {
 Immutability also allows us to remove `getChanges` and `didChange` methods.
 
 BREAKING CHANGES
-- `on('update', callback) is now simply onUpdate(callback)
-- `off('update', callback) is removed
+- `on('update', callback)` is now simply onUpdate(callback)
+- `off('update', callback)` is removed
 - `insertAt` and `removeAt` are replaced by `splice`, which behaves the same way as `Array.prototype.splice`
 - `add` is replaced by `merge`
 - for aesthetic reason, `remove` and `destroy` are swapped. So you would call `remove(key)` to remove a nested child and call `destroy` to remove self.
