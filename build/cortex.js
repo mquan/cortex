@@ -759,6 +759,8 @@ module.exports = function (cortexPubSub) {
       }
 
       this.__wrap();
+
+      this.val = this.getValue;
     }
 
     _createClass(ImmutableWrapper, [{
@@ -985,8 +987,8 @@ var ArrayWrapper = {
     return this.__value.length;
   },
 
-  map: function map(callback) {
-    return this.__wrappers.map(callback);
+  map: function map(callback, thisArg) {
+    return this.__wrappers.map(callback, thisArg);
   },
 
   filter: function filter(callback, thisArg) {

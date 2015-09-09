@@ -3,8 +3,8 @@ var ArrayWrapper = {
     return this.__value.length;
   },
 
-  map: function(callback) {
-    return this.__wrappers.map(callback);
+  map: function(callback, thisArg) {
+    return this.__wrappers.map(callback, thisArg);
   },
 
   filter: function(callback, thisArg) {

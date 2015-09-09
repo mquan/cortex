@@ -1,3 +1,6 @@
+# 2.0.1
+- Add optional thisArg to `map` method
+
 # 2.0.0
 - support immutable data structure
 - remove `didChange` and `getChanges`
