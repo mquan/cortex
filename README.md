@@ -57,6 +57,7 @@ cortex.set({a: 300})
 cortex.getValue()
 // ==> {a: 300}
 ```
+* Note that new value is only available after `onUpdate` callback is run. 
 
 Add callbacks
 ```javascript
