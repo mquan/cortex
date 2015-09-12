@@ -26,7 +26,7 @@ module.exports = (function() {
           this.__diffs = [];
           this.__diffSignature = {};
           this.__updating = true;
-          setTimeout((this.__updateAll).bind(this), 0);
+          setTimeout((this.__updateAll).bind(this));
         }
 
         for(var i = 0, ii = diffs.length; i < ii; i++) {
