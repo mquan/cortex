@@ -57,7 +57,7 @@ cortex.set({a: 300})
 cortex.getValue()
 // ==> {a: 300}
 ```
-* Note that new value is only available after `onUpdate` callback is run. 
+* Note that new value is only available after `onUpdate` callback is run.
 
 Add callbacks
 ```javascript
@@ -113,7 +113,7 @@ Cortex is simply a store that works for updates at any level. It achieves this b
 
 Cortex allows components to manage their own data instead of defining global update ACTIONS. A deeply nested data structure can simply be passed into the parent Component, which then passes pieces of the data onto child components without worrying about how they are used.
 
-Cortex also provides a few optimization to help boost performance. Fist, Cortex will skip triggering React to rerender when there is data change. Secondly, Cortex batches all updates in a cycle into one update call so that React is only triggered to render once. This is especially useful when updating multiple data nodes, such as data in an array.
+Cortex also provides a few optimizations to help boost performance. Fist, Cortex will skip triggering React rerender when an update results in no actual data change. Secondly, Cortex batches all updates in a cycle into one call so that React is only triggered to render once. This is especially useful when updating multiple data nodes, such as data in an array.
 
 # Basic example
 
