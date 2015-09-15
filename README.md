@@ -170,7 +170,7 @@ var orderComponent = React.renderComponent(
   <Order order={orderCortex} />, document.getElementById("order")
 );
 
-orderCortex.on("update", function(updatedOrder) {
+orderCortex.onUpdate(function(updatedOrder) {
   orderComponent.setProps({order: updatedOrder});
 });
 ```
@@ -184,7 +184,7 @@ Then it's passed into the Order component to render the Item components.
 
 We set a callback to run on update event using
 ```
-orderCortex.on("update", function(updatedOrder) {
+orderCortex.onUpdate(function(updatedOrder) {
   orderComponent.setProps({order: updatedOrder});
 });
 ```
