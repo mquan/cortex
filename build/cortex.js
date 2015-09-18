@@ -795,7 +795,7 @@ module.exports = function (cortexPubSub) {
             if (diff.path) path = path.concat(diff.path);
 
             // Both index and path may be available
-            if (diff.index) path.push(diff.index);
+            if (typeof diff.index !== 'undefined') path.push(diff.index);
 
             diffs.push({
               action: changeMappings[diff.item ? diff.item.kind : diff.kind],

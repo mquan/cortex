@@ -1,3 +1,6 @@
+# 2.0.2
+- Fix error inserting into 0 element by checking diff.index is undefined
+
 # 2.0.1
 - Add optional thisArg to `map` method
 

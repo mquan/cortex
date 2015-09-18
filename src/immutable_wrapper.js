@@ -53,7 +53,7 @@ module.exports = function(cortexPubSub) {
             path = path.concat(diff.path);
 
           // Both index and path may be available
-          if(diff.index)
+          if(typeof diff.index !== 'undefined')
             path.push(diff.index);
 
           diffs.push({

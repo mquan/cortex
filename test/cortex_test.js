@@ -99,6 +99,48 @@ describe("Cortex", function() {
         });
       });
 
+      describe("when setting value of root to an array", function() {
+        it("updates value and returns new cortex object", function() {
+          var updated;
+          var value = [],
+              newValue = [1, 2, 3];
+          var cortex = new Cortex(value, function(updatedCortex) {
+            updated = updatedCortex;
+          });
+          cortex.set(newValue);
+
+          jasmine.clock().tick();
+
+          expect(updated).not.toBe(cortex);
+          expect(updated.getValue()).toEqual(newValue);
+
+          for(var i = 0, ii = newValue.length; i < ii; i++) {
+            expect(updated[i].getValue()).toEqual(newValue[i]);
+          }
+        });
+      });
+
+      describe("when setting value of root to an object", function() {
+        it("updates value and returns new cortex object", function() {
+          var updated;
+          var value = {},
+              newValue = {a: 1, b: 2};
+          var cortex = new Cortex(value, function(updatedCortex) {
+            updated = updatedCortex;
+          });
+          cortex.set(newValue);
+
+          jasmine.clock().tick();
+
+          expect(updated).not.toBe(cortex);
+          expect(updated.getValue()).toEqual(newValue);
+
+          for(var key in newValue) {
+            expect(updated[key].getValue()).toEqual(newValue[key]);
+          }
+        });
+      });
+
       describe("when setting value of a nested object", function() {
         it("updates value and returns a new wrapper for every affected node", function() {
           var updated;
