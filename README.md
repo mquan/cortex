@@ -113,7 +113,7 @@ Cortex is simply a store that works for updates at any level. It achieves this b
 
 Cortex allows components to manage their own data instead of defining global update ACTIONS. A deeply nested data structure can simply be passed into the parent Component, which then passes pieces of the data onto child components without worrying about how they are used.
 
-Cortex also provides a few optimizations to help boost performance. Fist, Cortex will skip triggering React rerender when an update results in no actual data change. Secondly, Cortex batches all updates in a cycle into one call so that React is only triggered to render once. This is especially useful when updating multiple data nodes, such as data in an array.
+Cortex also provides a few optimizations to help boost performance. First, Cortex will skip triggering React rerender when an update results in no actual data change. Secondly, Cortex batches all updates in a cycle into one call so that React is only triggered to render once. This is especially useful when updating multiple data nodes, such as data in an array.
 
 # Basic example
 
