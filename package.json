@@ -9,7 +9,7 @@
     "url": "http://github.com/mquan/cortex.git"
   },
   "dependencies": {
-    "deep-diff": "~0.3.2"
+    "deep-diff": "~0.3.3"
   },
   "devDependencies": {
     "babelify": "^6.3.0",

@@ -5,7 +5,7 @@
  * Licensed under the MIT License.
  */
 ;(function(root, factory) {
-  "use strict";
+  'use strict';
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
     define([], factory);
@@ -19,7 +19,7 @@
     root.DeepDiff = factory();
   }
 }(this, function(undefined) {
-  "use strict";
+  'use strict';
 
   var $scope, conflict, conflictResolution = [];
   if (typeof global === 'object' && global) {
@@ -193,7 +193,7 @@
         stack.length = stack.length - 1;
       }
     } else if (lhs !== rhs) {
-      if (!(ltype === "number" && isNaN(lhs) && isNaN(rhs))) {
+      if (!(ltype === 'number' && isNaN(lhs) && isNaN(rhs))) {
         changes(new DiffEdit(currentPath, lhs, rhs));
       }
     }
@@ -251,7 +251,7 @@
     if (target && source && change && change.kind) {
       var it = target,
         i = -1,
-        last = change.path.length - 1;
+        last = change.path ? change.path.length - 1 : 0;
       while (++i < last) {
         if (typeof it[change.path[i]] === 'undefined') {
           it[change.path[i]] = (typeof change.path[i] === 'number') ? [] : {};
@@ -260,7 +260,7 @@
       }
       switch (change.kind) {
         case 'A':
-          applyArrayChange(it[change.path[i]], change.index, change.item);
+          applyArrayChange(change.path ? it[change.path[i]] : it, change.index, change.item);
           break;
         case 'D':
           delete it[change.path[i]];
