@@ -1,3 +1,6 @@
+# 2.0.3
+- Fix object remove method for 0 key
+
 # 2.0.2
 - Fix error inserting into 0 element by checking diff.index is undefined
 
