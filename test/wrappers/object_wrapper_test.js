@@ -49,6 +49,24 @@ describe("ObjectWrapper", function() {
         expect(updated.a).toBe(undefined);
         expect(cortex.a).not.toBe(undefined);
       });
+
+      describe("when key is 0", function() {
+        it("removes key value pair from object and updates wrapper", function() {
+          let value = {0: 'foo', 1: 'bar'};
+          var updated;
+          var cortex = new Cortex(value, function(updatedCortex) {
+            updated = updatedCortex;
+          });
+          cortex.remove(0);
+
+          jasmine.clock().tick();
+
+          expect(updated).not.toBe(cortex);
+          expect(updated.getValue()).toEqual({1: 'bar'});
+          expect(updated[0]).toBe(undefined);
+          expect(cortex[0]).not.toBe(undefined);
+        });
+      });
     });
 
     describe("when key does not exist", function() {

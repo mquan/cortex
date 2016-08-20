@@ -1122,7 +1122,7 @@ var ObjectWrapper = {
   },
 
   remove: function remove(key) {
-    if (key && this.hasKey(key)) this.__wrappers[key].destroy();
+    if (key !== undefined && key !== null && this.hasKey(key)) this.__wrappers[key].destroy();
   },
 
   merge: function merge(obj) {

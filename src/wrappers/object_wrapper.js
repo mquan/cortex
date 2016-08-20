@@ -17,7 +17,7 @@ var ObjectWrapper = {
   },
 
   remove: function(key) {
-    if (key && this.hasKey(key))
+    if (key !== undefined && key !== null && this.hasKey(key))
       this.__wrappers[key].destroy();
   },
 
