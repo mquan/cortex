@@ -1,3 +1,6 @@
+# 2.1.0
+- Update nested wrapper paths when array length changes (Issue #106)
+
 # 2.0.3
 - Fix object remove method for 0 key
 

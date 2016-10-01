@@ -349,19 +349,52 @@ describe("ArrayWrapper", function() {
         }
       });
     });
+
+    describe('when deeply nested object', function() {
+      it('adds element to beginning of array and updates wrapper including children paths', function() {
+        var value = [{a: 1}, {b: {c: 2}}]
+        var length = value.length;
+        var updated;
+        var cortex = new Cortex(value, function(updatedCortex) {
+          updated = updatedCortex;
+        })
+        var newElem = {d: 3};
+        cortex.unshift(newElem);
+
+        jasmine.clock().tick();
+
+        var newValue = value.slice();
+        newValue.unshift(newElem);
+
+        expect(updated).not.toBe(cortex);
+        expect(updated.count()).toEqual(length + 1);
+        expect(updated[0].getValue()).toEqual(newElem);
+        expect(updated[0].getPath()).toEqual([0]);
+
+        expect(updated[1].getValue()).toEqual({a: 1});
+        expect(updated[1].getPath()).toEqual([1]);
+        expect(updated[1].a.getPath()).toEqual([1, 'a']);
+
+        expect(updated[2].getValue()).toEqual({b: {c: 2}})
+        expect(updated[2].getPath()).toEqual([2]);
+        expect(updated[2].b.getPath()).toEqual([2, 'b']);
+        expect(updated[2].b.c.getPath()).toEqual([2, 'b', 'c']);
+      })
+    })
   });
 
   describe("#shift", function() {
     describe("when shift once", function() {
       it("removes the first element and updates wrapper", function() {
         var updated;
-        var length = this.value.length;
-        var cortex = new Cortex(this.value, function(updatedCortex) {
+        var value = [{a: 1}, {b: 2}, {c: { d: 3}}];
+        var length = value.length;
+        var cortex = new Cortex(value, function(updatedCortex) {
           updated = updatedCortex;
         });
         cortex.shift();
 
-        var newValue = this.value.slice();
+        var newValue = value.slice();
         newValue.shift();
 
         jasmine.clock().tick();
@@ -374,20 +407,27 @@ describe("ArrayWrapper", function() {
           expect(updated[i]).toBe(cortex[i + 1]);
           expect(updated[i].getValue()).toEqual(cortex[i + 1].getValue());
         }
+
+        expect(updated[0].getPath()).toEqual([0])
+        expect(updated[0].b.getPath()).toEqual([0, 'b'])
+        expect(updated[1].getPath()).toEqual([1])
+        expect(updated[1].c.getPath()).toEqual([1, 'c'])
+        expect(updated[1].c.d.getPath()).toEqual([1, 'c', 'd'])
       });
     });
 
     describe("when shift multiple times", function() {
       it("removes elements at the beginning and updates wrapper", function() {
         var updated;
-        var length = this.value.length;
-        var cortex = new Cortex(this.value, function(updatedCortex) {
+        var value = [{a: 1}, {b: 2}, {c: { d: 3}}];
+        var length = value.length;
+        var cortex = new Cortex(value, function(updatedCortex) {
           updated = updatedCortex;
         });
         cortex.shift();
         cortex.shift();
 
-        var newValue = this.value.slice();
+        var newValue = value.slice();
         newValue.shift();
         newValue.shift();
 
@@ -401,6 +441,10 @@ describe("ArrayWrapper", function() {
           expect(updated[i]).toBe(cortex[i + 2]);
           expect(updated[i].getValue()).toEqual(cortex[i + 2].getValue());
         }
+
+        expect(updated[0].getPath()).toEqual([0])
+        expect(updated[0].c.getPath()).toEqual([0, 'c'])
+        expect(updated[0].c.d.getPath()).toEqual([0, 'c', 'd'])
       });
     });
   });
@@ -409,14 +453,15 @@ describe("ArrayWrapper", function() {
     describe("when removing an element", function() {
       it("removes element and updates wrapper", function() {
         var updated;
-        var length = this.value.length;
-        var index = 2;
-        var cortex = new Cortex(this.value, function(updatedCortex) {
+        var value = [{a: 1}, {b: 2}, {c: { d: 3}}];
+        var length = value.length;
+        var index = 1;
+        var cortex = new Cortex(value, function(updatedCortex) {
           updated = updatedCortex;
         });
         cortex.splice(index, 1);
 
-        var newValue = this.value.slice();
+        var newValue = value.slice();
         newValue.splice(index, 1);
 
         jasmine.clock().tick();
@@ -427,6 +472,12 @@ describe("ArrayWrapper", function() {
 
         // does not remove the old wrapper
         expect(cortex[index]).not.toBe(undefined);
+
+        expect(updated[0].getPath()).toEqual([0])
+        expect(updated[0].a.getPath()).toEqual([0, 'a'])
+        expect(updated[1].getPath()).toEqual([1])
+        expect(updated[1].c.getPath()).toEqual([1, 'c'])
+        expect(updated[1].c.d.getPath()).toEqual([1, 'c', 'd'])
       });
     });
 
@@ -483,15 +534,16 @@ describe("ArrayWrapper", function() {
     describe("when inserting one element without removing", function() {
       it("adds element at index position and updates wrapper", function() {
         var updated;
-        var length = this.value.length;
-        let index = 3,
-            elem = 'a';
-        var cortex = new Cortex(this.value, function(updatedCortex) {
+        var value = [{a: 1}, {c: { d: 3}}];
+        var length = value.length;
+        let index = 1,
+            elem = {e: 4};
+        var cortex = new Cortex(value, function(updatedCortex) {
           updated = updatedCortex;
         });
         cortex.splice(index, 0, elem);
 
-        var newValue = this.value.slice();
+        var newValue = value.slice();
         newValue.splice(index, 0, elem);
 
         jasmine.clock().tick();
@@ -500,6 +552,14 @@ describe("ArrayWrapper", function() {
         expect(updated.count()).toBe(length + 1);
         expect(updated.getValue()).toEqual(newValue);
         expect(updated[index].getValue()).toEqual(elem);
+
+        expect(updated[0].getPath()).toEqual([0]);
+        expect(updated[0].a.getPath()).toEqual([0, 'a']);
+        expect(updated[1].getPath()).toEqual([1]);
+        expect(updated[1].e.getPath()).toEqual([1, 'e']);
+        expect(updated[2].getPath()).toEqual([2]);
+        expect(updated[2].c.getPath()).toEqual([2, 'c']);
+        expect(updated[2].c.d.getPath()).toEqual([2, 'c', 'd']);
       });
     });
 

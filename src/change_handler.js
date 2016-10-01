@@ -139,13 +139,16 @@ module.exports = function(ImmutableWrapper) {
         }
       }
 
-      // only run this if current array changes length
+      // Only run this if current array changes length
       if(ImmutableWrapper.__isArray(newWrapper.__value)) {
-        // reorder indices and set path to new value
+        // Reorder indices and set path to new value.
+        // This needs to be recursive for all nested wrappers.
         for(var j = 0, jj = newWrapper.__wrappers.length; j < jj; j++) {
-          // Set last element in path since index may already changed.
-          var newPath = newWrapper.__wrappers[j].__path;
-          newPath[newPath.length - 1] = j;
+          this._updateWrapperPath({
+            newWrapper: newWrapper.__wrappers[j],
+            updatedIndex: j,
+            updatedPathIndex: newWrapper.__path.length
+          });
 
           newWrapper[j] = newWrapper.__wrappers[j];
         }
@@ -158,6 +161,30 @@ module.exports = function(ImmutableWrapper) {
       }
 
       return childrenDiffs;
+    }
+
+    static _updateWrapperPath(params) {
+      var { newWrapper, updatedIndex, updatedPathIndex } = params;
+      var newPath = newWrapper.__path;
+      newPath[updatedPathIndex] = updatedIndex;
+
+      if (ImmutableWrapper.__isArray(newWrapper.__value)) {
+        for(var i = 0, ii = newWrapper.__wrappers.length; i < ii; i++) {
+          this._updateWrapperPath({
+            newWrapper: newWrapper.__wrappers[i],
+            updatedIndex: updatedIndex,
+            updatedPathIndex: updatedPathIndex
+          });
+        }
+      } else if (ImmutableWrapper.__isObject(newWrapper.__value)) {
+        for(var key in newWrapper.__wrappers) {
+          this._updateWrapperPath({
+            newWrapper: newWrapper.__wrappers[key],
+            updatedIndex: updatedIndex,
+            updatedPathIndex: updatedPathIndex
+          });
+        }
+      }
     }
 
     static _updateChildNodes(params) {
