@@ -1,3 +1,6 @@
+# 2.1.1
+- Update deep-diff to 0.3.8
+
 # 2.1.0
 - Update nested wrapper paths when array length changes (Issue #106)
 
