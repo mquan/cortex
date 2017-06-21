@@ -27,5 +27,8 @@
   "main": "./build/cortex",
   "engines": {
     "node": "*"
+  },
+  "scripts": {
+    "test": "gulp test"
   }
 }
