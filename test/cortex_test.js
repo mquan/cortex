@@ -458,8 +458,8 @@ describe("Cortex", function() {
         expect(updated.c[0]).toBe(cortex.c[0]);
         expect(updated.c[1]).toBe(cortex.c[1]);
 
-        expect(updated.getValue().c).toBe([0, 1]);
-        expect(updated.getValue()).toBe([0, 1]);
+        expect(updated.getValue()).toEqual(Object.assign(this.value, {c: [0, 1]}));
+        expect(updated.getValue().c).toEqual([0, 1]);
         expect(updated.a).toBe(cortex.a);
         expect(updated.b).toBe(cortex.b);
         expect(updated.d).toBe(cortex.d);
