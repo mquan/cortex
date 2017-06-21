@@ -24,7 +24,7 @@ describe("Cortex", function() {
   });
 
   describe("updating data", function() {
-    fdescribe("running callback", function() {
+    describe("running callback", function() {
       it("runs callback", function() {
         var called = false;
         var cortex = new Cortex(this.value, function() {
@@ -369,7 +369,7 @@ describe("Cortex", function() {
   });
 
   describe("#destroy", function() {
-    fdescribe("when deleting root node", function() {
+    describe("when deleting root node", function() {
       it("returns for wrapper for undefined", function() {
         var updated;
         var cortex = new Cortex(this.value, function(updatedCortex) {
