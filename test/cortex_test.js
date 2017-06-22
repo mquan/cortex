@@ -365,6 +365,20 @@ describe("Cortex", function() {
           expect(updated.c.getValue()).toEqual(this.value.c);
         })
       });
+
+      describe("when changing a changed value back to the original within the same tick", function() {
+        it("sets the last value", function() {
+          var updated;
+          var cortex = new Cortex(this.value, function(updatedCortex) {
+            updated = updatedCortex;
+          });
+          cortex.a.set(100);
+          cortex.a.set(1); // set back to original within the same tick
+          jasmine.clock().tick();
+
+          expect(updated.a.getValue()).toEqual(1);
+        });
+      });
     });
   });
 
